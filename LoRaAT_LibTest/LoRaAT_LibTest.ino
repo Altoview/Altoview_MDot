@@ -1,11 +1,11 @@
 /*
- This is a test program is writen for the Seeeduino Stalker v2.3 and 
- uses the MDOT LoRa(WAN?) module running the Australian compatable AT
+ This is a test program writen for the Seeeduino Stalker v2.3 and 
+ uses the Multitech mDOT LoRa module running the Australian compatable AT
  enabled firmware.
  
- This program joins the LoRa Network.
- 
- Sends predicitable data (a loop count), and temperature  (The DS3231
+ This program,
+  * joins the LoRa Network.
+  *Sends predicitable data (a loop count), and temperature  (The DS3231
  does a temperature conversion once every 64 seconds. This is also the
  default for the DS3232.)
 */
