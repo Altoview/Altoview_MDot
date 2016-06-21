@@ -271,6 +271,8 @@ uint8_t LoRaAT::ping() {
  //TODO: If not recieved in that format return an error
  */
 int LoRaAT::sendPairs(String pairs) {
+
+  debugSerial.println("Send Pairs: %s ", pairs);
   //Return constants
   const byte UNKNOWN_FORMAT = 4;
   int response = 0;
