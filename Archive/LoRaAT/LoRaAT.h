@@ -8,9 +8,6 @@
 #define LoRaAT_h
 
 #include "Arduino.h"
-#include <SoftwareSerial.h>       //Sneaky sofware serial to output debug info
-#include <stdio.h>
-
 
 /*
   Class definition
@@ -25,11 +22,11 @@ class LoRaAT
     int join();				//Join a LoRa(WAN?) network TODO: Think about network parameters, saying something about network?
 	int join(unsigned int); //Join with a specifc timeout
     void leave();			//Leave a LoRa(WAN?) network, do we event want this?
-	int send(char*);		//In general we send strings using the AT command, we could have overloaded functions to accept other things? Maybe data in a particular format?
-	int send(char*, unsigned int); //Use specific timout like join function.
-	int sendPairs(char*);
+	int send(String);		//In general we send strings using the AT command, we could have overloaded functions to accept other things? Maybe data in a particular format?
+	int send(String, unsigned int); //Use specific timout like join function.
+	int sendPairs(String);
 	uint8_t ping();			//I believe there maybe a ping function... I'm not sure yet what the AT command returns, or what we should return to the user?
-	//String debug;
+	String debug;
   private:
 	static const uint16_t _jsonMemeoryPool = 500;  //Preallocated memeory for JSON lib in bytes
 
@@ -38,18 +35,17 @@ class LoRaAT
 	static const uint8_t _HEADER_SIZE = 2;
 	static const uint8_t _PAYLOAD_SIZE = _PACKET_SIZE - _HEADER_SIZE;
 
-	char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
+	String _txBuffer[_MAX_FRAGMENTS];
 	uint8_t _txPutter = 0;
 	uint8_t _txGetter = 0;
 	
     int _findText(String, String);
-	void _pairsToJSON(char*, char*);
-	void _createFragmentBuffer(char*);
+	String _pairsToJSON(String);
+	void _createFragmentBuffer(String);
 	int _processBuffer();
 	
     uint8_t _u8SerialPort;	//< serial port initialized in constructor
-	//String _sendQueue[_MAX_FRAGMENTS];
-
+	String _sendQueue[_MAX_FRAGMENTS];
 };
 
 #endif

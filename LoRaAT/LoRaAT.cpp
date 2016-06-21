@@ -24,6 +24,7 @@
   #error "This library only supports boards with an AVR or SAM processor."
 #endif
 
+
 /************************************************************************************
  *                               PUBLIC FUNCTIONS                                   *
  ***********************************************************************************/
@@ -31,17 +32,17 @@
 /*
   CONSTRUCTOR: Creates class object using a default serial port 0
 */
-LoRaAT::LoRaAT() {
-  _u8SerialPort = 0;
-}
+  LoRaAT::LoRaAT() {
+    _u8SerialPort = 0;
+  }
 
 /*
   CONSTRUCTOR: Creates class object using a specified serial port
 */
-LoRaAT::LoRaAT(uint8_t u8SerialPort) {
+  LoRaAT::LoRaAT(uint8_t u8SerialPort) {
   //TODO: Input checking, what range of values to accept, how to handle invalid input
-  _u8SerialPort = u8SerialPort;
-}
+    _u8SerialPort = u8SerialPort;
+  }
 
 /*
   Initialize class object.
@@ -49,10 +50,10 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort) {
   Sets up the serial port using default 19200 baud rate.
   Call once class has been instantiated, typically within setup().
 */
-void LoRaAT::begin(void) {
+  void LoRaAT::begin(void) {
   //TODO: Input checking??
-  begin(19200);
-}
+    begin(19200);
+  }
 
 /*
   Initialize class object.
@@ -63,34 +64,34 @@ void LoRaAT::begin(void) {
   TODO: Think about what we should set here, what should be defaults. Datarates,
   adaptive data rates? Other things?
 */
-void LoRaAT::begin(uint32_t u32BaudRate) {
-  switch(_u8SerialPort) {
+  void LoRaAT::begin(uint32_t u32BaudRate) {
+    switch(_u8SerialPort) {
     #if defined(UBRR1H)
-    case 1:
+      case 1:
       MBSerial = &Serial1;
       break;
     #endif
       
     #if defined(UBRR2H)
-    case 2:
+      case 2:
       MBSerial = &Serial2;
       break;
     #endif
       
     #if defined(UBRR3H)
-    case 3:
+      case 3:
       MBSerial = &Serial3;
       break;
     #endif
       
-    case 0:
-    default:
+      case 0:
+      default:
       MBSerial = &Serial;
       break;
+    }
+
+    MBSerial->begin(u32BaudRate);
   }
-  
-  MBSerial->begin(u32BaudRate);
-}
 
 /*
   Join a LoRa(WAN?) network
@@ -107,9 +108,9 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
   
   uses a default of 10,000ms (10sec) timeout
 */
-int LoRaAT::join() {
-  return(join(10000));
-}
+  int LoRaAT::join() {
+    return(join(10000));
+  }
 
 /*
   Join a LoRa(WAN?) network
@@ -127,33 +128,56 @@ int LoRaAT::join() {
   takes the parameter timeout, which is the number of milliseconds you want it
   to wait for a response.
 */
-int LoRaAT::join(unsigned int timeout) {
+  int LoRaAT::join(unsigned int timeout) {
+
+  SoftwareSerial debugSerial(10, 11);     // RX, TX
+  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  debugSerial.println("DEBUG: Joining");
+
   const int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
-  String _recievedString;				//String returned by device
-  
+  // String _recievedString;				//String returned by device
+  char _recievedString[100];       //String returned by device
+  int available;
+
   //flush receive buffer before transmitting request
   while (MBSerial->read() != -1);
   
   //Send join request
-  MBSerial->println("at+join");
+  MBSerial->println("AT+JOIN");
   
   //Loop reading from serial buffer until we get either a recognisable error, or
   //success
   timeoutCounter = 0;
+  delay(10000);
+
   while(timeoutCounter < timeout) {
-    if (MBSerial->available() != 0) {
-      _recievedString = MBSerial->readString();
-	  if (_findText("Failed to join network",_recievedString) != -1) {
-		return(1);
-	  } else if (_findText("ERROR",_recievedString) != -1) {
-        return(-2);
-	  } else if (_findText("Successfully joined network",_recievedString) != -1) {
-        return(0);
-	  } else {
-		//Unknown response??
-	  }
-	}
+    // Blank string
+    for (int i = 0; i < 100; i++) 
+    {
+      _recievedString[i] = '\0';
+    }
+    available = MBSerial->available();
+    if (available) {
+      // _recievedString = MBSerial->readString();
+
+      if(MBSerial->readBytesUntil(NULL, _recievedString, available)) 
+      {
+        debugSerial.println(_recievedString);
+        debugSerial.println("DEBUG: Joined");
+        if (strstr(_recievedString, "OK") != NULL)
+          return (0);
+      }
+      //     if (_recievedString.indexOf("Failed to join network") >= 0) {
+      //       return(1);
+      //     } else if (_recievedString.indexOf("ERROR") >= 0) {
+      //       return(-2);
+      //     } else if (_recievedString.indexOf("Successfully joined network") >= 0) {
+      //       return(0);
+      //     } else {
+    		// //Unknown response??
+      //     }
+    }
     timeoutCounter += LOOP_DELAY;
     delay(LOOP_DELAY);
   }
@@ -164,9 +188,9 @@ int LoRaAT::join(unsigned int timeout) {
 /*
   Leave a LoRa(WAN?) network
 */
-void LoRaAT::leave() {
+  void LoRaAT::leave() {
 
-}
+  }
 
 /*
   In general we send strings using the AT command, TODO: we could have overloaded functions
@@ -189,9 +213,9 @@ void LoRaAT::leave() {
   
   uses a default of 10,000ms (10sec) timeout
 */
-int LoRaAT::send(String message) {
-  return(send(message,10000));
-}
+  int LoRaAT::send(char* message) {
+    return(send(message,10000));
+  }
 
 /*
   In general we send strings using the AT command, TODO: we could have overloaded functions
@@ -212,54 +236,125 @@ int LoRaAT::send(String message) {
 	  + Replace with something else?
 	  + Return error?
 */
-int LoRaAT::send(String message, unsigned int timeout) {
-  const int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
+  int LoRaAT::send(char* message, unsigned int timeout) {
+
+  SoftwareSerial debugSerial(10, 11);     // RX, TX
+  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  debugSerial.print("DEBUG: Sending: ");
+  debugSerial.println(message);
+
+
+  int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
-  String _recievedString;				//String returned by device
+  char _recievedString[45];				//String returned by device
   
   //flush receive buffer before transmitting request
   while (MBSerial->read() != -1);
+
+  int available = MBSerial->available();
+
+  debugSerial.print("DEBUG: available =:");
+  debugSerial.println(available , DEC);
   
   //Send message
-  MBSerial->println("at+send " + message);
+  MBSerial->print("AT+SEND ");
+  for (int i = 0; i < _PACKET_SIZE; i++)
+  {
+    MBSerial->print(message[i]);
+  }
+  MBSerial->println();
+
+
+  //MBSerial->println("at+send " + message + "\r\n");
+  delay(2000);
   
   //Loop reading from serial buffer until we get either a recognisable error, or
   //success
-  pinMode(3,OUTPUT);
+  //pinMode(3,OUTPUT);
   timeoutCounter = 0;
+
+  available = MBSerial->available();
+  debugSerial.print("DEBUG: available =:");
+  debugSerial.println(available , DEC);
+
   while(timeoutCounter < timeout) {
-    if (MBSerial->available() != 0) {
-      _recievedString = MBSerial->readString();
-	  debug = _recievedString;
-	  if (_findText("ACK not received",_recievedString) != -1) {
-		return(1);
-      } else if (_findText("ERROR",_recievedString) != -1) {
-        return(-2);
-	  } else if (_findText("Data exceeds datarate max payload",_recievedString) != -1) {
-        return(-3);
-	  } else if (_findText("OK",_recievedString) != -1) {
-        return(0);
-	  } else {
-		//Unknown response??
-	  }
-	}
+    // Blank string
+    available = MBSerial->available();
+    if (available) {
+      // _recievedString = MBSerial->readString();
+
+      if(MBSerial->readBytesUntil(NULL, _recievedString, available)) 
+      {
+        debugSerial.println(_recievedString);
+        if (strstr(_recievedString, "OK") != NULL)
+          return (0);
+      }
+      //     if (_recievedString.indexOf("Failed to join network") >= 0) {
+      //       return(1);
+      //     } else if (_recievedString.indexOf("ERROR") >= 0) {
+      //       return(-2);
+      //     } else if (_recievedString.indexOf("Successfully joined network") >= 0) {
+      //       return(0);
+      //     } else {
+        // //Unknown response??
+      //     }
+    }
     timeoutCounter += LOOP_DELAY;
-	digitalWrite(3, HIGH);
-    delay(LOOP_DELAY);
-	digitalWrite(3, LOW);
     delay(LOOP_DELAY);
   }
   
   return(-1);
+//  while(timeoutCounter < timeout) {
+  /*
+  while(available > 0) {
+//  while(true) {
+    debugSerial.print("<");
+    debugSerial.print(timeoutCounter, DEC);
+    debugSerial.print(">");
+    //if (MBSerial->available() != 0) {
+    _recievedString += MBSerial->readString();
+      //debugSerial.println("DEBUG: Received String=("+ _recievedString +")");
+
+      //debugSerial.print("DEBUG: Received String len=(");
+      //debugSerial.print(_recievedString.length(), DEC);
+      //debugSerial.println(")");
+      //if (_recievedString.indexOf("at+send") < 0) {
+    if (_recievedString.indexOf("ACK not received") >= 0)  {
+      return(1);
+    } else if (_recievedString.indexOf("ERROR") >= 0) {
+      return(-2);
+    } else if (_recievedString.indexOf("Data exceeds datarate max payload") >= 0) {
+      return(-3);
+    } else if (_recievedString.indexOf("OK") >= 0) {
+      return(0);
+    } else {
+      debugSerial.println("else(" + _recievedString + ")");
+          //return(100);
+		//Unknown response??
+    }
+      //}
+    //}
+    timeoutCounter += LOOP_DELAY;
+    digitalWrite(3, HIGH);
+    delay(LOOP_DELAY);
+    digitalWrite(3, LOW);
+    delay(LOOP_DELAY);
+    available = MBSerial->available();
+    debugSerial.print("DEBUG: available end WHILE =:");
+    debugSerial.println(available , DEC);
+  }
+  
+  return(-1);
+  */
 }
 
 /*
   I believe there maybe a ping function... I'm not sure yet what the AT command
   returns, or what we should return to the user?
 */
-uint8_t LoRaAT::ping() {
+  uint8_t LoRaAT::ping() {
 
-}
+  }
 
 /*
  Recieves a string in the format key:value,key:value,...
@@ -270,14 +365,18 @@ uint8_t LoRaAT::ping() {
 
  //TODO: If not recieved in that format return an error
  */
-int LoRaAT::sendPairs(String pairs) {
+ int LoRaAT::sendPairs(char* pairs) {
 
-  debugSerial.println("Send Pairs: %s ", pairs);
+  SoftwareSerial debugSerial(10, 11);     // RX, TX
+  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  //debugSerial.println("Send Pairs init: "+ pairs);
+
   //Return constants
   const byte UNKNOWN_FORMAT = 4;
   int response = 0;
 
-  String json;      
+//  String json;      
+  char json[100];      
   
   //TODO: Check the string is actually pairs
   
@@ -285,8 +384,11 @@ int LoRaAT::sendPairs(String pairs) {
     return(UNKNOWN_FORMAT);
   }
 
-  json = _pairsToJSON(pairs);
+  _pairsToJSON(json, pairs);
+  debugSerial.print("DEBUG, JSON: ");
+  debugSerial.println(json);
   _createFragmentBuffer(json);
+  //debugSerial.println("Prior to proccessing buffer");
   response = _processBuffer();
 
   return(response);
@@ -296,66 +398,123 @@ int LoRaAT::sendPairs(String pairs) {
  This function will take any correctly formatted string of key:value pairs
  and return a JSON formatted String.
  */
-String LoRaAT::_pairsToJSON(String pairs) {
-  String json = "";   //Finished JSON as a string
-  String temp = "";   //Temp storage as we look for delimters
-  String key = "";    //temp storage for the "key".. "value" is pulled straiged from temp
+ void LoRaAT::_pairsToJSON(char* json, char* pairs) {
+  // String json = "";   //Finished JSON as a string
+  // String temp = "";   //Temp storage as we look for delimters
+  // String key = "";    //temp storage for the "key".. "value" is pulled straiged from temp
   
-  StaticJsonBuffer<_jsonMemeoryPool> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
+  // StaticJsonBuffer<_jsonMemeoryPool> jsonBuffer;
+  // JsonObject& root = jsonBuffer.createObject();
+  SoftwareSerial debugSerial(10, 11);     // RX, TX
+  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  //debugSerial.println("Send Pairs init: "+ pairs);
+
+  char* jsonPtr = json;
+  char temp[20];
+  int len = strlen(pairs);
+  char* tempPtr = temp;
+
+  for (jsonPtr = json; jsonPtr < json + sizeof(json); jsonPtr++) 
+  {
+    *jsonPtr= '\0';
+  }
+
+  for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
+  {
+    *tempPtr = '\0';
+  }
+
+  jsonPtr = json;
+  tempPtr = temp;
+
+  // Adds the first {
+  *jsonPtr++ = '{';
 
   //Loop through each of the characters, when getting to a delimiter, act accordingly
-  for (int i = 0; i < pairs.length(); i++) {
-    char c = pairs.charAt(i);
-    if (c == ':') {
-      key = temp;
-      temp = "";
-    } else if (c == ',') {
-      root[key] = temp.toFloat();               //Defaults to 2 point precision
-      temp = "";
-    } else {
-      temp += c;
+  for (int i = 0; i < len; i++) 
+  {
+    char c = pairs[i];
+    if (c == ':') 
+    {
+      *jsonPtr++ = '\"';
+      int no = tempPtr-temp;
+      strncpy(jsonPtr, temp, no);
+      jsonPtr += no;
+      *jsonPtr++ = '\"';
+      *jsonPtr++ = ':';
+      for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
+      {
+        *tempPtr = '\0';
+      }
+      tempPtr = temp;
+    } 
+    else if (c == ',') 
+    {
+      int no = tempPtr-temp;
+      strncpy(jsonPtr, temp, no);
+      jsonPtr += no;
+      *jsonPtr++ = ',';
+      for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
+      {
+        *tempPtr = '\0';
+      }
+      tempPtr = temp;
+    } 
+    else 
+    {
+      *tempPtr++ = c;
+      // debugSerial.print("DEBUG: else,");
+      // debugSerial.println(temp);
     }
   }
-  //Of course add the final key value which is not succeeded by a delimter ","
-  root[key] = temp.toFloat();
+  int no = tempPtr-temp;
+  strncpy(jsonPtr, temp, no);
+  jsonPtr += no;
+  //no comma at the end of last JSON value
+  *jsonPtr++ = '}';
+  *jsonPtr++ = '\0';
 
-  //Write the json to a string
-  root.printTo(json);
-
-  return(json);
+  return;
 }
 
 /*
- This function will take and ASCII String message and fragment it into 11 byte packets
+ This function will take an ASCII String message and fragment it into 11 byte packets
 
  2 bytes of header, and 9 bytes of payloads
 
  header is of the format [fragment number][total number of fragments]
  */
-void LoRaAT::_createFragmentBuffer(String message) {
+ void LoRaAT::_createFragmentBuffer(char* message) {
 
+  SoftwareSerial debugSerial(10, 11);     // RX, TX
+  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  //debugSerial.println("_create Frag Buff");
+
+  int strLength = strlen(message);
   //Calculate the number of fragments required for this message
-  int numFragments = message.length()/_PAYLOAD_SIZE;
+  int numFragments = strLength/_PAYLOAD_SIZE;
   
   //Make sure we round up
-  if (_PAYLOAD_SIZE*numFragments < message.length()) {
+  if (_PAYLOAD_SIZE*numFragments < strLength) {
     numFragments += 1;
   }
 
   //Check we haven't exceeded the maximum number of fragments
-  if (numFragments > _MAX_FRAGMENTS) {
+  if (numFragments > _MAX_FRAGMENTS) 
+  {
     //TODO: What to do? For now, just don't send all of it...
     numFragments = _MAX_FRAGMENTS;
   }
 
   //Create each fragment. TODO: Can we optimise out using char array?
-  char messageAsC[numFragments*_PACKET_SIZE];
-  message.toCharArray(messageAsC,numFragments*_PACKET_SIZE);
+  // char messageAsC[numFragments * _PACKET_SIZE];
+  // message.toCharArray(messageAsC,numFragments*_PACKET_SIZE);
 
+  //debugSerial.println("_create Frag Buff, for");
   //Loop through each fragment
   for (_txPutter = 0; _txPutter < numFragments; _txPutter++) {
-    union headerPacket {
+    union headerPacket 
+    {
       uint8_t asByte[2];
       char asChar[2];
     } header;
@@ -365,23 +524,65 @@ void LoRaAT::_createFragmentBuffer(String message) {
     header.asByte[1] = numFragments;
 
     //Add the header to the byte array (delt with as a string)
-    _txBuffer[_txPutter] = header.asChar[0];
-    _txBuffer[_txPutter] += header.asChar[1];
+    _txBuffer[_txPutter][0] = header.asChar[0];
+    _txBuffer[_txPutter][1] = header.asChar[1];
 
+    //debugSerial.println("_create Frag Buff, for, for");
     //Loop through each location of the message and append to the fragment (as the payload)
-    for (int j = 0; j < _PAYLOAD_SIZE; j++) {
-      _txBuffer[_txPutter] += messageAsC[_PAYLOAD_SIZE*_txPutter + j];        
-      if (messageAsC[_PAYLOAD_SIZE*_txPutter+j] == '\0') {
+
+    for (uint8_t j = 0; j < _PAYLOAD_SIZE; j++) 
+    {
+      debugSerial.println(j);
+      debugSerial.println(_PAYLOAD_SIZE);
+      if (j < _PAYLOAD_SIZE)
+        debugSerial.println("A");
+     else
+        debugSerial.println("B");
+
+      _txBuffer[_txPutter][j + _HEADER_SIZE] = message[_PAYLOAD_SIZE * _txPutter + j];        
+      if (message[_PAYLOAD_SIZE * _txPutter + j] == '\0') 
+      {
+        debugSerial.println("break");
+        // debugSerial.println(_PAYLOAD_SIZE);
+        // padding the rest of the fragment if not fitting 100% with space
+        while (j < _PAYLOAD_SIZE)
+        {
+          _txBuffer[_txPutter][j + _HEADER_SIZE]   = ' ';
+          j++;
+        }
         break;
       }
     }
   }
 }
 
-int LoRaAT::_processBuffer() {
-  int response = 0;
-  response = send(_txBuffer[0]);
-  response = send(_txBuffer[1]);
+int LoRaAT::_processBuffer() 
+{
+  SoftwareSerial debugSerial(10, 11);     // RX, TX
+  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+
+  debugSerial.println("Manual print");
+  for (int i=0; i < _txPutter; i++)
+  {
+    for (int j=0; j < _PACKET_SIZE; j++)
+    {
+      debugSerial.print(_txBuffer[i][j], HEX);
+    }
+    debugSerial.println();
+  }
+
+  int response;
+  for(_txGetter; _txGetter < _txPutter; _txGetter++ )
+  {
+    debugSerial.print("DEBUG: Buffer: ");
+    debugSerial.print(_txGetter);
+    debugSerial.print(" : ");
+    debugSerial.println(_txBuffer[_txGetter]);
+
+    response = send(_txBuffer[_txGetter]);
+    debugSerial.print("DEBUG: Sent with response: ");
+    debugSerial.println(response, DEC);
+  }
   _txPutter = 0;
   _txGetter = 0;
   return(response);
@@ -389,13 +590,13 @@ int LoRaAT::_processBuffer() {
 
 /*
   Simple find substring within string function.
-*/
-int LoRaAT::_findText(String needle, String haystack) {
-  int foundpos = -1;
-  for (int i = 0; i <= haystack.length() - needle.length(); i++) {
-    if (haystack.substring(i,needle.length()+i) == needle) {
-      foundpos = i;
+  int LoRaAT::_findText(String needle, String haystack) {
+    int foundpos = -1;
+    for (int i = 0; i <= haystack.length() - needle.length(); i++) {
+      if (haystack.substring(i,needle.length()+i) == needle) {
+        foundpos = i;
+      }
     }
-  }
-  return foundpos;
-}
+    return foundpos;
+  }*/
+
