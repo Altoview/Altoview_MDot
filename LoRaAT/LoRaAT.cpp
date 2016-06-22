@@ -1,9 +1,15 @@
 /*
-  LoRaAT.cpp - Arduino library for controlling LoRa(WAN?) modules using AT commands.
-  
-  This library has specifically created to control the MDOT [TODO: Exactly what it is]
-  which is running the  Australian compatable, AT command enabled [TODO: Can I be more
-  specific?] firmware.
+  File: LoRaAT.cpp
+
+  Version: v0.0.1  
+
+  Breif: Arduino library for controlling Multitech mDot LoRa modules using 
+         AT commands.
+
+  Copyright: This library is published under GNU AGPLv3 license.
+             http://choosealicense.com/licenses/agpl-3.0/
+
+  Auther: Campbell Scientific Australia Pty Ltd
 */
 
 /************************************************************************************
