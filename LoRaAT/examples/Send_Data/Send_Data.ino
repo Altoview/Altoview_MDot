@@ -14,7 +14,6 @@
   Includes
   --------------------------------------------------------------------------------------*/
 #include <LoRaAT.h>               //Include LoRa AT libraray
-#include <SoftwareSerial.h>       //Sneaky sofware serial to output debug info
 
 /*--------------------------------------------------------------------------------------
   Definitions
@@ -49,16 +48,21 @@ void setup() {
 /*--- loop() ---------------------------------------------------------------------------
   Main loop called by the Arduino framework
   --------------------------------------------------------------------------------------*/
-unsigned int count = 1;
+int count = 1;
 void loop() {
   int responseCode;         //Response code from the mdot
-  String testMessage = "";  //Test message sent via debugSerial
-  char testMsg[40] = "test:";
-  sprintf(testMsg, "test:%d,alex:%d", count, count*2);
-  debugSerial.print("DEBUG MAIN: testMsg: ");
-  debugSerial.println(testMsg);
-
+  //String testMessage = "";  //Test message sent via debugSerial
+  String temp = "Temp:";
+  String rh = ", RH:";
+  String testMsg = temp + count + rh + count * 2;
+  
+  //testMsg = "test:" + count ;
+  //testMsg += ",Alex:" + count*2 ;
+  //sprintf(testMsg, "test:%d,alex:%d", count, count*2);
+  debugSerial.println("DEBUG MAIN: testMsg: " + testMsg);
+  
   responseCode = mdot.sendPairs(testMsg);
+
   debugSerial.println("send result: " + String(responseCode));
 /*
   if (debugSerial.available()) {

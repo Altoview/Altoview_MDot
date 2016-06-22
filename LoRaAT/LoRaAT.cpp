@@ -17,7 +17,6 @@
  ***********************************************************************************/
 #include "Arduino.h"
 #include "LoRaAT.h"
-#include <ArduinoJson.h>
 
 /************************************************************************************
  *                               GLOBAL VARIABLES                                   *
@@ -36,36 +35,38 @@
  ***********************************************************************************/
 
 /*
-  CONSTRUCTOR: Creates class object using a default serial port 0
-*/
+ * CONSTRUCTOR: 
+ * Creates class object using a default serial port 0
+ */
   LoRaAT::LoRaAT() {
     _u8SerialPort = 0;
   }
 
 /*
-  CONSTRUCTOR: Creates class object using a specified serial port
-*/
+ * CONSTRUCTOR: 
+ * Creates class object using a specified serial port
+ */
   LoRaAT::LoRaAT(uint8_t u8SerialPort) {
   //TODO: Input checking, what range of values to accept, how to handle invalid input
     _u8SerialPort = u8SerialPort;
   }
 
 /*
-  Initialize class object.
-  
-  Sets up the serial port using default 19200 baud rate.
-  Call once class has been instantiated, typically within setup().
-*/
+ * Initialize class object.
+ * 
+ * Sets up the serial port using default 19200 baud rate.
+ * Call once class has been instantiated, typically within setup().
+ */
   void LoRaAT::begin(void) {
   //TODO: Input checking??
     begin(19200);
   }
 
 /*
-  Initialize class object.
-  
-  Sets up the serial port using specified baud rate.
-  Call once class has been instantiated, typically within setup().
+ * Initialize class object.
+ * 
+ * Sets up the serial port using specified baud rate.
+ * Call once class has been instantiated, typically within setup().
 
   TODO: Think about what we should set here, what should be defaults. Datarates,
   adaptive data rates? Other things?
@@ -362,6 +363,14 @@
 
   }
 
+// Overloading the sendPairs
+ int LoRaAT::sendPairs(String pairs) 
+ {
+   char pairsC[_MAX_PAIRS_SIZE];
+   pairs.toCharArray(pairsC, _MAX_PAIRS_SIZE);
+   LoRaAT::sendPairs(pairsC);
+ }
+
 /*
  Recieves a string in the format key:value,key:value,...
 
@@ -382,7 +391,7 @@
   int response = 0;
 
 //  String json;      
-  char json[100];      
+  char json[_MAX_PAIRS_SIZE];      
   
   //TODO: Check the string is actually pairs
   
@@ -538,18 +547,9 @@
 
     for (uint8_t j = 0; j < _PAYLOAD_SIZE; j++) 
     {
-      debugSerial.println(j);
-      debugSerial.println(_PAYLOAD_SIZE);
-      if (j < _PAYLOAD_SIZE)
-        debugSerial.println("A");
-     else
-        debugSerial.println("B");
-
       _txBuffer[_txPutter][j + _HEADER_SIZE] = message[_PAYLOAD_SIZE * _txPutter + j];        
       if (message[_PAYLOAD_SIZE * _txPutter + j] == '\0') 
       {
-        debugSerial.println("break");
-        // debugSerial.println(_PAYLOAD_SIZE);
         // padding the rest of the fragment if not fitting 100% with space
         while (j < _PAYLOAD_SIZE)
         {

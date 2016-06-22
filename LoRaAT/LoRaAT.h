@@ -36,6 +36,7 @@ class LoRaAT
 	int send(char*);		//In general we send strings using the AT command, we could have overloaded functions to accept other things? Maybe data in a particular format?
 	int send(char*, unsigned int); //Use specific timout like join function.
 	int sendPairs(char*);
+    int sendPairs(String); 
 	uint8_t ping();			//I believe there maybe a ping function... I'm not sure yet what the AT command returns, or what we should return to the user?
 	//String debug;
   private:
@@ -45,6 +46,7 @@ class LoRaAT
 	static const uint8_t _PACKET_SIZE = 11;
 	static const uint8_t _HEADER_SIZE = 2;
 	static const uint8_t _PAYLOAD_SIZE = _PACKET_SIZE - _HEADER_SIZE;
+	static const uint8_t _MAX_PAIRS_SIZE = 100;
 
 	char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
 	uint8_t _txPutter = 0;
