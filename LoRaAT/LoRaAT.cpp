@@ -38,17 +38,28 @@
 | CONSTRUCTOR: Creates class object using a default serial port 0					|
 -----------------------------------------------------------------------------------*/
  LoRaAT::LoRaAT() {
-    _u8SerialPort = 0;
-  }
+  _u8SerialPort = 0;
+}
 
 /*----------------------------------------------------------------------------------|
 | CONSTRUCTOR: Creates class object using a specified serial port.					|
 -----------------------------------------------------------------------------------*/
-  LoRaAT::LoRaAT(uint8_t u8SerialPort) {
+ LoRaAT::LoRaAT(uint8_t u8SerialPort) {
   //TODO: Input checking, what range of values to accept, how to handle invalid input
-    _u8SerialPort = u8SerialPort;
-  }
+  _u8SerialPort = u8SerialPort;
+}
 
+/*----------------------------------------------------------------------------------|
+| CONSTRUCTOR: Creates class object using a specified serial port, and passing it a |
+| specificed debug stream. This stream can be used to pass debug info to a serial	|
+| port, either hardware serial or software serial.									|
+-----------------------------------------------------------------------------------*/
+LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
+  //TODO: Input checking, what range of values to accept, how to handle invalid input
+  _u8SerialPort = u8SerialPort;
+  _debugStream = debugStream;
+}
+  
 /*----------------------------------------------------------------------------------|
 | Initialize class object.															|
 | 																					|
@@ -134,10 +145,7 @@
 | to wait for a response.															|
 -----------------------------------------------------------------------------------*/
   int LoRaAT::join(unsigned int timeout) {
-
-  SoftwareSerial debugSerial(10, 11);     // RX, TX
-  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-  debugSerial.println("DEBUG: Joining");
+  _debugStream->println("DEBUG: Joining");
 
   const int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
@@ -165,8 +173,8 @@
     if (available) {
       if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
       {
-        debugSerial.println(_recievedString);
-        debugSerial.println("DEBUG: Joined");
+        //debugSerial.println(_recievedString);
+        //debugSerial.println("DEBUG: Joined");
         if (strstr(_recievedString, "OK") != '\0')
           return (0);
       }
@@ -231,10 +239,10 @@
 -----------------------------------------------------------------------------------*/
   int LoRaAT::send(char* message, unsigned int timeout) {
 
-  SoftwareSerial debugSerial(10, 11);     // RX, TX
-  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-  debugSerial.print("DEBUG: Sending: ");
-  debugSerial.println(message);
+  //SoftwareSerial debugSerial(10, 11);     // RX, TX
+  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  //debugSerial.print("DEBUG: Sending: ");
+  //debugSerial.println(message);
 
   int LOOP_DELAY = 250;					//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
@@ -245,8 +253,8 @@
 
   int available = ATSerial->available();
 
-  debugSerial.print("DEBUG: available =:");
-  debugSerial.println(available , DEC);
+  //debugSerial.print("DEBUG: available =:");
+  //debugSerial.println(available , DEC);
   
   //Send message
   ATSerial->print("AT+SEND ");
@@ -265,15 +273,15 @@
   timeoutCounter = 0;
 
   available = ATSerial->available();
-  debugSerial.print("DEBUG: available =:");
-  debugSerial.println(available , DEC);
+  //debugSerial.print("DEBUG: available =:");
+  //debugSerial.println(available , DEC);
 
   while(timeoutCounter < timeout) {
     available = ATSerial->available();
     if (available) {
       if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
       {
-        debugSerial.println(_recievedString);
+        //debugSerial.println(_recievedString);
         if (strstr(_recievedString, "OK") != '\0')
           return (0);
       }
@@ -320,8 +328,8 @@
 -----------------------------------------------------------------------------------*/
  int LoRaAT::sendPairs(char* pairs) {
 
-  SoftwareSerial debugSerial(10, 11);     // RX, TX
-  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  //SoftwareSerial debugSerial(10, 11);     // RX, TX
+  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
   //debugSerial.println("Send Pairs init: "+ pairs);
 
   //Return constants
@@ -337,8 +345,8 @@
   }
 
   _pairsToJSON(json, pairs);
-  debugSerial.print("DEBUG, JSON: ");
-  debugSerial.println(json);
+  //debugSerial.print("DEBUG, JSON: ");
+  //debugSerial.println(json);
   _createFragmentBuffer(json);
   //debugSerial.println("Prior to proccessing buffer");
   response = _processBuffer();
@@ -351,8 +359,8 @@
 | and return a JSON formatted String.												|
 -----------------------------------------------------------------------------------*/
  void LoRaAT::_pairsToJSON(char* json, char* pairs) {
-  SoftwareSerial debugSerial(10, 11);     // RX, TX
-  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  //SoftwareSerial debugSerial(10, 11);     // RX, TX
+  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
   //debugSerial.println("Send Pairs init: "+ pairs);
 
   char* jsonPtr = json;
@@ -433,8 +441,8 @@
 -----------------------------------------------------------------------------------*/
  void LoRaAT::_createFragmentBuffer(char* message) {
 
-  SoftwareSerial debugSerial(10, 11);     // RX, TX
-  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  //SoftwareSerial debugSerial(10, 11);     // RX, TX
+  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
   //debugSerial.println("_create Frag Buff");
 
   int strLength = strlen(message);
@@ -499,30 +507,30 @@
 -----------------------------------------------------------------------------------*/
 int LoRaAT::_processBuffer() 
 {
-  SoftwareSerial debugSerial(10, 11);     // RX, TX
-  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
+  //SoftwareSerial debugSerial(10, 11);     // RX, TX
+  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
 
-  debugSerial.println("Manual print");
+  //debugSerial.println("Manual print");
   for (int i=0; i < _txPutter; i++)
   {
     for (int j=0; j < _PACKET_SIZE; j++)
     {
-      debugSerial.print(_txBuffer[i][j], HEX);
+      //debugSerial.print(_txBuffer[i][j], HEX);
     }
-    debugSerial.println();
+    //debugSerial.println();
   }
 
   int response;
   for(_txGetter; _txGetter < _txPutter; _txGetter++ )
   {
-    debugSerial.print("DEBUG: Buffer: ");
-    debugSerial.print(_txGetter);
-    debugSerial.print(" : ");
-    debugSerial.println(_txBuffer[_txGetter]);
+    //debugSerial.print("DEBUG: Buffer: ");
+    //debugSerial.print(_txGetter);
+    //debugSerial.print(" : ");
+    //debugSerial.println(_txBuffer[_txGetter]);
 
     response = send(_txBuffer[_txGetter]);
-    debugSerial.print("DEBUG: Sent with response: ");
-    debugSerial.println(response, DEC);
+    //debugSerial.print("DEBUG: Sent with response: ");
+    //debugSerial.println(response, DEC);
   }
   _txPutter = 0;
   _txGetter = 0;
