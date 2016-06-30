@@ -17,8 +17,6 @@
 
 #include "Arduino.h"
 #include <SoftwareSerial.h>       //Sneaky sofware serial to output debug info
-#include <stdio.h>
-
 
 /*
   Class definition
@@ -38,10 +36,7 @@ class LoRaAT
 	int sendPairs(char*);
     int sendPairs(String); 
 	uint8_t ping();			//I believe there maybe a ping function... I'm not sure yet what the AT command returns, or what we should return to the user?
-	//String debug;
   private:
-	static const uint16_t _jsonMemeoryPool = 500;  //Preallocated memeory for JSON lib in bytes
-
 	static const uint8_t _MAX_FRAGMENTS = 16;
 	static const uint8_t _PACKET_SIZE = 11;
 	static const uint8_t _HEADER_SIZE = 2;
@@ -52,14 +47,11 @@ class LoRaAT
 	uint8_t _txPutter = 0;
 	uint8_t _txGetter = 0;
 	
-    int _findText(String, String);
 	void _pairsToJSON(char*, char*);
 	void _createFragmentBuffer(char*);
 	int _processBuffer();
 	
     uint8_t _u8SerialPort;	//< serial port initialized in constructor
-	//String _sendQueue[_MAX_FRAGMENTS];
-
 };
 
 #endif
