@@ -22,9 +22,9 @@
  *                               GLOBAL VARIABLES                                   *
  ***********************************************************************************/
 #if defined(ARDUINO_ARCH_AVR)
-  HardwareSerial* MBSerial = &Serial; //< Pointer to Serial class object
+  HardwareSerial* ATSerial = &Serial; //< Pointer to Serial class object
 #elif defined(ARDUINO_ARCH_SAM)
-  UARTClass* MBSerial = &Serial;      //< Pointer to Serial class object
+  UARTClass* ATSerial = &Serial;      //< Pointer to Serial class object
 #else
   #error "This library only supports boards with an AVR or SAM processor."
 #endif
@@ -73,29 +73,29 @@
     switch(_u8SerialPort) {
     #if defined(UBRR1H)
       case 1:
-      MBSerial = &Serial1;
+      ATSerial = &Serial1;
       break;
     #endif
       
     #if defined(UBRR2H)
       case 2:
-      MBSerial = &Serial2;
+      ATSerial = &Serial2;
       break;
     #endif
       
     #if defined(UBRR3H)
       case 3:
-      MBSerial = &Serial3;
+      ATSerial = &Serial3;
       break;
     #endif
       
       case 0:
       default:
-      MBSerial = &Serial;
+      ATSerial = &Serial;
       break;
     }
 
-    MBSerial->begin(u32BaudRate);
+    ATSerial->begin(u32BaudRate);
   }
 
 /*----------------------------------------------------------------------------------|
@@ -146,10 +146,10 @@
   int available;
 
   //flush receive buffer before transmitting request
-  while (MBSerial->read() != -1);
+  while (ATSerial->read() != -1);
   
   //Send join request
-  MBSerial->println("AT+JOIN");
+  ATSerial->println("AT+JOIN");
   
   //Loop reading from serial buffer until we get either a recognisable error, or
   //success
@@ -162,11 +162,11 @@
     {
       _recievedString[i] = '\0';
     }
-    available = MBSerial->available();
+    available = ATSerial->available();
     if (available) {
-      // _recievedString = MBSerial->readString();
+      // _recievedString = ATSerial->readString();
 
-      if(MBSerial->readBytesUntil(NULL, _recievedString, available)) 
+      if(ATSerial->readBytesUntil(NULL, _recievedString, available)) 
       {
         debugSerial.println(_recievedString);
         debugSerial.println("DEBUG: Joined");
@@ -254,23 +254,23 @@
   char _recievedString[45];				//String returned by device
   
   //flush receive buffer before transmitting request
-  while (MBSerial->read() != -1);
+  while (ATSerial->read() != -1);
 
-  int available = MBSerial->available();
+  int available = ATSerial->available();
 
   debugSerial.print("DEBUG: available =:");
   debugSerial.println(available , DEC);
   
   //Send message
-  MBSerial->print("AT+SEND ");
+  ATSerial->print("AT+SEND ");
   for (int i = 0; i < _PACKET_SIZE; i++)
   {
-    MBSerial->print(message[i]);
+    ATSerial->print(message[i]);
   }
-  MBSerial->println();
+  ATSerial->println();
 
 
-  //MBSerial->println("at+send " + message + "\r\n");
+  //ATSerial->println("at+send " + message + "\r\n");
   delay(2000);
   
   //Loop reading from serial buffer until we get either a recognisable error, or
@@ -278,17 +278,17 @@
   //pinMode(3,OUTPUT);
   timeoutCounter = 0;
 
-  available = MBSerial->available();
+  available = ATSerial->available();
   debugSerial.print("DEBUG: available =:");
   debugSerial.println(available , DEC);
 
   while(timeoutCounter < timeout) {
     // Blank string
-    available = MBSerial->available();
+    available = ATSerial->available();
     if (available) {
-      // _recievedString = MBSerial->readString();
+      // _recievedString = ATSerial->readString();
 
-      if(MBSerial->readBytesUntil(NULL, _recievedString, available)) 
+      if(ATSerial->readBytesUntil(NULL, _recievedString, available)) 
       {
         debugSerial.println(_recievedString);
         if (strstr(_recievedString, "OK") != NULL)
@@ -316,8 +316,8 @@
     debugSerial.print("<");
     debugSerial.print(timeoutCounter, DEC);
     debugSerial.print(">");
-    //if (MBSerial->available() != 0) {
-    _recievedString += MBSerial->readString();
+    //if (ATSerial->available() != 0) {
+    _recievedString += ATSerial->readString();
       //debugSerial.println("DEBUG: Received String=("+ _recievedString +")");
 
       //debugSerial.print("DEBUG: Received String len=(");
@@ -344,7 +344,7 @@
     delay(LOOP_DELAY);
     digitalWrite(3, LOW);
     delay(LOOP_DELAY);
-    available = MBSerial->available();
+    available = ATSerial->available();
     debugSerial.print("DEBUG: available end WHILE =:");
     debugSerial.println(available , DEC);
   }
