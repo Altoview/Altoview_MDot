@@ -68,10 +68,10 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | Sets up the serial port using default 19200 baud rate.							|
 | Call once class has been instantiated, typically within setup().					|
 -----------------------------------------------------------------------------------*/
-  void LoRaAT::begin(void) {
+void LoRaAT::begin(void) {
   //TODO: Input checking??
-    begin(19200);
-  }
+  begin(19200);
+}
 
 /*----------------------------------------------------------------------------------|
 | Initialize class object.															|
@@ -82,34 +82,34 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | TODO: Think about what we should set here, what should be defaults. Datarates,	|
 | adaptive data rates? Other things?												|
 -----------------------------------------------------------------------------------*/
-  void LoRaAT::begin(uint32_t u32BaudRate) {
-    switch(_u8SerialPort) {
-    #if defined(UBRR1H)
-      case 1:
-      ATSerial = &Serial1;
-      break;
-    #endif
-      
-    #if defined(UBRR2H)
-      case 2:
-      ATSerial = &Serial2;
-      break;
-    #endif
-      
-    #if defined(UBRR3H)
-      case 3:
-      ATSerial = &Serial3;
-      break;
-    #endif
-      
-      case 0:
-      default:
-      ATSerial = &Serial;
-      break;
-    }
-
-    ATSerial->begin(u32BaudRate);
+void LoRaAT::begin(uint32_t u32BaudRate) {
+  switch(_u8SerialPort) {
+  #if defined(UBRR1H)
+    case 1:
+    ATSerial = &Serial1;
+    break;
+  #endif
+    
+  #if defined(UBRR2H)
+    case 2:
+    ATSerial = &Serial2;
+    break;
+  #endif
+    
+  #if defined(UBRR3H)
+    case 3:
+    ATSerial = &Serial3;
+    break;
+  #endif
+    
+    case 0:
+    default:
+    ATSerial = &Serial;
+    break;
   }
+
+  ATSerial->begin(u32BaudRate);
+}
 
 /*----------------------------------------------------------------------------------|
 | Join a LoRa(WAN?) network															|
@@ -126,9 +126,9 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | 																					|
 | uses a default of 10,000ms (10sec) timeout										|
 -----------------------------------------------------------------------------------*/
-  int LoRaAT::join() {
-    return(join(10000));
-  }
+int LoRaAT::join() {
+  return(join(10000));
+}
 
 /*----------------------------------------------------------------------------------|
 | Join a LoRa(WAN?) network															|
@@ -146,19 +146,19 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | takes the parameter timeout, which is the number of milliseconds you want it		|
 | to wait for a response.															|
 -----------------------------------------------------------------------------------*/
-  int LoRaAT::join(unsigned int timeout) {
-  _debugStream->println("LoRaAT::join        : Entering subroutine");
+int LoRaAT::join(unsigned int timeout) {
+  _debugStream->println("LaT:j : enter");
 
   const int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
-  char _recievedString[100];       		//String returned by device
-  int available;
+  char _recievedString[_MAX_MDOT_RESPONSE];  //String returned by device
+  int available;						//Number of bytes in serial buffer
 
   //flush receive buffer before transmitting request
   while (ATSerial->read() != -1);
   
   //Send join request
-  _debugStream->println("LoRaAT::join        : Sending join request");
+  _debugStream->println("LaT:j : AT+JOIN");
   ATSerial->println("AT+JOIN");
   
   //Loop reading from serial buffer until we get either a recognisable error, or
@@ -166,40 +166,42 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
   timeoutCounter = 0;
   delay(10000);
 
-  _debugStream->println("LoRaAT::join        : Wait for response or timeout");
+  _debugStream->println("LaT:j : wait/response/timeout");
   while(timeoutCounter < timeout) {
     //Blank string
-    for (int i = 0; i < 100; i++) 
+    for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) 
     {
       _recievedString[i] = '\0';
     }
     available = ATSerial->available();			//Check number of bytes available
-	_debugStream->println("LoRaAT::join        : Is anything available on ATSerial?");
+	_debugStream->println("LaT:j : ATSerial.available?");
     if (available) {
-	  _debugStream->println("LoRaAT::join        : Yes, we received:");
+	  _debugStream->println("LaT:j : yes, received:");
       if(ATSerial->readBytesUntil('\0', _recievedString, available)) {
+		_debugStream->print("LaT:j : ");
         _debugStream->println(_recievedString);
-	    _debugStream->println("LoRaAT::join        : Is the keyword 'OK' in that?:");
+	    _debugStream->println("LaT:j : keyword 'OK'?");
         if (strstr(_recievedString, "OK") != '\0') {
-		  _debugStream->println("LoRaAT::join        : Yes, exit returning 0:");
+		  _debugStream->println("LaT:j : yes, return 0:");
           return (0);
 		}
       }
     }
-	_debugStream->println("LoRaAT::join        : No, let's check again");
+	_debugStream->println("LaT:j : no, delay/check again");
     timeoutCounter += LOOP_DELAY;
     delay(LOOP_DELAY);
   }
-  
+
+  _debugStream->println("LaT:j : timed-out. return -1:");
   return(-1);
 }
 
 /*----------------------------------------------------------------------------------|
 | Leave a LoRa(WAN?) network														|
 -----------------------------------------------------------------------------------*/
-  void LoRaAT::leave() {
-
-  }
+void LoRaAT::leave() {
+  _debugStream->println("LaT:l: not implemented");
+}
 
 /*----------------------------------------------------------------------------------|
 | In general we send strings using the AT command, TODO: we could have overloaded	|
@@ -222,9 +224,10 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | 																					|
 | uses a default of 10,000ms (10sec) timeout										|
 -----------------------------------------------------------------------------------*/
-  int LoRaAT::send(char* message) {
-    return(send(message,10000));
-  }
+int LoRaAT::send(char* message) {
+  _debugStream->println("LaT:s : enter, w/ default timeout");
+  return(send(message,10000));
+}
 
 /*----------------------------------------------------------------------------------|
 | In general we send strings using the AT command, TODO: we could have overloaded	|
@@ -245,59 +248,71 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 |	  + Replace with something else?												|
 |	  + Return error?																|
 -----------------------------------------------------------------------------------*/
-  int LoRaAT::send(char* message, unsigned int timeout) {
-
-  //SoftwareSerial debugSerial(10, 11);     // RX, TX
-  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-  //debugSerial.print("DEBUG: Sending: ");
-  //debugSerial.println(message);
+int LoRaAT::send(char* message, unsigned int timeout) {
+  _debugStream->println("LaT:s : enter");
+  _debugStream->println("LaT:s : sending:");
+  _debugStream->print("LaT:s : ");
+  _debugStream->println(message);
 
   int LOOP_DELAY = 250;					//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
-  char _recievedString[45];				//String returned by device
+  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  int available;						//Number of bytes in serial buffer
   
   //flush receive buffer before transmitting request
   while (ATSerial->read() != -1);
-
-  int available = ATSerial->available();
-
-  //debugSerial.print("DEBUG: available =:");
-  //debugSerial.println(available , DEC);
+  
+  //Mirror on debug what we're going to output on ATSerial
+  _debugStream->print("LaT:s : ");
+  _debugStream->print("AT+SEND ");
+  for (int i = 0; i < _PACKET_SIZE; i++)
+  {
+    _debugStream->print(message[i]);
+  }
+  _debugStream->println();
   
   //Send message
-  ATSerial->print("AT+SEND ");
+  ATSerial->print("LaT:s : AT+SEND ");
   for (int i = 0; i < _PACKET_SIZE; i++)
   {
     ATSerial->print(message[i]);
   }
   ATSerial->println();
-
-
-  //ATSerial->println("at+send " + message + "\r\n");
-  delay(2000);
   
   //Loop reading from serial buffer until we get either a recognisable error, or
   //success
   timeoutCounter = 0;
+  delay(2000);
 
-  available = ATSerial->available();
-  //debugSerial.print("DEBUG: available =:");
-  //debugSerial.println(available , DEC);
-
+  _debugStream->println("LaT:s : wait/response/timeout");
   while(timeoutCounter < timeout) {
+	//Blank string
+    for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) 
+    {
+      _recievedString[i] = '\0';
+    }
     available = ATSerial->available();
+	_debugStream->println("LaT:s : ATSerial.available?");
     if (available) {
+	  _debugStream->println("LaT:s : yes:");
       if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
       {
-        //debugSerial.println(_recievedString);
-        if (strstr(_recievedString, "OK") != '\0')
+		_debugStream->print("LaT:s : ");
+        _debugStream->println(_recievedString);
+		_debugStream->println("LaT:s : keyword 'OK'?:");
+        if (strstr(_recievedString, "OK") != '\0') {
+		  _debugStream->println("LaT:s : yes, return 0:");
           return (0);
+		}
       }
     }
+	_debugStream->println("LaT:s : No, delay/check again");
     timeoutCounter += LOOP_DELAY;
     delay(LOOP_DELAY);
   }
-  
+
+  _debugStream->println("LaT:s : timed-out");
+  _debugStream->println("LaT:s : return -1:");
   return(-1);
 }
 
@@ -305,9 +320,9 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | I believe there maybe a ping function... I'm not sure yet what the AT command		|
 | returns, or what we should return to the user?									|
 -----------------------------------------------------------------------------------*/
-  uint8_t LoRaAT::ping() {
-
-  }
+uint8_t LoRaAT::ping() {
+  _debugStream->println("LaT:p: not implemented");
+}
 
 /*----------------------------------------------------------------------------------|
 | Recieves a string in the format key:value,key:value,...							|
@@ -318,12 +333,14 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 |																					|
 | //TODO: If not recieved in that format return an error							|
 -----------------------------------------------------------------------------------*/
- int LoRaAT::sendPairs(String pairs) 
- {
-   char pairsC[_MAX_PAIRS_SIZE];
-   pairs.toCharArray(pairsC, _MAX_PAIRS_SIZE);
-   LoRaAT::sendPairs(pairsC);
- }
+int LoRaAT::sendPairs(String pairs) 
+{
+  _debugStream->println("LaT:sp: enter");
+  char pairsC[_MAX_PAIRS_SIZE];
+  _debugStream->println("LaT:sp: string to char[]");
+  pairs.toCharArray(pairsC, _MAX_PAIRS_SIZE);
+  LoRaAT::sendPairs(pairsC);
+}
 
 /*----------------------------------------------------------------------------------|
 | Recieves a char array in the format key:value,key:value,...						|
@@ -334,12 +351,11 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 |																					|
 | //TODO: If not recieved in that format return an error							|
 -----------------------------------------------------------------------------------*/
- int LoRaAT::sendPairs(char* pairs) {
-
-  //SoftwareSerial debugSerial(10, 11);     // RX, TX
-  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-  //debugSerial.println("Send Pairs init: "+ pairs);
-
+int LoRaAT::sendPairs(char* pairs) {
+  _debugStream->println("LaT:sp: enter");
+  _debugStream->println("LaT:sp: pairs:");
+  _debugStream->print("LaT:sp: ");
+  _debugStream->println(pairs);
   //Return constants
   const byte UNKNOWN_FORMAT = 4;
   int response = 0;
@@ -352,25 +368,25 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
     return(UNKNOWN_FORMAT);
   }
 
+  _debugStream->println("LaT:sp: convert to JSON");
   _pairsToJSON(json, pairs);
-  //debugSerial.print("DEBUG, JSON: ");
-  //debugSerial.println(json);
+  _debugStream->println("LaT:sp: pairs as JSON");
+  _debugStream->print("LaT:sp: ");
+  _debugStream->println(json);
+  _debugStream->println("LaT:sp: fragment JSON to buffer");
   _createFragmentBuffer(json);
-  //debugSerial.println("Prior to proccessing buffer");
+  _debugStream->println("LaT:sp: process buffer");
   response = _processBuffer();
 
   return(response);
 }
 
 /*----------------------------------------------------------------------------------|
-| This function will take any correctly formatted string of key:value pairs			|
+| This function will take any correctly formatted char array of key:value pairs		|
 | and return a JSON formatted String.												|
 -----------------------------------------------------------------------------------*/
- void LoRaAT::_pairsToJSON(char* json, char* pairs) {
-  //SoftwareSerial debugSerial(10, 11);     // RX, TX
-  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-  //debugSerial.println("Send Pairs init: "+ pairs);
-
+void LoRaAT::_pairsToJSON(char* json, char* pairs) {
+  _debugStream->println("LaT:pj: enter");
   char* jsonPtr = json;
   char temp[20];
   int len = strlen(pairs);
@@ -425,8 +441,6 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
     else 
     {
       *tempPtr++ = c;
-      // debugSerial.print("DEBUG: else,");
-      // debugSerial.println(temp);
     }
   }
   int no = tempPtr-temp;
@@ -436,6 +450,7 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
   *jsonPtr++ = '}';
   *jsonPtr++ = '\0';
 
+  _debugStream->println("LaT:pj: exit");
   return;
 }
 
@@ -447,11 +462,8 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 |																					|
 | header is of the format [fragment number][total number of fragments]				|
 -----------------------------------------------------------------------------------*/
- void LoRaAT::_createFragmentBuffer(char* message) {
-
-  //SoftwareSerial debugSerial(10, 11);     // RX, TX
-  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-  //debugSerial.println("_create Frag Buff");
+void LoRaAT::_createFragmentBuffer(char* message) {
+  _debugStream->println("LaT:fb: enter");
 
   int strLength = strlen(message);
   //Calculate the number of fragments required for this message
@@ -465,15 +477,13 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
   //Check we haven't exceeded the maximum number of fragments
   if (numFragments > _MAX_FRAGMENTS) 
   {
-    //TODO: What to do? For now, just don't send all of it...
+    _debugStream->println("LaT:fb: max frags exceeded");
     numFragments = _MAX_FRAGMENTS;
   }
 
-  //Create each fragment. TODO: Can we optimise out using char array?
-  // char messageAsC[numFragments * _PACKET_SIZE];
-  // message.toCharArray(messageAsC,numFragments*_PACKET_SIZE);
-
-  //debugSerial.println("_create Frag Buff, for");
+  _debugStream->print("LaT:fb: create ");
+  _debugStream->print(numFragments);
+  _debugStream->println(" fragments");
   //Loop through each fragment
   for (_txPutter = 0; _txPutter < numFragments; _txPutter++) {
     union headerPacket 
@@ -490,9 +500,9 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
     _txBuffer[_txPutter][0] = header.asChar[0];
     _txBuffer[_txPutter][1] = header.asChar[1];
 
-    //debugSerial.println("_create Frag Buff, for, for");
+    _debugStream->print("LaT:fb: create fragment ");
+	_debugStream->println(_txPutter);
     //Loop through each location of the message and append to the fragment (as the payload)
-
     for (uint8_t j = 0; j < _PAYLOAD_SIZE; j++) 
     {
       _txBuffer[_txPutter][j + _HEADER_SIZE] = message[_PAYLOAD_SIZE * _txPutter + j];        
@@ -507,6 +517,8 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
         break;
       }
     }
+	_debugStream->print("LaT:fb: ");
+	_debugStream->println(_txBuffer[_txPutter]);
   }
 }
 
@@ -515,30 +527,25 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::_processBuffer() 
 {
-  //SoftwareSerial debugSerial(10, 11);     // RX, TX
-  //debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-
-  //debugSerial.println("Manual print");
-  for (int i=0; i < _txPutter; i++)
-  {
-    for (int j=0; j < _PACKET_SIZE; j++)
-    {
-      //debugSerial.print(_txBuffer[i][j], HEX);
-    }
-    //debugSerial.println();
-  }
+  _debugStream->println("LaT:pb: enter");
 
   int response;
   for(_txGetter; _txGetter < _txPutter; _txGetter++ )
   {
-    //debugSerial.print("DEBUG: Buffer: ");
-    //debugSerial.print(_txGetter);
-    //debugSerial.print(" : ");
-    //debugSerial.println(_txBuffer[_txGetter]);
-
+	_debugStream->print("LaT:pb: putter: ");
+	_debugStream->print(_txPutter);
+	_debugStream->print(" getter: ");
+	_debugStream->println(_txGetter);
+	_debugStream->println("LaT:pb: packet as HEX:");
+	_debugStream->print("LaT:pb: ");
+	for (int j=0; j < _PACKET_SIZE; j++)
+    {
+      _debugStream->print(_txBuffer[_txGetter][j], HEX);
+    }
+	_debugStream->println();
     response = send(_txBuffer[_txGetter]);
-    //debugSerial.print("DEBUG: Sent with response: ");
-    //debugSerial.println(response, DEC);
+    _debugStream->print("LaT:pb: sent. response: ");
+    _debugStream->println(response, DEC);
   }
   _txPutter = 0;
   _txGetter = 0;

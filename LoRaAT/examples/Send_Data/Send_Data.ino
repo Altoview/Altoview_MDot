@@ -40,7 +40,7 @@ void setup() {
     responseCode = mdot.join();
     delay(5000);
   } while (responseCode != 0);
-  debugSerial.println("DEBUG MAIN: Join result: " + String(responseCode));
+  debugSerial.println("SETUP : Join result: " + String(responseCode));
 }
 
 /*--- loop() ---------------------------------------------------------------------------
@@ -51,24 +51,17 @@ void loop() {
   int responseCode;         //Response code from the mdot
   //String testMessage = "";  //Test message sent via debugSerial
   String temp = "Temp:";
-  String rh = ", RH:";
+  String rh = ",RH:";
   String testMsg = temp + count + rh + count * 2;
   
   //testMsg = "test:" + count ;
   //testMsg += ",Alex:" + count*2 ;
   //sprintf(testMsg, "test:%d,alex:%d", count, count*2);
-  debugSerial.println("DEBUG MAIN: testMsg: " + testMsg);
+  debugSerial.println("MAIN  : testMsg: " + testMsg);
   
   responseCode = mdot.sendPairs(testMsg);
 
-  debugSerial.println("send result: " + String(responseCode));
-/*
-  if (debugSerial.available()) {
-    testMessage = debugSerial.readString();
-    responseCode = mdot.sendPairs(testMessage);
-    debugSerial.println("send result: " + String(responseCode));
-  }
-  */
+  debugSerial.println("MAIN  : send result: " + String(responseCode));
 
   delay(10000);
   count++;
