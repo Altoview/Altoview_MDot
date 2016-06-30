@@ -147,17 +147,18 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | to wait for a response.															|
 -----------------------------------------------------------------------------------*/
   int LoRaAT::join(unsigned int timeout) {
-  _debugStream->println("DEBUG: Joining");
+  _debugStream->println("LoRaAT::join        : Entering subroutine");
 
   const int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
-  char _recievedString[100];       //String returned by device
+  char _recievedString[100];       		//String returned by device
   int available;
 
   //flush receive buffer before transmitting request
   while (ATSerial->read() != -1);
   
   //Send join request
+  _debugStream->println("LoRaAT::join        : Sending join request");
   ATSerial->println("AT+JOIN");
   
   //Loop reading from serial buffer until we get either a recognisable error, or
@@ -165,22 +166,27 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
   timeoutCounter = 0;
   delay(10000);
 
+  _debugStream->println("LoRaAT::join        : Wait for response or timeout");
   while(timeoutCounter < timeout) {
-    // Blank string
+    //Blank string
     for (int i = 0; i < 100; i++) 
     {
       _recievedString[i] = '\0';
     }
-    available = ATSerial->available();
+    available = ATSerial->available();			//Check number of bytes available
+	_debugStream->println("LoRaAT::join        : Is anything available on ATSerial?");
     if (available) {
-      if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
-      {
-        //debugSerial.println(_recievedString);
-        //debugSerial.println("DEBUG: Joined");
-        if (strstr(_recievedString, "OK") != '\0')
+	  _debugStream->println("LoRaAT::join        : Yes, we received:");
+      if(ATSerial->readBytesUntil('\0', _recievedString, available)) {
+        _debugStream->println(_recievedString);
+	    _debugStream->println("LoRaAT::join        : Is the keyword 'OK' in that?:");
+        if (strstr(_recievedString, "OK") != '\0') {
+		  _debugStream->println("LoRaAT::join        : Yes, exit returning 0:");
           return (0);
+		}
       }
     }
+	_debugStream->println("LoRaAT::join        : No, let's check again");
     timeoutCounter += LOOP_DELAY;
     delay(LOOP_DELAY);
   }
