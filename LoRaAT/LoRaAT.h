@@ -26,6 +26,7 @@ class LoRaAT
   public:
     LoRaAT();				//Use default serial port
 	LoRaAT(uint8_t);		//Use specified serial port. TODO: Think about other things we want to define at this point
+	LoRaAT(uint8_t,Stream*);
 	void begin();			//Use default baud
 	void begin(uint32_t);	//Use specificed baud rate. TODO: Think about other things, e.g. datarate, adaptive data rate.
     int join();				//Join a LoRa(WAN?) network TODO: Think about network parameters, saying something about network?
@@ -52,6 +53,7 @@ class LoRaAT
 	int _processBuffer();
 	
     uint8_t _u8SerialPort;	//< serial port initialized in constructor
+	Stream* _debugStream;
 };
 
 #endif
