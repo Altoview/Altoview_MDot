@@ -141,7 +141,6 @@
 
   const int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
-  // String _recievedString;				//String returned by device
   char _recievedString[100];       //String returned by device
   int available;
 
@@ -164,8 +163,6 @@
     }
     available = ATSerial->available();
     if (available) {
-      // _recievedString = ATSerial->readString();
-
       if(ATSerial->readBytesUntil(NULL, _recievedString, available)) 
       {
         debugSerial.println(_recievedString);
@@ -173,15 +170,6 @@
         if (strstr(_recievedString, "OK") != NULL)
           return (0);
       }
-      //     if (_recievedString.indexOf("Failed to join network") >= 0) {
-      //       return(1);
-      //     } else if (_recievedString.indexOf("ERROR") >= 0) {
-      //       return(-2);
-      //     } else if (_recievedString.indexOf("Successfully joined network") >= 0) {
-      //       return(0);
-      //     } else {
-    		// //Unknown response??
-      //     }
     }
     timeoutCounter += LOOP_DELAY;
     delay(LOOP_DELAY);
@@ -248,8 +236,7 @@
   debugSerial.print("DEBUG: Sending: ");
   debugSerial.println(message);
 
-
-  int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
+  int LOOP_DELAY = 250;					//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
   char _recievedString[45];				//String returned by device
   
@@ -275,7 +262,6 @@
   
   //Loop reading from serial buffer until we get either a recognisable error, or
   //success
-  //pinMode(3,OUTPUT);
   timeoutCounter = 0;
 
   available = ATSerial->available();
@@ -283,74 +269,20 @@
   debugSerial.println(available , DEC);
 
   while(timeoutCounter < timeout) {
-    // Blank string
     available = ATSerial->available();
     if (available) {
-      // _recievedString = ATSerial->readString();
-
       if(ATSerial->readBytesUntil(NULL, _recievedString, available)) 
       {
         debugSerial.println(_recievedString);
         if (strstr(_recievedString, "OK") != NULL)
           return (0);
       }
-      //     if (_recievedString.indexOf("Failed to join network") >= 0) {
-      //       return(1);
-      //     } else if (_recievedString.indexOf("ERROR") >= 0) {
-      //       return(-2);
-      //     } else if (_recievedString.indexOf("Successfully joined network") >= 0) {
-      //       return(0);
-      //     } else {
-        // //Unknown response??
-      //     }
     }
     timeoutCounter += LOOP_DELAY;
     delay(LOOP_DELAY);
   }
   
   return(-1);
-//  while(timeoutCounter < timeout) {
-  /*
-  while(available > 0) {
-//  while(true) {
-    debugSerial.print("<");
-    debugSerial.print(timeoutCounter, DEC);
-    debugSerial.print(">");
-    //if (ATSerial->available() != 0) {
-    _recievedString += ATSerial->readString();
-      //debugSerial.println("DEBUG: Received String=("+ _recievedString +")");
-
-      //debugSerial.print("DEBUG: Received String len=(");
-      //debugSerial.print(_recievedString.length(), DEC);
-      //debugSerial.println(")");
-      //if (_recievedString.indexOf("at+send") < 0) {
-    if (_recievedString.indexOf("ACK not received") >= 0)  {
-      return(1);
-    } else if (_recievedString.indexOf("ERROR") >= 0) {
-      return(-2);
-    } else if (_recievedString.indexOf("Data exceeds datarate max payload") >= 0) {
-      return(-3);
-    } else if (_recievedString.indexOf("OK") >= 0) {
-      return(0);
-    } else {
-      debugSerial.println("else(" + _recievedString + ")");
-          //return(100);
-		//Unknown response??
-    }
-      //}
-    //}
-    timeoutCounter += LOOP_DELAY;
-    digitalWrite(3, HIGH);
-    delay(LOOP_DELAY);
-    digitalWrite(3, LOW);
-    delay(LOOP_DELAY);
-    available = ATSerial->available();
-    debugSerial.print("DEBUG: available end WHILE =:");
-    debugSerial.println(available , DEC);
-  }
-  
-  return(-1);
-  */
 }
 
 /*----------------------------------------------------------------------------------|
@@ -361,7 +293,15 @@
 
   }
 
-// Overloading the sendPairs
+/*----------------------------------------------------------------------------------|
+| Recieves a string in the format key:value,key:value,...							|
+|																					|
+| 1. The csv is translated to a json,												|
+| 2. The json is added to the _txBuffer												|
+| 3. The _txBuffer is processed														|
+|																					|
+| //TODO: If not recieved in that format return an error							|
+-----------------------------------------------------------------------------------*/
  int LoRaAT::sendPairs(String pairs) 
  {
    char pairsC[_MAX_PAIRS_SIZE];
@@ -370,7 +310,7 @@
  }
 
 /*----------------------------------------------------------------------------------|
-| Recieves a string in the format key:value,key:value,...							|
+| Recieves a char array in the format key:value,key:value,...						|
 |																					|
 | 1. The csv is translated to a json,												|
 | 2. The json is added to the _txBuffer												|
@@ -388,11 +328,10 @@
   const byte UNKNOWN_FORMAT = 4;
   int response = 0;
 
-//  String json;      
+  //String json;      
   char json[_MAX_PAIRS_SIZE];      
   
   //TODO: Check the string is actually pairs
-  
   if (false) { //TODO: if format not recoginised
     return(UNKNOWN_FORMAT);
   }
@@ -412,12 +351,6 @@
 | and return a JSON formatted String.												|
 -----------------------------------------------------------------------------------*/
  void LoRaAT::_pairsToJSON(char* json, char* pairs) {
-  // String json = "";   //Finished JSON as a string
-  // String temp = "";   //Temp storage as we look for delimters
-  // String key = "";    //temp storage for the "key".. "value" is pulled straiged from temp
-  
-  // StaticJsonBuffer<_jsonMemeoryPool> jsonBuffer;
-  // JsonObject& root = jsonBuffer.createObject();
   SoftwareSerial debugSerial(10, 11);     // RX, TX
   debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
   //debugSerial.println("Send Pairs init: "+ pairs);
@@ -595,18 +528,4 @@ int LoRaAT::_processBuffer()
   _txGetter = 0;
   return(response);
 }
-
-/*----------------------------------------------------------------------------------|
-|  Simple find substring within string function.									|
------------------------------------------------------------------------------------*/
-/*
-  int LoRaAT::_findText(String needle, String haystack) {
-    int foundpos = -1;
-    for (int i = 0; i <= haystack.length() - needle.length(); i++) {
-      if (haystack.substring(i,needle.length()+i) == needle) {
-        foundpos = i;
-      }
-    }
-    return foundpos;
-  }*/
 
