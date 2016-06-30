@@ -1,7 +1,7 @@
 /*
   File: LoRaAT.h
 
-  Version: v0.0.1  
+  Version: v0.0.1
 
   Breif: Arduino library for controlling Multitech mDot LoRa modules using 
          AT commands.
@@ -9,7 +9,7 @@
   Copyright: This library is published under GNU AGPLv3 license.
              http://choosealicense.com/licenses/agpl-3.0/
 
-  Auther: Campbell Scientific Australia Pty Ltd
+  Author: Campbell Scientific Australia Pty Ltd
 */
 
 #ifndef LoRaAT_h
