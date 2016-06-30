@@ -1,7 +1,7 @@
 /*
   File: LoRaAT.cpp
 
-  Version: v0.0.1  
+  Version: v0.0.1
 
   Breif: Arduino library for controlling Multitech mDot LoRa modules using 
          AT commands.
@@ -9,7 +9,7 @@
   Copyright: This library is published under GNU AGPLv3 license.
              http://choosealicense.com/licenses/agpl-3.0/
 
-  Auther: Campbell Scientific Australia Pty Ltd
+  Author: Campbell Scientific Australia Pty Ltd
 */
 
 /************************************************************************************
@@ -34,43 +34,41 @@
  *                               PUBLIC FUNCTIONS                                   *
  ***********************************************************************************/
 
-/*
- * CONSTRUCTOR: 
- * Creates class object using a default serial port 0
- */
-  LoRaAT::LoRaAT() {
+/*----------------------------------------------------------------------------------|
+| CONSTRUCTOR: Creates class object using a default serial port 0					|
+-----------------------------------------------------------------------------------*/
+ LoRaAT::LoRaAT() {
     _u8SerialPort = 0;
   }
 
-/*
- * CONSTRUCTOR: 
- * Creates class object using a specified serial port
- */
+/*----------------------------------------------------------------------------------|
+| CONSTRUCTOR: Creates class object using a specified serial port.					|
+-----------------------------------------------------------------------------------*/
   LoRaAT::LoRaAT(uint8_t u8SerialPort) {
   //TODO: Input checking, what range of values to accept, how to handle invalid input
     _u8SerialPort = u8SerialPort;
   }
 
-/*
- * Initialize class object.
- * 
- * Sets up the serial port using default 19200 baud rate.
- * Call once class has been instantiated, typically within setup().
- */
+/*----------------------------------------------------------------------------------|
+| Initialize class object.															|
+| 																					|
+| Sets up the serial port using default 19200 baud rate.							|
+| Call once class has been instantiated, typically within setup().					|
+-----------------------------------------------------------------------------------*/
   void LoRaAT::begin(void) {
   //TODO: Input checking??
     begin(19200);
   }
 
-/*
- * Initialize class object.
- * 
- * Sets up the serial port using specified baud rate.
- * Call once class has been instantiated, typically within setup().
-
-  TODO: Think about what we should set here, what should be defaults. Datarates,
-  adaptive data rates? Other things?
-*/
+/*----------------------------------------------------------------------------------|
+| Initialize class object.															|
+| 																					|
+| Sets up the serial port using default 19200 baud rate.							|
+| Call once class has been instantiated, typically within setup().					|
+|																					|
+| TODO: Think about what we should set here, what should be defaults. Datarates,	|
+| adaptive data rates? Other things?												|
+-----------------------------------------------------------------------------------*/
   void LoRaAT::begin(uint32_t u32BaudRate) {
     switch(_u8SerialPort) {
     #if defined(UBRR1H)
@@ -100,41 +98,41 @@
     MBSerial->begin(u32BaudRate);
   }
 
-/*
-  Join a LoRa(WAN?) network
-  
-  TODO: Review returns, can we return something more meaningfull?
-  Currently, zero is a success, negative integers are generic errors, and positive
-  integers are a specific failure.
-    0 - success
-    1 - mdot responds with failure to join network response
-   -1 - mdot responds with "ERROR"
-   -2 - Timeout error
-  
-  //TODO: parameters, saying something about network we want to join?
-  
-  uses a default of 10,000ms (10sec) timeout
-*/
+/*----------------------------------------------------------------------------------|
+| Join a LoRa(WAN?) network															|
+| 																					|
+| TODO: Review returns, can we return something more meaningfull?					|
+| Currently, zero is a success, negative integers are generic errors, and positive	|
+| integers are a specific failure.													|
+|   0 - success																		|
+|   1 - mdot responds with failure to join network response							|
+|  -1 - mdot responds with "ERROR"													|
+|  -2 - Timeout error																|
+| 																					|
+| //TODO: parameters, saying something about network we want to join?				|
+| 																					|
+| uses a default of 10,000ms (10sec) timeout										|
+-----------------------------------------------------------------------------------*/
   int LoRaAT::join() {
     return(join(10000));
   }
 
-/*
-  Join a LoRa(WAN?) network
-  
-  TODO: Review returns, can we return something more meaningfull?
-  Currently, zero is a success, negative integers are generic errors, and positive
-  integers are a specific failure.
-    0 - success
-    1 - mdot responds with failure to join network response
-   -1 - Timeout error
-   -2 - mdot responds with "ERROR"
-  
-  //TODO: parameters, saying something about network we want to join?
-  
-  takes the parameter timeout, which is the number of milliseconds you want it
-  to wait for a response.
-*/
+/*----------------------------------------------------------------------------------|
+| Join a LoRa(WAN?) network															|
+|																					| 
+| TODO: Review returns, can we return something more meaningfull?					|
+| Currently, zero is a success, negative integers are generic errors, and positive	|
+| integers are a specific failure.													|
+|   0 - success																		|
+|   1 - mdot responds with failure to join network response							|
+|  -1 - Timeout error																|
+|  -2 - mdot responds with "ERROR"													|
+| 																					|
+| //TODO: parameters, saying something about network we want to join?				|
+| 																					|
+| takes the parameter timeout, which is the number of milliseconds you want it		|
+| to wait for a response.															|
+-----------------------------------------------------------------------------------*/
   int LoRaAT::join(unsigned int timeout) {
 
   SoftwareSerial debugSerial(10, 11);     // RX, TX
@@ -192,57 +190,57 @@
   return(-1);
 }
 
-/*
-  Leave a LoRa(WAN?) network
-*/
+/*----------------------------------------------------------------------------------|
+| Leave a LoRa(WAN?) network														|
+-----------------------------------------------------------------------------------*/
   void LoRaAT::leave() {
 
   }
 
-/*
-  In general we send strings using the AT command, TODO: we could have overloaded functions
-  to accept other things?
-  
-  TODO: Input checking?
-    - Too long?
-	  + Return error?
-	  + Break it up?
-	  + Send first part?
-	- Too short?
-	  + Is it even a problem?
-	  + Pad it out?
-	  + Return error?
-	- Invalid characters?
-	  + Is it even a problem?
-	  + Send anyway?
-	  + Replace with something else?
-	  + Return error?
-  
-  uses a default of 10,000ms (10sec) timeout
-*/
+/*----------------------------------------------------------------------------------|
+| In general we send strings using the AT command, TODO: we could have overloaded	|
+| functions to accept other things?													|
+|																					| 
+| TODO: Input checking?																|
+|   - Too long?																		|
+|	  + Return error?																|
+|	  + Break it up?																|
+|	  + Send first part?															|
+|	- Too short?																	|
+|	  + Is it even a problem?														|
+|	  + Pad it out?																	|
+|	  + Return error?																|
+|	- Invalid characters?															|
+|	  + Is it even a problem?														|
+|	  + Send anyway?																|
+|	  + Replace with something else?												|
+|	  + Return error?																|
+| 																					|
+| uses a default of 10,000ms (10sec) timeout										|
+-----------------------------------------------------------------------------------*/
   int LoRaAT::send(char* message) {
     return(send(message,10000));
   }
 
-/*
-  In general we send strings using the AT command, TODO: we could have overloaded functions
-  to accept other things?
-  
-  TODO: Input checking?
-    - Too long?
-	  + Return error?
-	  + Break it up?
-	  + Send first part?
-	- Too short?
-	  + Is it even a problem?
-	  + Pad it out?
-	  + Return error?
-	- Invalid characters?
-	  + Is it even a problem?
-	  + Send anyway?
-	  + Replace with something else?
-	  + Return error?
-*/
+/*----------------------------------------------------------------------------------|
+| In general we send strings using the AT command, TODO: we could have overloaded	|
+| functions to accept other things?													|
+|																					| 
+| TODO: Input checking?																|
+|   - Too long?																		|
+|	  + Return error?																|
+|	  + Break it up?																|
+|	  + Send first part?															|
+|	- Too short?																	|
+|	  + Is it even a problem?														|
+|	  + Pad it out?																	|
+|	  + Return error?																|
+|	- Invalid characters?															|
+|	  + Is it even a problem?														|
+|	  + Send anyway?																|
+|	  + Replace with something else?												|
+|	  + Return error?																|
+-----------------------------------------------------------------------------------*/
   int LoRaAT::send(char* message, unsigned int timeout) {
 
   SoftwareSerial debugSerial(10, 11);     // RX, TX
@@ -355,10 +353,10 @@
   */
 }
 
-/*
-  I believe there maybe a ping function... I'm not sure yet what the AT command
-  returns, or what we should return to the user?
-*/
+/*----------------------------------------------------------------------------------|
+| I believe there maybe a ping function... I'm not sure yet what the AT command		|
+| returns, or what we should return to the user?									|
+-----------------------------------------------------------------------------------*/
   uint8_t LoRaAT::ping() {
 
   }
@@ -371,15 +369,15 @@
    LoRaAT::sendPairs(pairsC);
  }
 
-/*
- Recieves a string in the format key:value,key:value,...
-
- 1. The csv is translated to a json,
- 2. The json is added to the _txBuffer
- 3. The _txBuffer is processed
-
- //TODO: If not recieved in that format return an error
- */
+/*----------------------------------------------------------------------------------|
+| Recieves a string in the format key:value,key:value,...							|
+|																					|
+| 1. The csv is translated to a json,												|
+| 2. The json is added to the _txBuffer												|
+| 3. The _txBuffer is processed														|
+|																					|
+| //TODO: If not recieved in that format return an error							|
+-----------------------------------------------------------------------------------*/
  int LoRaAT::sendPairs(char* pairs) {
 
   SoftwareSerial debugSerial(10, 11);     // RX, TX
@@ -409,10 +407,10 @@
   return(response);
 }
 
-/*
- This function will take any correctly formatted string of key:value pairs
- and return a JSON formatted String.
- */
+/*----------------------------------------------------------------------------------|
+| This function will take any correctly formatted string of key:value pairs			|
+| and return a JSON formatted String.												|
+-----------------------------------------------------------------------------------*/
  void LoRaAT::_pairsToJSON(char* json, char* pairs) {
   // String json = "";   //Finished JSON as a string
   // String temp = "";   //Temp storage as we look for delimters
@@ -492,13 +490,14 @@
   return;
 }
 
-/*
- This function will take an ASCII String message and fragment it into 11 byte packets
-
- 2 bytes of header, and 9 bytes of payloads
-
- header is of the format [fragment number][total number of fragments]
- */
+/*----------------------------------------------------------------------------------|
+| This function will take and ASCII String message and fragment it into 11 byte		|
+| packets.																			|
+|																					|
+| 2 bytes of header, and 9 bytes of payloads										|
+|																					|
+| header is of the format [fragment number][total number of fragments]				|
+-----------------------------------------------------------------------------------*/
  void LoRaAT::_createFragmentBuffer(char* message) {
 
   SoftwareSerial debugSerial(10, 11);     // RX, TX
@@ -562,6 +561,9 @@
   }
 }
 
+/*----------------------------------------------------------------------------------|
+| Buffer processing function, which will send out all data currently in the buffer  |
+-----------------------------------------------------------------------------------*/
 int LoRaAT::_processBuffer() 
 {
   SoftwareSerial debugSerial(10, 11);     // RX, TX
@@ -594,8 +596,10 @@ int LoRaAT::_processBuffer()
   return(response);
 }
 
+/*----------------------------------------------------------------------------------|
+|  Simple find substring within string function.									|
+-----------------------------------------------------------------------------------*/
 /*
-  Simple find substring within string function.
   int LoRaAT::_findText(String needle, String haystack) {
     int foundpos = -1;
     for (int i = 0; i <= haystack.length() - needle.length(); i++) {
