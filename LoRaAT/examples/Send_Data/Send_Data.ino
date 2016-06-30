@@ -30,7 +30,6 @@ SoftwareSerial debugSerial(10, 11);     // RX, TX
   --------------------------------------------------------------------------------------*/
 void setup() {
   int responseCode;
-  pinMode(13, OUTPUT);
   
   debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
   mdot.begin(38400);          //Begin (possibly amongst other things) opens serial comms with MDOT
@@ -38,7 +37,6 @@ void setup() {
 
 
   do {
-    digitalWrite(13, HIGH);
     responseCode = mdot.join();
     delay(5000);
   } while (responseCode != 0);

@@ -163,11 +163,11 @@
     }
     available = ATSerial->available();
     if (available) {
-      if(ATSerial->readBytesUntil(NULL, _recievedString, available)) 
+      if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
       {
         debugSerial.println(_recievedString);
         debugSerial.println("DEBUG: Joined");
-        if (strstr(_recievedString, "OK") != NULL)
+        if (strstr(_recievedString, "OK") != '\0')
           return (0);
       }
     }
@@ -271,10 +271,10 @@
   while(timeoutCounter < timeout) {
     available = ATSerial->available();
     if (available) {
-      if(ATSerial->readBytesUntil(NULL, _recievedString, available)) 
+      if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
       {
         debugSerial.println(_recievedString);
-        if (strstr(_recievedString, "OK") != NULL)
+        if (strstr(_recievedString, "OK") != '\0')
           return (0);
       }
     }
