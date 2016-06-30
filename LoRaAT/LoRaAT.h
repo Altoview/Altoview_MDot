@@ -1,7 +1,7 @@
 /*
   File: LoRaAT.h
 
-  Version: v0.0.1
+  Version: v0.0.1.1
 
   Breif: Arduino library for controlling Multitech mDot LoRa modules using 
          AT commands.
