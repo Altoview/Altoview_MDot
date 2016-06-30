@@ -19,8 +19,8 @@
   Definitions
   --------------------------------------------------------------------------------------*/
 
-LoRaAT mdot;                            //Instantiate a LoRaAT object
 SoftwareSerial debugSerial(10, 11);     // RX, TX
+LoRaAT mdot(0, &debugSerial);           //Instantiate a LoRaAT object
 
 /*--- setup() --------------------------------------------------------------------------
   Called by the Arduino framework once, before the main loop begins.

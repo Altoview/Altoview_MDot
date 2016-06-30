@@ -39,6 +39,7 @@
 -----------------------------------------------------------------------------------*/
  LoRaAT::LoRaAT() {
   _u8SerialPort = 0;
+  _debugStream = NULL;
 }
 
 /*----------------------------------------------------------------------------------|
@@ -47,6 +48,7 @@
  LoRaAT::LoRaAT(uint8_t u8SerialPort) {
   //TODO: Input checking, what range of values to accept, how to handle invalid input
   _u8SerialPort = u8SerialPort;
+  _debugStream = NULL;
 }
 
 /*----------------------------------------------------------------------------------|
