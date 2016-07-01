@@ -588,12 +588,13 @@ int LoRaAT::getFrequencySubBand() {
   
   //Mirror on debug what we're going to output on ATSerial
   _debugStream->println("LaT:gf: AT+FSB?");
-  ATSerial->println("LaT:gf: AT+FSB?");
+  ATSerial->println("AT+FSB?");
   
   //Loop reading from serial buffer until we get either a recognisable error, or
   //success
   timeoutCounter = 0;
-
+  delay(LOOP_DELAY);
+  
   _debugStream->println("LaT:gf: wait");
   while(timeoutCounter < timeout) {
 	//Blank string
@@ -621,7 +622,7 @@ int LoRaAT::getFrequencySubBand() {
     delay(LOOP_DELAY);
   }
 
-  _debugStream->println("LaT:s : timed-out. return -1");
+  _debugStream->println("LaT:gf: timed-out. return -1");
   return(-1);
 }
 
