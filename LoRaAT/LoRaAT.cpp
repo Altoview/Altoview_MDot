@@ -177,7 +177,7 @@ int LoRaAT::join(unsigned int timeout) {
   timeoutCounter = 0;
   delay(10000);
 
-  _debugStream->println("LaT:j : wait/response/timeout");
+  _debugStream->println("LaT:j : wait");
   while(timeoutCounter < timeout) {
     //Blank string
     for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) 
@@ -185,25 +185,25 @@ int LoRaAT::join(unsigned int timeout) {
       _recievedString[i] = '\0';
     }
     available = ATSerial->available();			//Check number of bytes available
-	_debugStream->println("LaT:j : ATSerial.available?");
+	///_debugStream->println("LaT:j : ATSerial.available?");
     if (available) {
-	  _debugStream->println("LaT:j : yes, received:");
+	  ///_debugStream->println("LaT:j : yes, received:");
       if(ATSerial->readBytesUntil('\0', _recievedString, available)) {
-		_debugStream->print("LaT:j : ");
-        _debugStream->println(_recievedString);
-	    _debugStream->println("LaT:j : keyword 'OK'?");
+		///_debugStream->print("LaT:j : ");
+        ///_debugStream->println(_recievedString);
+	    ///_debugStream->println("LaT:j : keyword 'OK'?");
         if (strstr(_recievedString, "OK") != '\0') {
-		  _debugStream->println("LaT:j : yes, return 0:");
+		  _debugStream->println("LaT:j : Keyword 'OK', return 0");
           return (0);
 		}
       }
     }
-	_debugStream->println("LaT:j : no, delay/check again");
+	///_debugStream->println("LaT:j : no, delay/check again");
     timeoutCounter += LOOP_DELAY;
     delay(LOOP_DELAY);
   }
 
-  _debugStream->println("LaT:j : timed-out. return -1:");
+  _debugStream->println("LaT:j : timed-out. return -1");
   return(-1);
 }
 
@@ -236,7 +236,7 @@ void LoRaAT::leave() {
 | uses a default of 10,000ms (10sec) timeout										|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::send(char* message) {
-  _debugStream->println("LaT:s : enter, w/ default timeout");
+  ///_debugStream->println("LaT:s : enter, w/ default timeout");
   return(send(message,10000));
 }
 
@@ -261,9 +261,9 @@ int LoRaAT::send(char* message) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::send(char* message, unsigned int timeout) {
   _debugStream->println("LaT:s : enter");
-  _debugStream->println("LaT:s : sending:");
-  _debugStream->print("LaT:s : ");
-  _debugStream->println(message);
+  ///_debugStream->println("LaT:s : sending:");
+  ///_debugStream->print("LaT:s : ");
+  ///_debugStream->println(message);
 
   int LOOP_DELAY = 250;					//Millisecond delay between serial attempts
   unsigned long timeoutCounter = 0;		//We don't wait forever for a response
@@ -295,7 +295,7 @@ int LoRaAT::send(char* message, unsigned int timeout) {
   timeoutCounter = 0;
   delay(2000);
 
-  _debugStream->println("LaT:s : wait/response/timeout");
+  _debugStream->println("LaT:s : wait");
   while(timeoutCounter < timeout) {
 	//Blank string
     for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) 
@@ -303,27 +303,26 @@ int LoRaAT::send(char* message, unsigned int timeout) {
       _recievedString[i] = '\0';
     }
     available = ATSerial->available();
-	_debugStream->println("LaT:s : ATSerial.available?");
+	///_debugStream->println("LaT:s : ATSerial.available?");
     if (available) {
-	  _debugStream->println("LaT:s : yes:");
+	  ///_debugStream->println("LaT:s : yes:");
       if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
       {
-		_debugStream->print("LaT:s : ");
-        _debugStream->println(_recievedString);
-		_debugStream->println("LaT:s : keyword 'OK'?:");
+		///_debugStream->print("LaT:s : ");
+        ///_debugStream->println(_recievedString);
+		///_debugStream->println("LaT:s : keyword 'OK'?:");
         if (strstr(_recievedString, "OK") != '\0') {
-		  _debugStream->println("LaT:s : yes, return 0:");
+		  _debugStream->println("LaT:s : Keyword 'OK', return 0");
           return (0);
 		}
       }
     }
-	_debugStream->println("LaT:s : No, delay/check again");
+	///_debugStream->println("LaT:s : No, delay/check again");
     timeoutCounter += LOOP_DELAY;
     delay(LOOP_DELAY);
   }
 
-  _debugStream->println("LaT:s : timed-out");
-  _debugStream->println("LaT:s : return -1:");
+  _debugStream->println("LaT:s : timed-out. return -1");
   return(-1);
 }
 
@@ -346,9 +345,9 @@ uint8_t LoRaAT::ping() {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::sendPairs(String pairs) 
 {
-  _debugStream->println("LaT:sp: enter");
+  ///_debugStream->println("LaT:sp: enter");
   char pairsC[_MAX_PAIRS_SIZE];
-  _debugStream->println("LaT:sp: string to char[]");
+  ///_debugStream->println("LaT:sp: string to char[]");
   pairs.toCharArray(pairsC, _MAX_PAIRS_SIZE);
   LoRaAT::sendPairs(pairsC);
 }
@@ -364,9 +363,9 @@ int LoRaAT::sendPairs(String pairs)
 -----------------------------------------------------------------------------------*/
 int LoRaAT::sendPairs(char* pairs) {
   _debugStream->println("LaT:sp: enter");
-  _debugStream->println("LaT:sp: pairs:");
-  _debugStream->print("LaT:sp: ");
-  _debugStream->println(pairs);
+  ///_debugStream->println("LaT:sp: pairs:");
+  ///_debugStream->print("LaT:sp: ");
+  ///_debugStream->println(pairs);
   //Return constants
   const byte UNKNOWN_FORMAT = 4;
   int response = 0;
@@ -379,14 +378,14 @@ int LoRaAT::sendPairs(char* pairs) {
     return(UNKNOWN_FORMAT);
   }
 
-  _debugStream->println("LaT:sp: convert to JSON");
+  ///_debugStream->println("LaT:sp: convert to JSON");
   _pairsToJSON(json, pairs);
-  _debugStream->println("LaT:sp: pairs as JSON");
-  _debugStream->print("LaT:sp: ");
-  _debugStream->println(json);
-  _debugStream->println("LaT:sp: fragment JSON to buffer");
+  ///_debugStream->println("LaT:sp: pairs as JSON");
+  ///_debugStream->print("LaT:sp: ");
+  ///_debugStream->println(json);
+  ///_debugStream->println("LaT:sp: fragment JSON to buffer");
   _createFragmentBuffer(json);
-  _debugStream->println("LaT:sp: process buffer");
+  ///_debugStream->println("LaT:sp: process buffer");
   response = _processBuffer();
 
   return(response);
@@ -461,7 +460,7 @@ void LoRaAT::_pairsToJSON(char* json, char* pairs) {
   *jsonPtr++ = '}';
   *jsonPtr++ = '\0';
 
-  _debugStream->println("LaT:pj: exit");
+  ///_debugStream->println("LaT:pj: exit");
   return;
 }
 
@@ -492,9 +491,9 @@ void LoRaAT::_createFragmentBuffer(char* message) {
     numFragments = _MAX_FRAGMENTS;
   }
 
-  _debugStream->print("LaT:fb: create ");
-  _debugStream->print(numFragments);
-  _debugStream->println(" fragments");
+  ///_debugStream->print("LaT:fb: create ");
+  ///_debugStream->print(numFragments);
+  ///_debugStream->println(" fragments");
   //Loop through each fragment
   for (_txPutter = 0; _txPutter < numFragments; _txPutter++) {
     union headerPacket 
@@ -511,8 +510,8 @@ void LoRaAT::_createFragmentBuffer(char* message) {
     _txBuffer[_txPutter][0] = header.asChar[0];
     _txBuffer[_txPutter][1] = header.asChar[1];
 
-    _debugStream->print("LaT:fb: create fragment ");
-	_debugStream->println(_txPutter);
+    ///_debugStream->print("LaT:fb: create fragment ");
+	///_debugStream->println(_txPutter);
     //Loop through each location of the message and append to the fragment (as the payload)
     for (uint8_t j = 0; j < _PAYLOAD_SIZE; j++) 
     {
@@ -528,8 +527,8 @@ void LoRaAT::_createFragmentBuffer(char* message) {
         break;
       }
     }
-	_debugStream->print("LaT:fb: ");
-	_debugStream->println(_txBuffer[_txPutter]);
+	///_debugStream->print("LaT:fb: ");
+	///_debugStream->println(_txBuffer[_txPutter]);
   }
 }
 
@@ -555,8 +554,8 @@ int LoRaAT::_processBuffer()
     }
 	_debugStream->println();
     response = send(_txBuffer[_txGetter]);
-    _debugStream->print("LaT:pb: sent. response: ");
-    _debugStream->println(response, DEC);
+    ///_debugStream->print("LaT:pb: sent. response: ");
+    ///_debugStream->println(response, DEC);
   }
   _txPutter = 0;
   _txGetter = 0;
