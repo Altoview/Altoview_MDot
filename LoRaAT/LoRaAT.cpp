@@ -574,8 +574,55 @@ int LoRaAT::setFrequencySubBand() {
 | Gets the frequency sub band                                                       |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getFrequencySubBand() {
+  _debugStream->println("LaT:gf: enter");
 
-  return(0);
+  static const uint16_t timeout = 10000;
+  static const uint16_t LOOP_DELAY = 250;	//Millisecond delay between serial attempts
+  
+  unsigned long timeoutCounter = 0;		    //We don't wait forever for a response
+  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  int available;						    //Number of bytes in serial buffer
+  
+  //flush receive buffer before transmitting request
+  while (ATSerial->read() != -1);
+  
+  //Mirror on debug what we're going to output on ATSerial
+  _debugStream->println("LaT:gf: AT+FSB?");
+  ATSerial->println("LaT:gf: AT+FSB?");
+  
+  //Loop reading from serial buffer until we get either a recognisable error, or
+  //success
+  timeoutCounter = 0;
+
+  _debugStream->println("LaT:gf: wait");
+  while(timeoutCounter < timeout) {
+	//Blank string
+    for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) 
+    {
+      _recievedString[i] = '\0';
+    }
+    available = ATSerial->available();
+	_debugStream->println("LaT:gf: ATSerial.available?");
+    if (available) {
+	  _debugStream->println("LaT:gf: yes:");
+      if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
+      {
+		_debugStream->print("LaT:gf: ");
+        _debugStream->println(_recievedString);
+		_debugStream->println("LaT:gf: keyword 'OK'?:");
+        if (strstr(_recievedString, "OK") != '\0') {
+		  _debugStream->println("LaT:gf: Keyword 'OK', return 0");
+          return (0);
+		}
+      }
+    }
+	_debugStream->println("LaT:gf: No, delay/check again");
+    timeoutCounter += LOOP_DELAY;
+    delay(LOOP_DELAY);
+  }
+
+  _debugStream->println("LaT:s : timed-out. return -1");
+  return(-1);
 }
 
 /*----------------------------------------------------------------------------------|
