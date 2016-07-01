@@ -29,7 +29,8 @@ class LoRaAT
 	LoRaAT(uint8_t,Stream*);
 	void begin();			//Use default baud
 	void begin(uint32_t);	//Use specificed baud rate. TODO: Think about other things, e.g. datarate, adaptive data rate.
-    int join();				//Join a LoRa(WAN?) network TODO: Think about network parameters, saying something about network?
+    int init();				//Initilise with default settings
+	int join();				//Join a LoRa(WAN?) network TODO: Think about network parameters, saying something about network?
 	int join(unsigned int); //Join with a specifc timeout
     void leave();			//Leave a LoRa(WAN?) network, do we event want this?
 	int send(char*);		//In general we send strings using the AT command, we could have overloaded functions to accept other things? Maybe data in a particular format?
@@ -37,6 +38,19 @@ class LoRaAT
 	int sendPairs(char*);
     int sendPairs(String); 
 	uint8_t ping();			//I believe there maybe a ping function... I'm not sure yet what the AT command returns, or what we should return to the user?
+    int setFSB();
+    int getFSB();
+    int setPN();
+    int getPN();
+    int setNetworkID();
+    int getNetworkID();
+    int setNetworkKey();
+    int getNetworkKey();
+    int setDataRate();
+    int getDataRate();
+    int setRXO();
+    int getRXO();
+    int commitSettings();
   private:
 	static const uint8_t _MAX_FRAGMENTS = 16;
 	static const uint8_t _PACKET_SIZE = 11;
