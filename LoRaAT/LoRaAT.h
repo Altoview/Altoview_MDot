@@ -38,10 +38,10 @@ class LoRaAT
 	int sendPairs(char*);
     int sendPairs(String); 
 	uint8_t ping();			//I believe there maybe a ping function... I'm not sure yet what the AT command returns, or what we should return to the user?
-    int setFSB();
-    int getFSB();
-    int setPN();
-    int getPN();
+    int setFrequencySubBand();
+    int getFrequencySubBand();
+    int setPublicNetwork();
+    int getPublicNetwork();
     int setNetworkID();
     int getNetworkID();
     int setNetworkKey();
