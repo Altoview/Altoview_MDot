@@ -40,11 +40,13 @@ class LoRaAT
 	uint8_t ping();			//I believe there maybe a ping function... I'm not sure yet what the AT command returns, or what we should return to the user?
 	int setFrequencySubBand(char);
     int getFrequencySubBand();
-    int setPublicNetwork();
+    int setPublicNetwork(char);
     int getPublicNetwork();
-    int setNetworkID();
+    //int setNetworkID(String);
+    int setNetworkID(char*);
     int getNetworkID();
-    int setNetworkKey();
+	//int setNetworkKey(String);
+    int setNetworkKey(char*);
     int getNetworkKey();
     int setDataRate();
     int getDataRate();
@@ -57,8 +59,8 @@ class LoRaAT
 	static const uint8_t _HEADER_SIZE = 2;
 	static const uint8_t _PAYLOAD_SIZE = _PACKET_SIZE - _HEADER_SIZE;
 	static const uint8_t _MAX_PAIRS_SIZE = 100;
-	static const uint8_t _MAX_MDOT_RESPONSE = 100;			//Max number of bytes the mdot might return
-	static const uint8_t _MAX_MDOT_COMMAND = 100;
+	static const uint8_t _MAX_MDOT_RESPONSE = 255;			//Max number of bytes the mdot might return
+	static const uint8_t _MAX_MDOT_COMMAND = 255;
 	char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
 	uint8_t _txPutter = 0;
 	uint8_t _txGetter = 0;
