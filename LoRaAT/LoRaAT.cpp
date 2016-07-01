@@ -283,7 +283,7 @@ int LoRaAT::send(char* message, unsigned int timeout) {
   _debugStream->println();
   
   //Send message
-  ATSerial->print("LaT:s : AT+SEND ");
+  ATSerial->print("AT+SEND ");
   for (int i = 0; i < _PACKET_SIZE; i++)
   {
     ATSerial->print(message[i]);
