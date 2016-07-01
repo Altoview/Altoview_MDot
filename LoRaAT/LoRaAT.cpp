@@ -173,8 +173,7 @@ void LoRaAT::_sendCommand(char* response, char* command, uint16_t timeout) {
 	delay(10);
   } while (ATSerial->available());
   
-  _debugStream->println("LaT:sc: response received");
-  _debugStream->print("LaT:sc: ");
+  _debugStream->println("LaT:sc: response received\r\n");
   _debugStream->println(response);
   return;
 }
@@ -540,10 +539,31 @@ int LoRaAT::_processBuffer() {
 
 /*----------------------------------------------------------------------------------|
 | Sets the frequency sub band                                                       |
+|																					|
+| TODO:																				|
+|  * parse the response																|
+|  * Return something meaningfull (based on response)								|
+|  * Overload to accept, string, int, uint, byte, maybe others, maybe less.			|
 -----------------------------------------------------------------------------------*/
-int LoRaAT::setFrequencySubBand() {
+int LoRaAT::setFrequencySubBand(char fsb) {
+  ///_debugStream->println("LaT:gf: enter");
+  static const uint16_t timeout = 10000;	  //Max time allowed to receive response
+  static const uint8_t _MAX_FSB_COMMAND = 9;  //Max characters in FSB command "AT+FSB x"
+  char command[_MAX_FSB_COMMAND] = "AT+FSB "; //Command to get frequency sub band
+  char _recievedString[_MAX_MDOT_RESPONSE];	  //String returned by device
+  
+  command[7] = fsb;
+  command[8] = '\0';
+  
+  _sendCommand(_recievedString,command,timeout);
 
-  return(0);
+  if (strstr(_recievedString, "OK") != '\0') {
+    ///_debugStream->println("LaT:gf: Keyword 'OK', return 0");
+    return (0);
+  }
+
+  ///_debugStream->println("LaT:gf: timed-out. return -1");
+  return(-1);
 }
 
 /*----------------------------------------------------------------------------------|
