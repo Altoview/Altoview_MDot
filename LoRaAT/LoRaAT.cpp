@@ -123,6 +123,63 @@ int LoRaAT::init() {
 }
 
 /*----------------------------------------------------------------------------------|
+| the send command method, sends a command to the mDot and waits for a response.    |
+| once a full response has been received it passes it back to the calling function  |
+| as a char array.																	|
+-----------------------------------------------------------------------------------*/
+void LoRaAT::_sendCommand(char* response, char* command, uint16_t timeout) {
+  _debugStream->println("LaT:sc: enter");
+  
+  static const uint16_t LOOP_DELAY = 250;	 //Millisecond delay between serial attempts
+  
+  unsigned long timeoutCounter = 0;		     //We don't wait forever for a response
+  unsigned long maxEndTime = 0;				 //
+  uint16_t i = 0;						     //Recieve character putter
+  int available;						     //Number of bytes in serial buffer
+
+  //flush receive buffer before transmitting request
+  while (ATSerial->read() != -1);
+  
+  //Send command
+  _debugStream->print("LaT:sc: ");
+  _debugStream->println(command);
+  ATSerial->println(command);
+    
+  //Blank string
+  for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) {
+    response[i] = '\0';
+  }
+  
+  //Set timeout time
+  maxEndTime = millis() + timeout;
+  
+  //Wait for something to be available
+  _debugStream->println("LaT:sc: wait");
+  do {
+	if (millis() > maxEndTime) {
+	  _debugStream->println("LaT:sc: timed-out");
+	  return;
+	}
+  } while (ATSerial->available() == 0);
+  
+  //While something is available get it
+  do {
+	response[i] = ATSerial->read();
+	i++;
+	if (millis() > maxEndTime) {
+	  _debugStream->println("LaT:sc: timed-out");
+	  return;
+	}
+	delay(10);
+  } while (ATSerial->available());
+  
+  _debugStream->println("LaT:sc: response received");
+  _debugStream->print("LaT:sc: ");
+  _debugStream->println(response);
+  return;
+}
+
+/*----------------------------------------------------------------------------------|
 | Join a LoRa(WAN?) network															|
 | 																					|
 | TODO: Review returns, can we return something more meaningfull?					|
@@ -159,50 +216,15 @@ int LoRaAT::join() {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::join(unsigned int timeout) {
   _debugStream->println("LaT:j : enter");
-
-  const int LOOP_DELAY = 250;			//Millisecond delay between serial attempts
-  unsigned long timeoutCounter = 0;		//We don't wait forever for a response
   char _recievedString[_MAX_MDOT_RESPONSE];  //String returned by device
-  int available;						//Number of bytes in serial buffer
-
-  //flush receive buffer before transmitting request
-  while (ATSerial->read() != -1);
+  char command[] = "AT+JOIN";
   
-  //Send join request
-  _debugStream->println("LaT:j : AT+JOIN");
-  ATSerial->println("AT+JOIN");
-  
-  //Loop reading from serial buffer until we get either a recognisable error, or
-  //success
-  timeoutCounter = 0;
-  delay(10000);
+  _sendCommand(_recievedString,command,timeout);
 
-  _debugStream->println("LaT:j : wait");
-  while(timeoutCounter < timeout) {
-    //Blank string
-    for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) 
-    {
-      _recievedString[i] = '\0';
-    }
-    available = ATSerial->available();			//Check number of bytes available
-	///_debugStream->println("LaT:j : ATSerial.available?");
-    if (available) {
-	  ///_debugStream->println("LaT:j : yes, received:");
-      if(ATSerial->readBytesUntil('\0', _recievedString, available)) {
-		///_debugStream->print("LaT:j : ");
-        ///_debugStream->println(_recievedString);
-	    ///_debugStream->println("LaT:j : keyword 'OK'?");
-        if (strstr(_recievedString, "OK") != '\0') {
-		  _debugStream->println("LaT:j : Keyword 'OK', return 0");
-          return (0);
-		}
-      }
-    }
-	///_debugStream->println("LaT:j : no, delay/check again");
-    timeoutCounter += LOOP_DELAY;
-    delay(LOOP_DELAY);
+  if (strstr(_recievedString, "OK") != '\0') {
+    _debugStream->println("LaT:j : Keyword 'OK', return 0");
+    return (0);
   }
-
   _debugStream->println("LaT:j : timed-out. return -1");
   return(-1);
 }
@@ -261,65 +283,17 @@ int LoRaAT::send(char* message) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::send(char* message, unsigned int timeout) {
   _debugStream->println("LaT:s : enter");
-  ///_debugStream->println("LaT:s : sending:");
-  ///_debugStream->print("LaT:s : ");
-  ///_debugStream->println(message);
 
-  int LOOP_DELAY = 250;					//Millisecond delay between serial attempts
-  unsigned long timeoutCounter = 0;		//We don't wait forever for a response
   char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
-  int available;						//Number of bytes in serial buffer
+  char command[_MAX_MDOT_COMMAND] = "AT+SEND ";
+ 
+  strcat(command,message);				    //Append message to command
   
-  //flush receive buffer before transmitting request
-  while (ATSerial->read() != -1);
-  
-  //Mirror on debug what we're going to output on ATSerial
-  _debugStream->print("LaT:s : ");
-  _debugStream->print("AT+SEND ");
-  for (int i = 0; i < _PACKET_SIZE; i++)
-  {
-    _debugStream->print(message[i]);
-  }
-  _debugStream->println();
-  
-  //Send message
-  ATSerial->print("AT+SEND ");
-  for (int i = 0; i < _PACKET_SIZE; i++)
-  {
-    ATSerial->print(message[i]);
-  }
-  ATSerial->println();
-  
-  //Loop reading from serial buffer until we get either a recognisable error, or
-  //success
-  timeoutCounter = 0;
-  delay(2000);
+  _sendCommand(_recievedString,command,timeout);
 
-  _debugStream->println("LaT:s : wait");
-  while(timeoutCounter < timeout) {
-	//Blank string
-    for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) 
-    {
-      _recievedString[i] = '\0';
-    }
-    available = ATSerial->available();
-	///_debugStream->println("LaT:s : ATSerial.available?");
-    if (available) {
-	  ///_debugStream->println("LaT:s : yes:");
-      if(ATSerial->readBytesUntil('\0', _recievedString, available)) 
-      {
-		///_debugStream->print("LaT:s : ");
-        ///_debugStream->println(_recievedString);
-		///_debugStream->println("LaT:s : keyword 'OK'?:");
-        if (strstr(_recievedString, "OK") != '\0') {
-		  _debugStream->println("LaT:s : Keyword 'OK', return 0");
-          return (0);
-		}
-      }
-    }
-	///_debugStream->println("LaT:s : No, delay/check again");
-    timeoutCounter += LOOP_DELAY;
-    delay(LOOP_DELAY);
+  if (strstr(_recievedString, "OK") != '\0') {
+    _debugStream->println("LaT:s : Keyword 'OK', return 0");
+    return (0);
   }
 
   _debugStream->println("LaT:s : timed-out. return -1");
@@ -535,8 +509,8 @@ void LoRaAT::_createFragmentBuffer(char* message) {
 /*----------------------------------------------------------------------------------|
 | Buffer processing function, which will send out all data currently in the buffer  |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::_processBuffer() 
-{
+int LoRaAT::_processBuffer() {
+  char temp[_MAX_MDOT_COMMAND - 8];
   _debugStream->println("LaT:pb: enter");
 
   int response;
@@ -551,9 +525,11 @@ int LoRaAT::_processBuffer()
 	for (int j=0; j < _PACKET_SIZE; j++)
     {
       _debugStream->print(_txBuffer[_txGetter][j], HEX);
+	  temp[j] = _txBuffer[_txGetter][j];
+	  temp[j+1] = '\0';
     }
 	_debugStream->println();
-    response = send(_txBuffer[_txGetter]);
+    response = send(temp);
     ///_debugStream->print("LaT:pb: sent. response: ");
     ///_debugStream->println(response, DEC);
   }
