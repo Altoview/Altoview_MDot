@@ -41,6 +41,7 @@ class LoRaAT
 	uint8_t ping();			//Not yet implemented
 	
 	//Getter and setter functions for mDot Settings.
+	//NOT FULLY TESTED AND IMPLEMENTED
 	int setFrequencySubBand(char);
     int getFrequencySubBand();
     int setPublicNetwork(char);
@@ -53,7 +54,7 @@ class LoRaAT
     int getDataRate();
     int setRXOutput();
     int getRXOutput();
-    int commitSettings();
+    int commitSettings();			//Not yet implemented
   private:
 	static const uint8_t _MAX_FRAGMENTS = 16;
 	static const uint8_t _PACKET_SIZE = 11;

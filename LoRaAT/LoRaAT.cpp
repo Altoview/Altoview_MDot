@@ -35,7 +35,7 @@
  ***********************************************************************************/
 
 /*----------------------------------------------------------------------------------|
-| CONSTRUCTOR: Creates class object using a default serial port 0					|
+| CONSTRUCTOR: Creates class object using a default hardware serial port 0			|
 -----------------------------------------------------------------------------------*/
  LoRaAT::LoRaAT() {
   _u8SerialPort = 0;
@@ -123,21 +123,21 @@ void LoRaAT::_sendCommand(char* response, char* command, uint16_t timeout) {
   
   unsigned long timeoutCounter = 0;		     //We don't wait forever for a response
   unsigned long maxEndTime = 0;				 //
-  uint16_t i = 0;						     //Recieve character putter
+  uint16_t i = 0;						     //Receive character putter
   int available;						     //Number of bytes in serial buffer
 
   //flush receive buffer before transmitting request
   while (ATSerial->read() != -1);
   
-  //Send command
-  _debugStream->print("LaT:sc: ");
-  _debugStream->println(command);
-  ATSerial->println(command);
-    
   //Blank string
   for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) {
     response[i] = '\0';
   }
+  
+  //Send command
+  _debugStream->print("LaT:sc: ");
+  _debugStream->println(command);
+  ATSerial->println(command);
   
   //Set timeout time
   maxEndTime = millis() + timeout;
@@ -204,12 +204,12 @@ int LoRaAT::join() {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::join(unsigned int timeout) {
   ///_debugStream->println("LaT:j : enter");
-  char _recievedString[_MAX_MDOT_RESPONSE];  //String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];  //String returned by device
   char command[] = "AT+JOIN";
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     ///_debugStream->println("LaT:j : Keyword 'OK', return 0");
     return (0);
   }
@@ -272,14 +272,14 @@ int LoRaAT::send(char* message) {
 int LoRaAT::send(char* message, unsigned int timeout) {
   ///_debugStream->println("LaT:s : enter");
 
-  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   char command[_MAX_MDOT_COMMAND] = "AT+SEND ";
  
   strcat(command,message);				    //Append message to command
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     ///_debugStream->println("LaT:s : Keyword 'OK', return 0");
     return (0);
   }
@@ -289,8 +289,7 @@ int LoRaAT::send(char* message, unsigned int timeout) {
 }
 
 /*----------------------------------------------------------------------------------|
-| I believe there maybe a ping function... I'm not sure yet what the AT command		|
-| returns, or what we should return to the user?									|
+| Not yet implemented.																|
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::ping() {
   ///_debugStream->println("LaT:p: not implemented");
@@ -538,14 +537,14 @@ int LoRaAT::setFrequencySubBand(char fsb) {
   static const uint16_t timeout = 10000;	  //Max time allowed to receive response
   static const uint8_t _MAX_FSB_COMMAND = 9;  //Max characters in FSB command "AT+FSB x"
   char command[_MAX_FSB_COMMAND] = "AT+FSB "; //Command to get frequency sub band
-  char _recievedString[_MAX_MDOT_RESPONSE];	  //String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	  //String returned by device
   
   command[7] = fsb;
   command[8] = '\0';
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     return (0);
   }
 
@@ -564,11 +563,11 @@ int LoRaAT::getFrequencySubBand() {
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] = "AT+FSB?";				//Command to get frequency sub band
-  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     ///_debugStream->println("LaT:gf: Keyword 'OK', return 0");
     return (0);
   }
@@ -589,7 +588,7 @@ int LoRaAT::setPublicNetwork(char pn) {
   static const uint16_t timeout = 10000;	  //Max time allowed to receive response
   static const uint8_t _MAX_PN_COMMAND = 8;   //Max characters in PN command "AT+FSB x"
   char command[_MAX_PN_COMMAND] = "AT+PN ";   //Command to get frequency sub band
-  char _recievedString[_MAX_MDOT_RESPONSE];	  //String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	  //String returned by device
   
   if (pn != '0') {
 	pn = '1';
@@ -598,9 +597,9 @@ int LoRaAT::setPublicNetwork(char pn) {
   command[6] = pn;
   command[7] = '\0';
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     return (0);
   }
   
@@ -619,11 +618,11 @@ int LoRaAT::getPublicNetwork() {
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] = "AT+PN?";				//Command to get public network
-  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     ///_debugStream->println("LaT:gp: Keyword 'OK', return 0");
     return (0);
   }
@@ -662,13 +661,13 @@ int LoRaAT::setNetworkID(char* id) {
   static const uint16_t timeout = 10000;	  //Max time allowed to receive response
   static const uint8_t _MAX_NI_COMMAND = 32;  //Max characters in PN command "AT+FSB x"
   char command[_MAX_NI_COMMAND] = "AT+NI 0,"; //Command to get frequency sub band
-  char _recievedString[_MAX_MDOT_RESPONSE];	  //String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	  //String returned by device
   
   strcat(command,id);				      //Append ID to command
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     return (0);
   }
   
@@ -687,11 +686,11 @@ int LoRaAT::getNetworkID() {
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] = "AT+NI?";				//Command to get network ID
-  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     ///_debugStream->println("LaT:gi: Keyword 'OK', return 0");
     return (0);
   }
@@ -730,13 +729,13 @@ int LoRaAT::setNetworkKey(char* key) {
   static const uint16_t timeout = 10000;	  //Max time allowed to receive response
   static const uint8_t _MAX_NK_COMMAND = 56;  //Max characters in PN command "AT+FSB x"
   char command[_MAX_NK_COMMAND] = "AT+NK 0,"; //Command to get frequency sub band
-  char _recievedString[_MAX_MDOT_RESPONSE];	  //String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	  //String returned by device
   
   strcat(command,key);				          //Append ID to command
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     return (0);
   }
   
@@ -755,11 +754,11 @@ int LoRaAT::getNetworkKey() {
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] = "AT+NK?";				//Command to get the network key
-  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     ///_debugStream->println("LaT:gk: Keyword 'OK', return 0");
     return (0);
   }
@@ -791,11 +790,11 @@ int LoRaAT::getDataRate() {
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] = "AT+ADR?";				//Command to get data rate
-  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     ///_debugStream->println("LaT:gd: Keyword 'OK', return 0");
     return (0);
   }
@@ -824,11 +823,11 @@ int LoRaAT::getRXOutput() {
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] = "AT+RXO?";				//Command to get RXO
-  char _recievedString[_MAX_MDOT_RESPONSE];	//String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
-  _sendCommand(_recievedString,command,timeout);
+  _sendCommand(_receivedString,command,timeout);
 
-  if (strstr(_recievedString, "OK") != '\0') {
+  if (strstr(_receivedString, "OK") != '\0') {
     ///_debugStream->println("LaT:gr: Keyword 'OK', return 0");
     return (0);
   }
