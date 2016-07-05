@@ -76,7 +76,6 @@ void LoRaAT::begin(void) {
 /*----------------------------------------------------------------------------------|
 | Initialize class object.															|
 | 																					|
-| Sets up the serial port using default 19200 baud rate.							|
 | Call once class has been instantiated, typically within setup().					|
 |																					|
 | TODO: Think about what we should set here, what should be defaults. Datarates,	|
@@ -117,9 +116,9 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 | as a char array.																	|
 -----------------------------------------------------------------------------------*/
 void LoRaAT::_sendCommand(char* response, char* command, uint16_t timeout) {
-  ///_debugStream->println("LaT:sc: enter");
+  ///_debugStream->println(F("LaT:sc: enter"));
   
-  static const uint16_t LOOP_DELAY = 10;	 //Millisecond delay between serial attempts
+  static const uint16_t LOOP_DELAY = 20;	 //Millisecond delay between serial attempts
   
   unsigned long timeoutCounter = 0;		     //We don't wait forever for a response
   unsigned long maxEndTime = 0;				 //
@@ -127,7 +126,7 @@ void LoRaAT::_sendCommand(char* response, char* command, uint16_t timeout) {
   int available;						     //Number of bytes in serial buffer
 
   //flush receive buffer before transmitting request
-  while (ATSerial->read() != -1);
+  //while (ATSerial->read() != -1);
   
   //Blank string
   for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) {
@@ -135,35 +134,31 @@ void LoRaAT::_sendCommand(char* response, char* command, uint16_t timeout) {
   }
   
   //Send command
-  _debugStream->print("LaT:sc: ");
+  _debugStream->print(F("LaT:sc: "));
   _debugStream->println(command);
   ATSerial->println(command);
+  _debugStream->println(F("LaT:sc: command sent to mDot"));
   
   //Set timeout time
   maxEndTime = millis() + timeout;
   
-  //Wait for something to be available
-  ///_debugStream->println("LaT:sc: wait");
-  do {
-	if (millis() > maxEndTime) {
-	  _debugStream->println("LaT:sc: timed-out");
-	  return;
-	}
-  } while (ATSerial->available() == 0);
-  
   //While something is available get it
+  _debugStream->println(F("LaT:sc: Loop collecting response"));
   do {
-	response[i] = ATSerial->read();
-	i++;
+	if (ATSerial->available() != 0) {
+	  response[i] = ATSerial->read();
+	  i++;
+	}
 	if (millis() > maxEndTime) {
-	  _debugStream->println("LaT:sc: timed-out");
+	  _debugStream->println(F("LaT:sc: timed-out, with response:"));
+	  _debugStream->println(response);
 	  return;
 	}
-	delay(LOOP_DELAY);
-  } while (ATSerial->available());
+  } while (true);
+  //Loop until timeout, TODO: Fix the bug so this isn't a requirement. 
   
-  _debugStream->println("LaT:sc: response received\r\n");
-  _debugStream->println(response);
+  ///_debugStream->println(F("LaT:sc: response received\r\n"));
+  ///_debugStream->println(response);
   return;
 }
 
@@ -203,17 +198,17 @@ int LoRaAT::join() {
 | to wait for a response.															|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::join(unsigned int timeout) {
-  ///_debugStream->println("LaT:j : enter");
+  ///_debugStream->println(F("LaT:j : enter"));
   char _receivedString[_MAX_MDOT_RESPONSE];  //String returned by device
-  char command[] = "AT+JOIN";
+  char command[] PROGMEM = "AT+JOIN";
   
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println("LaT:j : Keyword 'OK', return 0");
+    ///_debugStream->println(F("LaT:j : Keyword 'OK', return 0"));
     return (0);
   }
-  ///_debugStream->println("LaT:j : timed-out. return -1");
+  ///_debugStream->println(F("LaT:j : timed-out. return -1"));
   return(-1);
 }
 
@@ -221,7 +216,7 @@ int LoRaAT::join(unsigned int timeout) {
 | Leave a LoRa(WAN?) network														|
 -----------------------------------------------------------------------------------*/
 void LoRaAT::leave() {
-  ///_debugStream->println("LaT:l: not implemented");
+  ///_debugStream->println(F("LaT:l: not implemented"));
 }
 
 /*----------------------------------------------------------------------------------|
@@ -246,7 +241,7 @@ void LoRaAT::leave() {
 | uses a default of 10,000ms (10sec) timeout										|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::send(char* message) {
-  ///_debugStream->println("LaT:s : enter, w/ default timeout");
+  ///_debugStream->println(F("LaT:s : enter, w/ default timeout"));
   return(send(message,10000));
 }
 
@@ -270,7 +265,7 @@ int LoRaAT::send(char* message) {
 |	  + Return error?																|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::send(char* message, unsigned int timeout) {
-  ///_debugStream->println("LaT:s : enter");
+  ///_debugStream->println(F("LaT:s : enter"));
 
   char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   char command[_MAX_MDOT_COMMAND] = "AT+SEND ";
@@ -280,11 +275,11 @@ int LoRaAT::send(char* message, unsigned int timeout) {
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println("LaT:s : Keyword 'OK', return 0");
+    ///_debugStream->println(F("LaT:s : Keyword 'OK', return 0"));
     return (0);
   }
 
-  ///_debugStream->println("LaT:s : timed-out. return -1");
+  ///_debugStream->println(F("LaT:s : timed-out. return -1"));
   return(-1);
 }
 
@@ -292,7 +287,7 @@ int LoRaAT::send(char* message, unsigned int timeout) {
 | Not yet implemented.																|
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::ping() {
-  ///_debugStream->println("LaT:p: not implemented");
+  ///_debugStream->println(F("LaT:p: not implemented"));
 }
 
 /*----------------------------------------------------------------------------------|
@@ -306,9 +301,9 @@ uint8_t LoRaAT::ping() {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::sendPairs(String pairs) 
 {
-  ///_debugStream->println("LaT:sp: enter");
+  ///_debugStream->println(F("LaT:sp: enter"));
   char pairsC[_MAX_PAIRS_SIZE];
-  ///_debugStream->println("LaT:sp: string to char[]");
+  ///_debugStream->println(F("LaT:sp: string to char[]"));
   pairs.toCharArray(pairsC, _MAX_PAIRS_SIZE);
   LoRaAT::sendPairs(pairsC);
 }
@@ -323,9 +318,9 @@ int LoRaAT::sendPairs(String pairs)
 | //TODO: If not recieved in that format return an error							|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::sendPairs(char* pairs) {
-  ///_debugStream->println("LaT:sp: enter");
-  ///_debugStream->println("LaT:sp: pairs:");
-  ///_debugStream->print("LaT:sp: ");
+  ///_debugStream->println(F("LaT:sp: enter"));
+  ///_debugStream->println(F("LaT:sp: pairs:"));
+  ///_debugStream->print(F("LaT:sp: "));
   ///_debugStream->println(pairs);
   //Return constants
   const byte UNKNOWN_FORMAT = 4;
@@ -339,14 +334,14 @@ int LoRaAT::sendPairs(char* pairs) {
     return(UNKNOWN_FORMAT);
   }
 
-  ///_debugStream->println("LaT:sp: convert to JSON");
+  ///_debugStream->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, pairs);
-  ///_debugStream->println("LaT:sp: pairs as JSON");
-  ///_debugStream->print("LaT:sp: ");
+  ///_debugStream->println(F("LaT:sp: pairs as JSON"));
+  ///_debugStream->print(F("LaT:sp: "));
   ///_debugStream->println(json);
-  ///_debugStream->println("LaT:sp: fragment JSON to buffer");
+  ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
   _createFragmentBuffer(json);
-  ///_debugStream->println("LaT:sp: process buffer");
+  ///_debugStream->println(F("LaT:sp: process buffer"));
   response = _processBuffer();
 
   return(response);
@@ -357,7 +352,7 @@ int LoRaAT::sendPairs(char* pairs) {
 | and return a JSON formatted String.												|
 -----------------------------------------------------------------------------------*/
 void LoRaAT::_pairsToJSON(char* json, char* pairs) {
-  ///_debugStream->println("LaT:pj: enter");
+  ///_debugStream->println(F("LaT:pj: enter"));
   char* jsonPtr = json;
   char temp[20];
   int len = strlen(pairs);
@@ -421,7 +416,7 @@ void LoRaAT::_pairsToJSON(char* json, char* pairs) {
   *jsonPtr++ = '}';
   *jsonPtr++ = '\0';
 
-  ///_debugStream->println("LaT:pj: exit");
+  ///_debugStream->println(F("LaT:pj: exit"));
   return;
 }
 
@@ -434,7 +429,7 @@ void LoRaAT::_pairsToJSON(char* json, char* pairs) {
 | header is of the format [fragment number][total number of fragments]				|
 -----------------------------------------------------------------------------------*/
 void LoRaAT::_createFragmentBuffer(char* message) {
-  ///_debugStream->println("LaT:fb: enter");
+  ///_debugStream->println(F("LaT:fb: enter"));
 
   int strLength = strlen(message);
   //Calculate the number of fragments required for this message
@@ -448,13 +443,13 @@ void LoRaAT::_createFragmentBuffer(char* message) {
   //Check we haven't exceeded the maximum number of fragments
   if (numFragments > _MAX_FRAGMENTS) 
   {
-    ///_debugStream->println("LaT:fb: max frags exceeded");
+    ///_debugStream->println(F("LaT:fb: max frags exceeded"));
     numFragments = _MAX_FRAGMENTS;
   }
 
-  ///_debugStream->print("LaT:fb: create ");
+  ///_debugStream->print(F("LaT:fb: create "));
   ///_debugStream->print(numFragments);
-  ///_debugStream->println(" fragments");
+  ///_debugStream->println(F(" fragments"));
   //Loop through each fragment
   for (_txPutter = 0; _txPutter < numFragments; _txPutter++) {
     union headerPacket 
@@ -471,7 +466,7 @@ void LoRaAT::_createFragmentBuffer(char* message) {
     _txBuffer[_txPutter][0] = header.asChar[0];
     _txBuffer[_txPutter][1] = header.asChar[1];
 
-    ///_debugStream->print("LaT:fb: create fragment ");
+    ///_debugStream->print(F("LaT:fb: create fragment "));
 	///_debugStream->println(_txPutter);
     //Loop through each location of the message and append to the fragment (as the payload)
     for (uint8_t j = 0; j < _PAYLOAD_SIZE; j++) 
@@ -488,7 +483,7 @@ void LoRaAT::_createFragmentBuffer(char* message) {
         break;
       }
     }
-	///_debugStream->print("LaT:fb: ");
+	///_debugStream->print(F("LaT:fb: "));
 	///_debugStream->println(_txBuffer[_txPutter]);
   }
 }
@@ -498,17 +493,17 @@ void LoRaAT::_createFragmentBuffer(char* message) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::_processBuffer() {
   char temp[_MAX_MDOT_COMMAND - 8];
-  ///_debugStream->println("LaT:pb: enter");
+  ///_debugStream->println(F("LaT:pb: enter"));
 
   int response;
   for(_txGetter; _txGetter < _txPutter; _txGetter++ )
   {
-	///_debugStream->print("LaT:pb: putter: ");
+	///_debugStream->print(F("LaT:pb: putter: "));
 	///_debugStream->print(_txPutter);
-	///_debugStream->print(" getter: ");
+	///_debugStream->print(F(" getter: "));
 	///_debugStream->println(_txGetter);
-	///_debugStream->println("LaT:pb: packet as HEX:");
-	///_debugStream->print("LaT:pb: ");
+	///_debugStream->println(F("LaT:pb: packet as HEX:"));
+	///_debugStream->print(F("LaT:pb: "));
 	for (int j=0; j < _PACKET_SIZE; j++)
     {
       ///_debugStream->print(_txBuffer[_txGetter][j], HEX);
@@ -517,7 +512,7 @@ int LoRaAT::_processBuffer() {
     }
 	///_debugStream->println();
     response = send(temp);
-    ///_debugStream->print("LaT:pb: sent. response: ");
+    ///_debugStream->print(F("LaT:pb: sent. response: ");
     ///_debugStream->println(response, DEC);
   }
   _txPutter = 0;
@@ -559,20 +554,20 @@ int LoRaAT::setFrequencySubBand(char fsb) {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getFrequencySubBand() {
-  ///_debugStream->println("LaT:gf: enter");
+  ///_debugStream->println(F("LaT:gf: enter");
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
-  char command[] = "AT+FSB?";				//Command to get frequency sub band
+  char command[] PROGMEM = "AT+FSB?";				//Command to get frequency sub band
   char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println("LaT:gf: Keyword 'OK', return 0");
+    ///_debugStream->println(F("LaT:gf: Keyword 'OK', return 0");
     return (0);
   }
 
-  ///_debugStream->println("LaT:gf: timed-out. return -1");
+  ///_debugStream->println(F("LaT:gf: timed-out. return -1");
   return(-1);
 }
 
@@ -614,20 +609,20 @@ int LoRaAT::setPublicNetwork(char pn) {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getPublicNetwork() {
-  ///_debugStream->println("LaT:gp: enter");
+  ///_debugStream->println(F("LaT:gp: enter");
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
-  char command[] = "AT+PN?";				//Command to get public network
+  char command[] PROGMEM = "AT+PN?";				//Command to get public network
   char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println("LaT:gp: Keyword 'OK', return 0");
+    ///_debugStream->println(F("LaT:gp: Keyword 'OK', return 0");
     return (0);
   }
 
-  ///_debugStream->println("LaT:gp: timed-out. return -1");
+  ///_debugStream->println(F("LaT:gp: timed-out. return -1");
   return(-1);
 }
 
@@ -682,20 +677,20 @@ int LoRaAT::setNetworkID(char* id) {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getNetworkID() {
-  ///_debugStream->println("LaT:gi: enter");
+  ///_debugStream->println(F("LaT:gi: enter");
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
-  char command[] = "AT+NI?";				//Command to get network ID
+  char command[] PROGMEM = "AT+NI?";				//Command to get network ID
   char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println("LaT:gi: Keyword 'OK', return 0");
+    ///_debugStream->println(F("LaT:gi: Keyword 'OK', return 0");
     return (0);
   }
 
-  ///_debugStream->println("LaT:gi: timed-out. return -1");
+  ///_debugStream->println(F("LaT:gi: timed-out. return -1");
   return(-1);
 }
 
@@ -750,20 +745,20 @@ int LoRaAT::setNetworkKey(char* key) {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getNetworkKey() {
-  ///_debugStream->println("LaT:gk: enter");
+  ///_debugStream->println(F("LaT:gk: enter");
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
-  char command[] = "AT+NK?";				//Command to get the network key
+  char command[] PROGMEM = "AT+NK?";				//Command to get the network key
   char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println("LaT:gk: Keyword 'OK', return 0");
+    ///_debugStream->println(F("LaT:gk: Keyword 'OK', return 0");
     return (0);
   }
 
-  ///_debugStream->println("LaT:gk: timed-out. return -1");
+  ///_debugStream->println(F("LaT:gk: timed-out. return -1");
   return(-1);
 }
 
@@ -786,20 +781,20 @@ int LoRaAT::setDataRate() {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getDataRate() {
-  ///_debugStream->println("LaT:gd: enter");
+  ///_debugStream->println(F("LaT:gd: enter");
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
-  char command[] = "AT+ADR?";				//Command to get data rate
+  char command[] PROGMEM = "AT+ADR?";				//Command to get data rate
   char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println("LaT:gd: Keyword 'OK', return 0");
+    ///_debugStream->println(F("LaT:gd: Keyword 'OK', return 0");
     return (0);
   }
 
-  ///_debugStream->println("LaT:gd: timed-out. return -1");
+  ///_debugStream->println(F("LaT:gd: timed-out. return -1");
   return(-1);
 }
 
@@ -819,20 +814,20 @@ int LoRaAT::setRXOutput() {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getRXOutput() {
-  ///_debugStream->println("LaT:gr: enter");
+  ///_debugStream->println(F("LaT:gr: enter");
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
-  char command[] = "AT+RXO?";				//Command to get RXO
+  char command[] PROGMEM = "AT+RXO?";				//Command to get RXO
   char _receivedString[_MAX_MDOT_RESPONSE];	//String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println("LaT:gr: Keyword 'OK', return 0");
+    ///_debugStream->println(F("LaT:gr: Keyword 'OK', return 0");
     return (0);
   }
 
-  ///_debugStream->println("LaT:gr: timed-out. return -1");
+  ///_debugStream->println(F("LaT:gr: timed-out. return -1");
   return(-1);
 }
 
