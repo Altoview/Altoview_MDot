@@ -16,7 +16,6 @@
 #define LoRaAT_h
 
 #include "Arduino.h"
-#include <SoftwareSerial.h>       //Sneaky sofware serial to output debug info
 
 /*
   Class definition
@@ -61,8 +60,8 @@ class LoRaAT
 	static const uint8_t _HEADER_SIZE = 2;
 	static const uint8_t _PAYLOAD_SIZE = _PACKET_SIZE - _HEADER_SIZE;
 	static const uint8_t _MAX_PAIRS_SIZE = 100;
-	static const uint8_t _MAX_MDOT_RESPONSE = 255;			//Max number of bytes the mdot might return
-	static const uint8_t _MAX_MDOT_COMMAND = 255;			//TODO: Check against the manual for mDot
+	static const uint8_t _MAX_MDOT_RESPONSE = 120;			//Max number of bytes the mdot might return
+	static const uint8_t _MAX_MDOT_COMMAND = 120;			//TODO: Check against the manual for mDot
 	char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
 	uint8_t _txPutter = 0;
 	uint8_t _txGetter = 0;
