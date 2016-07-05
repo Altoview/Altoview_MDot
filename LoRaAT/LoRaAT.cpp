@@ -112,17 +112,6 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 }
 
 /*----------------------------------------------------------------------------------|
-| Initialize the mDot.																|
-|																					|
-| This method initilises the mDot with some default settings						|
------------------------------------------------------------------------------------*/
-int LoRaAT::init() {
-  _debugStream->println("LaT:i : enter");
-
-  return(0);
-}
-
-/*----------------------------------------------------------------------------------|
 | the send command method, sends a command to the mDot and waits for a response.    |
 | once a full response has been received it passes it back to the calling function  |
 | as a char array.																	|
@@ -818,7 +807,7 @@ int LoRaAT::getDataRate() {
 /*----------------------------------------------------------------------------------|
 | Sets the ???                                                                      |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::setRXO() {
+int LoRaAT::setRXOutput() {
 
   return(0);
 }
@@ -830,7 +819,7 @@ int LoRaAT::setRXO() {
 |  * parse the response																|
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
-int LoRaAT::getRXO() {
+int LoRaAT::getRXOutput() {
   ///_debugStream->println("LaT:gr: enter");
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
