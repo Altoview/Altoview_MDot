@@ -4,22 +4,18 @@
  enabled firmware.
  
  This program,
-  * Joins the LoRa Network.
-  * Sends predicitable data (a loop count), and temperature  (The DS3231
- does a temperature conversion once every 64 seconds. This is also the
- default for the DS3232.)
+  * Gets and sets settings on the mDot
 */
 
 /*--------------------------------------------------------------------------------------
   Includes
   --------------------------------------------------------------------------------------*/
-#include <LoRaAT.h>               //Include LoRa AT libraray
+#include <LoRaAT.h>                     //Include LoRa AT libraray
 
 /*--------------------------------------------------------------------------------------
   Definitions
   --------------------------------------------------------------------------------------*/
-
-SoftwareSerial debugSerial(10, 11);     // RX, TX
+SoftwareSerial debugSerial(10, 11);     //RX, TX
 LoRaAT mdot(0, &debugSerial);           //Instantiate a LoRaAT object
 
 /*--- setup() --------------------------------------------------------------------------
@@ -27,42 +23,34 @@ LoRaAT mdot(0, &debugSerial);           //Instantiate a LoRaAT object
 
   In the setup() routine:
    - Opens serial communication with MDOT
+   - Gets some settings from the mDOT
+   - Sets some settings to random values
+   - Gets the settings (just to check)
+   - Sets to some default settings CSA like to use and recomend
+   - Gets the settings again (to check)
   --------------------------------------------------------------------------------------*/
 void setup() {
   int responseCode;
   
-  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-  mdot.begin(38400);          //Begin (possibly amongst other things) opens serial comms with MDOT
+  debugSerial.begin(38400);             //Debug output. Listen on this ports for debugging info
+  mdot.begin(38400);                    //Begin (possibly amongst other things) opens serial comms with MDOT
+  
   debugSerial.println("\r\n\r\n++ START ++\r\n\r\n");
 
+  //Get all the initial settings
 
-  do {
-    responseCode = mdot.join();
-    delay(5000);
-  } while (responseCode != 0);
-  debugSerial.println("SETUP : Join result: " + String(responseCode));
+  //Set some settings
+
+  //Get the settings
+
+  //Set to defaults
+
+  //Get the settings
 }
 
 /*--- loop() ---------------------------------------------------------------------------
   Main loop called by the Arduino framework
   --------------------------------------------------------------------------------------*/
-int count = 1;
 void loop() {
-  int responseCode;         //Response code from the mdot
-  //String testMessage = "";  //Test message sent via debugSerial
-  String temp = "Temp:";
-  String rh = ",RH:";
-  String testMsg = temp + count + rh + count * 2;
-  
-  //testMsg = "test:" + count ;
-  //testMsg += ",Alex:" + count*2 ;
-  //sprintf(testMsg, "test:%d,alex:%d", count, count*2);
-  debugSerial.println("MAIN  : testMsg: " + testMsg);
-  
-  responseCode = mdot.sendPairs(testMsg);
 
-  debugSerial.println("MAIN  : send result: " + String(responseCode));
-
-  delay(10000);
-  count++;
 }
