@@ -14,6 +14,7 @@
   Includes
   --------------------------------------------------------------------------------------*/
 #include <LoRaAT.h>               //Include LoRa AT libraray
+#include <SoftwareSerial.h>       //Software serial for debug
 
 /*--------------------------------------------------------------------------------------
   Definitions
@@ -33,14 +34,15 @@ void setup() {
   
   debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
   mdot.begin(38400);          //Begin (possibly amongst other things) opens serial comms with MDOT
-  debugSerial.println("\r\n\r\n++ START ++\r\n\r\n");
+  debugSerial.println(F("\r\n\r\n++ START ++\r\n\r\n"));
 
 
   do {
     responseCode = mdot.join();
-    delay(5000);
+    delay(10000);
   } while (responseCode != 0);
-  debugSerial.println("SETUP : Join result: " + String(responseCode));
+  debugSerial.print(F("SETUP : Join result: "));
+  debugSerial.println(String(responseCode));
 }
 
 /*--- loop() ---------------------------------------------------------------------------
@@ -50,16 +52,15 @@ int count = 1;
 void loop() {
   int responseCode;         //Response code from the mdot
   //String testMessage = "";  //Test message sent via debugSerial
-  String temp = "Temp:";
-  String rh = ",RH:";
+  String temp PROGMEM = "Temp:";
+  String rh PROGMEM = ",RH:";
   String testMsg = temp + count + rh + count * 2;
-  
-  //testMsg = "test:" + count ;
-  //testMsg += ",Alex:" + count*2 ;
-  //sprintf(testMsg, "test:%d,alex:%d", count, count*2);
+  char testChars[100];
+
   debugSerial.println("MAIN  : testMsg: " + testMsg);
-  
-  responseCode = mdot.sendPairs(testMsg);
+
+  testMsg.toCharArray(testChars,50);
+  responseCode = mdot.sendPairs(testChars);
 
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
