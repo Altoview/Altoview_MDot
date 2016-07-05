@@ -1,7 +1,7 @@
 # mdot_lora_arduino
 The library to send user data to Multitech mDot using AT commands on serial. 
 
-# Pre Requisits
+# Pre-requisites
 - Make sure the mDot serial port is configured to match the baud rate specified in `begin(<baud-rate>)` methods.
 1. `AT+IPR 38400` to change the BR to 38400 in this example.
 2. `AT&W` to save the changes.
