@@ -117,9 +117,7 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 -----------------------------------------------------------------------------------*/
 void LoRaAT::_sendCommand(char* response, char* command, uint16_t timeout) {
   ///_debugStream->println(F("LaT:sc: enter"));
-  
-  static const uint16_t LOOP_DELAY = 20;	 //Millisecond delay between serial attempts
-  
+   
   unsigned long timeoutCounter = 0;		     //We don't wait forever for a response
   unsigned long maxEndTime = 0;				 //
   uint16_t i = 0;						     //Receive character putter
@@ -513,7 +511,7 @@ int LoRaAT::_processBuffer() {
 	///_debugStream->println();
     response = send(temp);
     ///_debugStream->print(F("LaT:pb: sent. response: ");
-    ///_debugStream->println(response, DEC);
+    _debugStream->println(response, DEC);
   }
   _txPutter = 0;
   _txGetter = 0;
@@ -554,7 +552,7 @@ int LoRaAT::setFrequencySubBand(char fsb) {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getFrequencySubBand() {
-  ///_debugStream->println(F("LaT:gf: enter");
+  _debugStream->println(F("LaT:gf: enter"));
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] PROGMEM = "AT+FSB?";				//Command to get frequency sub band
@@ -563,11 +561,11 @@ int LoRaAT::getFrequencySubBand() {
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println(F("LaT:gf: Keyword 'OK', return 0");
+    _debugStream->println(F("LaT:gf: Keyword 'OK', return 0"));
     return (0);
   }
 
-  ///_debugStream->println(F("LaT:gf: timed-out. return -1");
+  _debugStream->println(F("LaT:gf: timed-out. return -1"));
   return(-1);
 }
 
@@ -609,7 +607,7 @@ int LoRaAT::setPublicNetwork(char pn) {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getPublicNetwork() {
-  ///_debugStream->println(F("LaT:gp: enter");
+  _debugStream->println(F("LaT:gp: enter"));
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] PROGMEM = "AT+PN?";				//Command to get public network
@@ -618,11 +616,11 @@ int LoRaAT::getPublicNetwork() {
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println(F("LaT:gp: Keyword 'OK', return 0");
+    _debugStream->println(F("LaT:gp: Keyword 'OK', return 0"));
     return (0);
   }
 
-  ///_debugStream->println(F("LaT:gp: timed-out. return -1");
+  _debugStream->println(F("LaT:gp: timed-out. return -1"));
   return(-1);
 }
 
@@ -677,7 +675,7 @@ int LoRaAT::setNetworkID(char* id) {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getNetworkID() {
-  ///_debugStream->println(F("LaT:gi: enter");
+  _debugStream->println(F("LaT:gi: enter"));
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] PROGMEM = "AT+NI?";				//Command to get network ID
@@ -686,11 +684,11 @@ int LoRaAT::getNetworkID() {
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println(F("LaT:gi: Keyword 'OK', return 0");
+    _debugStream->println(F("LaT:gi: Keyword 'OK', return 0"));
     return (0);
   }
 
-  ///_debugStream->println(F("LaT:gi: timed-out. return -1");
+  _debugStream->println(F("LaT:gi: timed-out. return -1"));
   return(-1);
 }
 
@@ -745,7 +743,7 @@ int LoRaAT::setNetworkKey(char* key) {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getNetworkKey() {
-  ///_debugStream->println(F("LaT:gk: enter");
+  _debugStream->println(F("LaT:gk: enter"));
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] PROGMEM = "AT+NK?";				//Command to get the network key
@@ -754,11 +752,11 @@ int LoRaAT::getNetworkKey() {
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println(F("LaT:gk: Keyword 'OK', return 0");
+    _debugStream->println(F("LaT:gk: Keyword 'OK', return 0"));
     return (0);
   }
 
-  ///_debugStream->println(F("LaT:gk: timed-out. return -1");
+  _debugStream->println(F("LaT:gk: timed-out. return -1"));
   return(-1);
 }
 
@@ -781,7 +779,7 @@ int LoRaAT::setDataRate() {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getDataRate() {
-  ///_debugStream->println(F("LaT:gd: enter");
+  _debugStream->println(F("LaT:gd: enter"));
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] PROGMEM = "AT+ADR?";				//Command to get data rate
@@ -790,11 +788,11 @@ int LoRaAT::getDataRate() {
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println(F("LaT:gd: Keyword 'OK', return 0");
+    _debugStream->println(F("LaT:gd: Keyword 'OK', return 0"));
     return (0);
   }
 
-  ///_debugStream->println(F("LaT:gd: timed-out. return -1");
+  _debugStream->println(F("LaT:gd: timed-out. return -1"));
   return(-1);
 }
 
@@ -814,7 +812,7 @@ int LoRaAT::setRXOutput() {
 |  * Return something meaningfull (based on response)								|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getRXOutput() {
-  ///_debugStream->println(F("LaT:gr: enter");
+  _debugStream->println(F("LaT:gr: enter"));
   static const uint16_t timeout = 10000;	//Max time allowed to receive response
   
   char command[] PROGMEM = "AT+RXO?";				//Command to get RXO
@@ -823,11 +821,11 @@ int LoRaAT::getRXOutput() {
   _sendCommand(_receivedString,command,timeout);
 
   if (strstr(_receivedString, "OK") != '\0') {
-    ///_debugStream->println(F("LaT:gr: Keyword 'OK', return 0");
+    _debugStream->println(F("LaT:gr: Keyword 'OK', return 0"));
     return (0);
   }
 
-  ///_debugStream->println(F("LaT:gr: timed-out. return -1");
+  _debugStream->println(F("LaT:gr: timed-out. return -1"));
   return(-1);
 }
 
