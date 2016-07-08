@@ -65,13 +65,17 @@ class LoRaAT
 	static const uint8_t _MAX_PAIRS_SIZE = 100;
 	
 	static const uint8_t _MAX_MDOT_RESPONSE = 120;			//Max number of bytes the mdot might return
+	char _response[_MAX_MDOT_RESPONSE];						//mDot response buffer
+	uint8_t _length;										//Lenght of a response
+	
 	static const uint8_t _MAX_MDOT_COMMAND = 120;			//TODO: Check against the manual for mDot
+	char _command[_MAX_MDOT_COMMAND];
 	
 	char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
 	uint8_t _txPutter = 0;
 	uint8_t _txGetter = 0;
 	
-	void _sendCommand(char*, char*, uint16_t);             //Generic serial out get response wrapper
+	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);             //Generic serial out get response wrapper
 	
 	void _pairsToJSON(char*, char*);
 	void _createFragmentBuffer(char*);
