@@ -11,6 +11,7 @@
   Includes
   --------------------------------------------------------------------------------------*/
 #include <LoRaAT.h>                     //Include LoRa AT libraray
+#include <SoftwareSerial.h>
 
 /*--------------------------------------------------------------------------------------
   Definitions
@@ -38,9 +39,21 @@ void setup() {
   debugSerial.println("\r\n\r\n++ START ++\r\n\r\n");
 
   //Get all the initial settings
+  mdot.getFrequencySubBand();
+  mdot.getPublicNetwork();
+  mdot.getNetworkID();
+  mdot.getNetworkKey();
+  mdot.getDataRate();
+  mdot.getRXOutput();
 
   //Set some settings
-
+  mdot.setFrequencySubBand('2');
+  mdot.setPublicNetwork('1');
+  char id[] = "00:00:aa:00:00:00:00:01";
+  mdot.setNetworkID(id);
+  char key[] = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+  mdot.setNetworkKey(key);
+  
   //Get the settings
 
   //Set to defaults
