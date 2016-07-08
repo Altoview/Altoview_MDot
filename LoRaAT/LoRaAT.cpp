@@ -124,9 +124,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   while (ATSerial->read() != -1);
   
   //Blank string
-  for (int i = 0; i < _MAX_MDOT_RESPONSE; i++) {
-    _response[i] = '\0';
-  }
+  memset(_response,0x00,_MAX_MDOT_RESPONSE);
   _length = 0;
   
   //Send command
