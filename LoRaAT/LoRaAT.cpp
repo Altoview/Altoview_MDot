@@ -112,8 +112,8 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 
 /*----------------------------------------------------------------------------------|
 | the send command method, sends a command to the mDot and waits for a response.    |
-| once a full response has been received it passes it back to the calling function  |
-| as a char array.                                                                  |
+| once a recognised response is received it returns the corresponding interger,     |
+| if no recognised response is recieved in the timout specified return 0.           |
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout) {
   ///_debugStream->println(F("LaT:sc: enter"));
@@ -333,7 +333,7 @@ int LoRaAT::sendPairs(char* pairs) {
   char json[_MAX_PAIRS_SIZE];      
   
   //TODO: Check the string is actually pairs
-  if (false) { //TODO: if format not recoginised
+  if (false) { //TODO: if format not recognised
     return(UNKNOWN_FORMAT);
   }
 
