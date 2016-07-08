@@ -64,11 +64,11 @@ class LoRaAT
 	
 	static const uint8_t _MAX_PAIRS_SIZE = 100;
 	
-	static const uint8_t _MAX_MDOT_RESPONSE = 120;			//Max number of bytes the mdot might return
+	static const uint8_t _MAX_MDOT_RESPONSE = 255;			//Max number of bytes the mdot might return
 	char _response[_MAX_MDOT_RESPONSE];						//mDot response buffer
 	uint8_t _length;										//Lenght of a response
 	
-	static const uint8_t _MAX_MDOT_COMMAND = 120;			//TODO: Check against the manual for mDot
+	static const uint8_t _MAX_MDOT_COMMAND = 255;			//TODO: Check against the manual for mDot
 	char _command[_MAX_MDOT_COMMAND];
 	
 	char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
