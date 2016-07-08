@@ -64,6 +64,6 @@ void loop() {
 
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
-  delay(10000);
+  delay(30000);
   count++;
 }
