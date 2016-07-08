@@ -22,9 +22,9 @@
  *                               GLOBAL VARIABLES                                   *
  ***********************************************************************************/
 #if defined(ARDUINO_ARCH_AVR)
-  HardwareSerial* ATSerial = &Serial; //< Pointer to Serial class object
+  HardwareSerial* ATSerial = &Serial;            //Pointer to Serial class object
 #elif defined(ARDUINO_ARCH_SAM)
-  UARTClass* ATSerial = &Serial;      //< Pointer to Serial class object
+  UARTClass* ATSerial = &Serial;                 //Pointer to Serial class object
 #else
   #error "This library only supports boards with an AVR or SAM processor."
 #endif
@@ -118,10 +118,10 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 void LoRaAT::_sendCommand(char* response, char* command, uint16_t timeout) {
   ///_debugStream->println(F("LaT:sc: enter"));
    
-  unsigned long timeoutCounter = 0;             //We don't wait forever for a response
-  unsigned long maxEndTime = 0;                 //
-  uint16_t i = 0;                             //Receive character putter
-  int available;                             //Number of bytes in serial buffer
+  unsigned long timeoutCounter = 0;              //We don't wait forever for a response
+  unsigned long maxEndTime = 0;                  //
+  uint16_t i = 0;                                //Receive character putter
+  int available;                                 //Number of bytes in serial buffer
 
   //flush receive buffer before transmitting request
   //while (ATSerial->read() != -1);
@@ -197,7 +197,7 @@ int LoRaAT::join() {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::join(unsigned int timeout) {
   ///_debugStream->println(F("LaT:j : enter"));
-  char _receivedString[_MAX_MDOT_RESPONSE];  //String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   char command[] PROGMEM = "AT+JOIN";
   
   _sendCommand(_receivedString,command,timeout);
@@ -265,10 +265,10 @@ int LoRaAT::send(char* message) {
 int LoRaAT::send(char* message, unsigned int timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
 
-  char _receivedString[_MAX_MDOT_RESPONSE];    //String returned by device
+  char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   char command[_MAX_MDOT_COMMAND] = "AT+SEND ";
  
-  strcat(command,message);                    //Append message to command
+  strcat(command,message);                       //Append message to command
   
   _sendCommand(_receivedString,command,timeout);
 
@@ -527,9 +527,9 @@ int LoRaAT::_processBuffer() {
 |  * Overload to accept, string, int, uint, byte, maybe others, maybe less.         |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setFrequencySubBand(char fsb) {
-  static const uint16_t timeout = 10000;      //Max time allowed to receive response
-  static const uint8_t _MAX_FSB_COMMAND = 9;  //Max characters in FSB command "AT+FSB x"
-  char command[_MAX_FSB_COMMAND] = "AT+FSB "; //Command to get frequency sub band
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
+  static const uint8_t _MAX_FSB_COMMAND = 9;     //Max characters in FSB command "AT+FSB x"
+  char command[_MAX_FSB_COMMAND] = "AT+FSB ";    //Command to get frequency sub band
   char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
   command[7] = fsb;
@@ -553,10 +553,10 @@ int LoRaAT::setFrequencySubBand(char fsb) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getFrequencySubBand() {
   _debugStream->println(F("LaT:gf: enter"));
-  static const uint16_t timeout = 10000;    //Max time allowed to receive response
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
   
-  char command[] PROGMEM = "AT+FSB?";                //Command to get frequency sub band
-  char _receivedString[_MAX_MDOT_RESPONSE];    //String returned by device
+  char command[] PROGMEM = "AT+FSB?";            //Command to get frequency sub band
+  char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
@@ -578,9 +578,9 @@ int LoRaAT::getFrequencySubBand() {
 |  1 - on                                                                           |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setPublicNetwork(char pn) {
-  static const uint16_t timeout = 10000;      //Max time allowed to receive response
-  static const uint8_t _MAX_PN_COMMAND = 8;   //Max characters in PN command "AT+FSB x"
-  char command[_MAX_PN_COMMAND] = "AT+PN ";   //Command to get frequency sub band
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
+  static const uint8_t _MAX_PN_COMMAND = 8;      //Max characters in PN command "AT+FSB x"
+  char command[_MAX_PN_COMMAND] = "AT+PN ";      //Command to get frequency sub band
   char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
   if (pn != '0') {
@@ -608,10 +608,10 @@ int LoRaAT::setPublicNetwork(char pn) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getPublicNetwork() {
   _debugStream->println(F("LaT:gp: enter"));
-  static const uint16_t timeout = 10000;    //Max time allowed to receive response
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
   
-  char command[] PROGMEM = "AT+PN?";                //Command to get public network
-  char _receivedString[_MAX_MDOT_RESPONSE];    //String returned by device
+  char command[] PROGMEM = "AT+PN?";             //Command to get public network
+  char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
@@ -651,12 +651,12 @@ int LoRaAT::getPublicNetwork() {
 |  * AT+NI 0,00-00-aa-00-00-00-00-01                                                |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setNetworkID(char* id) {
-  static const uint16_t timeout = 10000;      //Max time allowed to receive response
-  static const uint8_t _MAX_NI_COMMAND = 32;  //Max characters in PN command "AT+FSB x"
-  char command[_MAX_NI_COMMAND] = "AT+NI 0,"; //Command to get frequency sub band
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
+  static const uint8_t _MAX_NI_COMMAND = 32;     //Max characters in PN command "AT+FSB x"
+  char command[_MAX_NI_COMMAND] = "AT+NI 0,";    //Command to get frequency sub band
   char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
-  strcat(command,id);                      //Append ID to command
+  strcat(command,id);                            //Append ID to command
   
   _sendCommand(_receivedString,command,timeout);
 
@@ -676,10 +676,10 @@ int LoRaAT::setNetworkID(char* id) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getNetworkID() {
   _debugStream->println(F("LaT:gi: enter"));
-  static const uint16_t timeout = 10000;    //Max time allowed to receive response
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
   
-  char command[] PROGMEM = "AT+NI?";                //Command to get network ID
-  char _receivedString[_MAX_MDOT_RESPONSE];    //String returned by device
+  char command[] PROGMEM = "AT+NI?";             //Command to get network ID
+  char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
@@ -719,12 +719,12 @@ int LoRaAT::getNetworkID() {
 |  * AT+NK 0,00-00-00-00-00-00-00-00- 00-00-00-00-00-00-00-01                       |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setNetworkKey(char* key) {
-  static const uint16_t timeout = 10000;      //Max time allowed to receive response
-  static const uint8_t _MAX_NK_COMMAND = 56;  //Max characters in PN command "AT+FSB x"
-  char command[_MAX_NK_COMMAND] = "AT+NK 0,"; //Command to get frequency sub band
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
+  static const uint8_t _MAX_NK_COMMAND = 56;     //Max characters in PN command "AT+FSB x"
+  char command[_MAX_NK_COMMAND] = "AT+NK 0,";    //Command to get frequency sub band
   char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
-  strcat(command,key);                          //Append ID to command
+  strcat(command,key);                           //Append ID to command
   
   _sendCommand(_receivedString,command,timeout);
 
@@ -744,10 +744,10 @@ int LoRaAT::setNetworkKey(char* key) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getNetworkKey() {
   _debugStream->println(F("LaT:gk: enter"));
-  static const uint16_t timeout = 10000;    //Max time allowed to receive response
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
   
-  char command[] PROGMEM = "AT+NK?";                //Command to get the network key
-  char _receivedString[_MAX_MDOT_RESPONSE];    //String returned by device
+  char command[] PROGMEM = "AT+NK?";             //Command to get the network key
+  char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
@@ -780,10 +780,10 @@ int LoRaAT::setDataRate() {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getDataRate() {
   _debugStream->println(F("LaT:gd: enter"));
-  static const uint16_t timeout = 10000;    //Max time allowed to receive response
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
   
-  char command[] PROGMEM = "AT+ADR?";                //Command to get data rate
-  char _receivedString[_MAX_MDOT_RESPONSE];    //String returned by device
+  char command[] PROGMEM = "AT+ADR?";            //Command to get data rate
+  char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
@@ -813,10 +813,10 @@ int LoRaAT::setRXOutput() {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getRXOutput() {
   _debugStream->println(F("LaT:gr: enter"));
-  static const uint16_t timeout = 10000;    //Max time allowed to receive response
+  static const uint16_t timeout = 10000;         //Max time allowed to receive response
   
-  char command[] PROGMEM = "AT+RXO?";                //Command to get RXO
-  char _receivedString[_MAX_MDOT_RESPONSE];    //String returned by device
+  char command[] PROGMEM = "AT+RXO?";            //Command to get RXO
+  char _receivedString[_MAX_MDOT_RESPONSE];      //String returned by device
   
   _sendCommand(_receivedString,command,timeout);
 
