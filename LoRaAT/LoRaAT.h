@@ -23,21 +23,22 @@
 class LoRaAT
 {
   public:
-    LoRaAT();				//Use default serial port
-	LoRaAT(uint8_t);		//Use specified serial port. TODO: Think about other things we want to define at this point
-	LoRaAT(uint8_t,Stream*);//Use a debugging stream.
-	void begin();			//Use default baud
-	void begin(uint32_t);	//Use specified baud rate. TODO: Think about other things, e.g. datarate, adaptive data rate.
+    LoRaAT();				        //Use default serial port
+	LoRaAT(uint8_t);		        //Use specified serial port.
+	LoRaAT(uint8_t,Stream*);        //Use specified serial port and a debugging stream.
 	
-	int join();				//Join a LoRa(WAN?) network TODO: Think about network parameters, saying something about network?
-	int join(unsigned int); //Join with a specific timeout
-    void leave();			//Leave a LoRa(WAN?) network, Not yet implemented
+	void begin();			        //Use default baud
+	void begin(uint32_t);	        //Use specified baud rate.
 	
-	int send(char*);		//In general we send strings using the AT command, we could have overloaded functions to accept other things? Maybe data in a particular format?
-	int send(char*, unsigned int); //Use specific timeout like join function.
-	int sendPairs(char*);	//Takes key,value pairs, forms a message, and sends to the LoRa server.
-    int sendPairs(String); 	//Takes key,value pairs, forms a message, and sends to the LoRa server.
-	uint8_t ping();			//Not yet implemented
+	int join();				        //Join a LoRa network.
+	int join(unsigned int);         //Join with a specific timeout
+    void leave();			        //Leave a LoRa network, Not yet implemented
+	
+	int send(char*);		        //Generic send command, using AT+SEND
+	int send(char*, unsigned int);  //Use specific timeout.
+	int sendPairs(char*);	        //Takes key,value pairs, forms a message, and sends to the LoRa server.
+    int sendPairs(String); 	        //Takes key,value pairs, forms a message, and sends to the LoRa server.
+	uint8_t ping();			        //Not yet implemented
 	
 	//Getter and setter functions for mDot Settings.
 	//NOT FULLY TESTED AND IMPLEMENTED
@@ -54,25 +55,30 @@ class LoRaAT
     int setRXOutput();
     int getRXOutput();
     int commitSettings();			//Not yet implemented
+  
   private:
 	static const uint8_t _MAX_FRAGMENTS = 16;
 	static const uint8_t _PACKET_SIZE = 11;
 	static const uint8_t _HEADER_SIZE = 2;
 	static const uint8_t _PAYLOAD_SIZE = _PACKET_SIZE - _HEADER_SIZE;
+	
 	static const uint8_t _MAX_PAIRS_SIZE = 100;
+	
 	static const uint8_t _MAX_MDOT_RESPONSE = 120;			//Max number of bytes the mdot might return
 	static const uint8_t _MAX_MDOT_COMMAND = 120;			//TODO: Check against the manual for mDot
+	
 	char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
 	uint8_t _txPutter = 0;
 	uint8_t _txGetter = 0;
 	
-	void _sendCommand(char*, char*, uint16_t);
+	void _sendCommand(char*, char*, uint16_t);             //Generic serial out get response wrapper
+	
 	void _pairsToJSON(char*, char*);
 	void _createFragmentBuffer(char*);
 	int _processBuffer();
 	
-    uint8_t _u8SerialPort;	//Debugging serial port initialized in constructor
-	Stream* _debugStream;
+    uint8_t _u8SerialPort;                                 //AT Command serial port selection by user
+	Stream* _debugStream;                                  //Debugging serial port initialized in constructor
 };
 
 #endif
