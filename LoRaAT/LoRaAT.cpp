@@ -510,7 +510,7 @@ int LoRaAT::_processBuffer() {
     }
     ///_debugStream->println();
     response = send(temp);
-    ///_debugStream->print(F("LaT:pb: sent. response: ");
+    ///_debugStream->print(F("LaT:pb: sent. response: "));
     _debugStream->println(response, DEC);
   }
   _txPutter = 0;
