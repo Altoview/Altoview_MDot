@@ -462,8 +462,8 @@ void LoRaAT::_createFragmentBuffer(char* message) {
     } header;
 
     //Create the header bytes
-    header.asByte[0] = _txPutter + 1;
-    header.asByte[1] = numFragments;
+    header.asByte[0] = _txPutter + 1 + _HEADER_OFFSET;
+    header.asByte[1] = numFragments + _HEADER_OFFSET;
 
     //Add the header to the byte array (delt with as a string)
     _txBuffer[_txPutter][0] = header.asChar[0];
