@@ -25,7 +25,7 @@ This method accepts a comma separated key-value pair in the form of a `String` o
 License
 =======
 
-Copyright (C) 2013-2016 [Paralect, Inc](http://www.paralect.com)
+Copyright (C) 2013-2016 - Campbell Scientific Australia ,Pty Ltd
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 3 as 
