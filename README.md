@@ -1,4 +1,4 @@
-# mdot_lora_arduino
+# About mdot_lora_arduino
 The library to send user data to Multitech mDot using AT commands on serial. 
 
 # Pre-requisites
@@ -20,3 +20,21 @@ This method sends a join request to the LoRa server.
 
 #sendPairs( )
 This method accepts a comma separated key-value pair in the form of a `String` or array of chars.
+
+
+License
+=======
+
+Copyright (C) 2013-2016 [Paralect, Inc](http://www.paralect.com)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 3 as 
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
