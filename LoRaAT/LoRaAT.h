@@ -61,6 +61,7 @@ class LoRaAT
 	static const uint8_t _PACKET_SIZE = 11;
 	static const uint8_t _HEADER_SIZE = 2;
 	static const uint8_t _PAYLOAD_SIZE = _PACKET_SIZE - _HEADER_SIZE;
+	static const uint8_t _HEADER_OFFSET = 48;
     
 	static const uint8_t _MAX_PAIRS_SIZE = 100;
     
