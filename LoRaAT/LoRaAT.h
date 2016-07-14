@@ -25,8 +25,8 @@ class LoRaAT
   public:
     char frequencySubBand = '\0';   //0-8
 	char publicNetwork = '\0';		//0,1
-	char networkId[23] = {'\0'};    //00:00:aa:00:00:00:00:01
-	char networkKey[47] = {'\0'};	//00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01
+	char networkId[24] = {'\0'};    //00:00:aa:00:00:00:00:01
+	char networkKey[48] = {'\0'};	//00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01
     char dataRate = '\0';			//0-3
 	LoRaAT();				        //Use default serial port
 	LoRaAT(uint8_t);		        //Use specified serial port.
