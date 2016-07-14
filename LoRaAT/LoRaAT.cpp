@@ -136,7 +136,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   maxEndTime = millis() + timeout;
   
   //While something is available get it
-  _debugStream->println(F("LaT:sc: Loop collecting response"));
+  ///_debugStream->println(F("LaT:sc: Loop collecting response"));
   do {
     if (ATSerial->available() != 0) {
 	  if (_length < (_MAX_MDOT_RESPONSE - 1)) {
@@ -340,8 +340,8 @@ int LoRaAT::sendPairs(char* pairs) {
   ///_debugStream->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, pairs);
   ///_debugStream->println(F("LaT:sp: pairs as JSON"));
-  ///_debugStream->print(F("LaT:sp: "));
-  ///_debugStream->println(json);
+  _debugStream->print(F("LaT:sp: "));
+  _debugStream->println(json);
   ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
   _createFragmentBuffer(json);
   ///_debugStream->println(F("LaT:sp: process buffer"));
@@ -516,7 +516,7 @@ int LoRaAT::_processBuffer() {
     ///_debugStream->println();
     response = send(temp);
     ///_debugStream->print(F("LaT:pb: sent. response: "));
-    _debugStream->println(response, DEC);
+    ///_debugStream->println(response, DEC);
   }
   _txPutter = 0;
   _txGetter = 0;
