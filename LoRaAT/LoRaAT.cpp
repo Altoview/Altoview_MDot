@@ -544,7 +544,7 @@ int LoRaAT::setFrequencySubBand(char fsb) {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
-	//TODO: set the FSB public member
+	frequencySubBand = fsb;
     return (0);
   }
   
@@ -563,6 +563,8 @@ int LoRaAT::getFrequencySubBand() {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
+	//We know AT+FSB? is echoed, then a <CR><LF>. So 9 characters
+	frequencySubBand = _response[10];
 	//TODO: Look in _response for FSB and set a public member
     return (0);
   }
