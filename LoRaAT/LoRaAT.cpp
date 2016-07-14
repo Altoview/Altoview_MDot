@@ -713,12 +713,25 @@ int LoRaAT::getNetworkKey() {
 /*----------------------------------------------------------------------------------|
 | Sets the data rate                                                                |
 |                                                                                   |
-| this function can be used to set a specific data rate or set the data rate to     |
-| adaptive.                                                                         |
+| AT+TXDR ?                                                                         |
+| AT+TXDR: (0-3|10-7|DR0-DR4|DR8-DR13)                                              |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::setDataRate() {
+int LoRaAT::setDataRate(char txdr) {
+  uint8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  
+  sprintf_P(_command,(char*)F("AT+TXDR "));
+  _command[9] = txdr;
+  _command[10] = '\0';
+  
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
-  return(0);
+  if (ansCode == 1) {
+	//TODO: set the txdr public member
+    return (0);
+  }
+  
+  return(-1);
 }
 
 /*----------------------------------------------------------------------------------|
@@ -728,39 +741,12 @@ int LoRaAT::getDataRate() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
   
-  sprintf_P(_command,(char*)F("AT+ADR?"));
+  sprintf_P(_command,(char*)F("AT+TXDR?"));
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
-	//TODO: Look in _response for DR and ADR and set the public members
-    return (0);
-  }
-  
-  return(-1);
-}
-
-/*----------------------------------------------------------------------------------|
-| Sets the ???                                                                      |
------------------------------------------------------------------------------------*/
-int LoRaAT::setRXOutput(uint8_t rxo) {
-
-  return(0);
-}
-
-/*----------------------------------------------------------------------------------|
-| Gets the ???                                                                      |
------------------------------------------------------------------------------------*/
-int LoRaAT::getRXOutput() {
-  uint8_t ansCode;
-  char ans1[] PROGMEM = "OK";
-  
-  sprintf_P(_command,(char*)F("AT+RXO?"));
-  
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
-
-  if (ansCode == 1) {
-	//TODO: Look in _response for RXO and set a public member
+	//TODO: Look in _response for TXDR and set the public member
     return (0);
   }
   
