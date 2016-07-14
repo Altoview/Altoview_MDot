@@ -52,15 +52,13 @@ int count = 1;
 void loop() {
   int responseCode;         //Response code from the mdot
   //String testMessage = "";  //Test message sent via debugSerial
-  String temp PROGMEM = "Temp:";
-  String rh PROGMEM = ",RH:";
-  String testMsg = temp + count + rh + count * 2;
-  char testChars[100];
+  //String temp PROGMEM = "Temp:";
+  //String rh PROGMEM = ",RH:";
+  String testMsg = "test1:-127.00,test2:202,test3:119,test7:12.7,test8:86,test9:6";
 
   debugSerial.println("MAIN  : testMsg: " + testMsg);
 
-  testMsg.toCharArray(testChars,50);
-  responseCode = mdot.sendPairs(testChars);
+  responseCode = mdot.sendPairs(testMsg);
 
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
