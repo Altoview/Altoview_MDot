@@ -55,7 +55,13 @@ void setup() {
   mdot.setNetworkKey(key);
   
   //Get the settings
-
+  mdot.getFrequencySubBand();
+  mdot.getPublicNetwork();
+  mdot.getNetworkID();
+  mdot.getNetworkKey();
+  mdot.getDataRate();
+  mdot.getRXOutput();
+  
   //Set to defaults
 
   //Get the settings
