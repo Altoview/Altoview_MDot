@@ -52,7 +52,7 @@ class LoRaAT
     int getNetworkKey();			//Also referred to as the AppKey
     int setDataRate();
     int getDataRate();
-    int setRXOutput();
+    int setRXOutput(uint8_t);
     int getRXOutput();
     int commitSettings();			//Not yet implemented
   
