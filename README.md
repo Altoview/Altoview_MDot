@@ -19,7 +19,12 @@ The library to send user data to Multitech mDot using AT commands on serial.
 This method sends a join request to the LoRa server.
 
 #sendPairs( )
-This method accepts a comma separated key-value pair in the form of a `String` or array of chars.
+This method accepts a comma separated key-value pair in the form of a `String` or `array of chars`.
+
+example:
+
+`{"Temp1":26.00,"Temp2":22.70,"RH%":59,"Moral%":100}`
+
 
 
 License
