@@ -166,6 +166,8 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
       _debugStream->print(F("LaT:sc: MEMLOC: "));
 	  if (resp != NULL) {
         *resp = strstr(_response,command);
+		*resp += strlen(command);
+		*resp += sizeof(TERMINATOR);             //3
 	  }
 	  if (*resp != NULL) {
 		_debugStream->println((int)*resp);
