@@ -23,11 +23,11 @@
 class LoRaAT
 {
   public:
-    char frequencySubBand = '\0';   //0-8
+    char networkKey[48] = {'\0'};	//00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01
+    char networkId[24] = {'\0'};    //00:00:aa:00:00:00:00:01
+	char frequencySubBand = '\0';   //0-8
 	char publicNetwork = '\0';		//0,1
-	char networkId[24] = {'\0'};    //00:00:aa:00:00:00:00:01
-	char networkKey[48] = {'\0'};	//00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01
-    char dataRate = '\0';			//0-3
+	char dataRate = '\0';			//0-3
 	
 	LoRaAT();				        //Use default serial port
 	LoRaAT(uint8_t);		        //Use specified serial port.
@@ -75,7 +75,7 @@ class LoRaAT
 	uint8_t _txPutter = 0;
 	uint8_t _txGetter = 0;
 	
-	static const uint8_t _MAX_MDOT_RESPONSE = 150;			//Max number of bytes the mdot might return
+	static const uint8_t _MAX_MDOT_RESPONSE = 200;			//Max number of bytes the mdot might return
 	char _response[_MAX_MDOT_RESPONSE];						//mDot response buffer
 	uint8_t _length;										//Lenght of a response
 	

@@ -715,11 +715,12 @@ int LoRaAT::getNetworkID() {
 int LoRaAT::setNetworkKey(char* key) {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char ansX[] PROGMEM = "BUG";
   
   sprintf_P(_command,(char*)F("AT+NK 0,"));
   strcat(_command,key);                          //Append key to command
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000);
 
   if (ansCode == 1) {
 	strncpy(networkKey,key,sizeof(networkKey)-1);
@@ -736,12 +737,13 @@ int LoRaAT::setNetworkKey(char* key) {
 int LoRaAT::getNetworkKey() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char ansX[] PROGMEM = "BUG";
   char* r;
   
   sprintf_P(_command,(char*)F("AT+NK?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
-
+  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000, &r);
+  
   if (ansCode == 1) {
 	strncpy(networkKey,r,(sizeof(networkKey)-1));
 	networkKey[47] = '\0';
@@ -788,7 +790,7 @@ int LoRaAT::getDataRate() {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-	dataRate = r[0];
+	dataRate = r[2];
     return (0);
   }
   
