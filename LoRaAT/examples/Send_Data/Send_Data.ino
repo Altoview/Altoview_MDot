@@ -60,16 +60,16 @@ void loop() {
   String testMessage = "";  //Test message sent via debugSerial
   
   //Build the message to send:
-  String rtcTemp = F("RTC Temp:");
+  String rtcTemp = F("Temp1:");
   testMessage = rtcTemp;
   RTC.convertTemperature(); //convert current temperature into registers
   testMessage += RTC.getTemperature();
 
-  String atTemp = F("ATmega328P Temp:");
+  String atTemp = F(",Temp2:");
   testMessage += atTemp;
   testMessage += GetTemp();
   
-  String count = F(",Loop Count:");
+  String count = F(",Loop:");
   testMessage += count;
   testMessage += loopNum;
 
