@@ -130,9 +130,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   unsigned long maxEndTime = 0;
 
   //flush receive buffer before transmitting request
-  delay(200);
   while (ATSerial->read() != -1);
-  delay(200);
   
   //Blank string
   memset(_response,0x00,_MAX_MDOT_RESPONSE);
