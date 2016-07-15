@@ -83,7 +83,7 @@ class LoRaAT
 	char _command[_MAX_MDOT_COMMAND];
 	
 	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
-	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char*);             //Generic serial out get response wrapper
+	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char**);             //Generic serial out get response wrapper
 	
 	//void _pairsToJSON(char*, char*);
 	//void _createFragmentBuffer(char*);
