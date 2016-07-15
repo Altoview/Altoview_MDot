@@ -125,7 +125,6 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char* resp) {
   ///_debugStream->println(F("LaT:sc: enter"));
-  //char* resp;
   static const char TERMINATOR[3] = {'\r','\n','\0'};
    
   unsigned long maxEndTime = 0;
@@ -141,10 +140,12 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   
   //Send command
   _debugStream->print(F("LaT:sc: "));
-  _debugStream->print(command);
-  _debugStream->print(TERMINATOR);
-  ATSerial->print(command);
-  ATSerial->print(TERMINATOR);
+  _debugStream->println(command);
+  //_debugStream->print(command);
+  //_debugStream->print(TERMINATOR);
+  ATSerial->println(command);
+  //ATSerial->print(command);
+  //ATSerial->print(TERMINATOR);
   
   //Set timeout time
   maxEndTime = millis() + timeout;
@@ -159,23 +160,13 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 	  }
     }
 	
-	//if (resp = strstr(_response,command)) {
-      //resp += strlen(command)+strlen(TERMINATOR) + 3;
-    //}
-	
-	//char* resp = (char*)strstr(_response,command);
-	//resp = _response;
-	//_find(_response,command,resp);
-	
     if (strstr(_response, ans1) != '\0') {
-      resp = strstr(_response,command);
-      _debugStream->print(F("LaT:sc: MEMLOC: "));
-      _debugStream->println((int)ans1);
       _debugStream->print(F("LaT:sc: MEMLOC: "));
       _debugStream->println((int)_response);
       _debugStream->print(F("LaT:sc: MEMLOC: "));
 	  _debugStream->println((int)strstr(_response,command));
       _debugStream->print(F("LaT:sc: MEMLOC: "));
+      resp = strstr(_response,command);
 	  if (resp != NULL) {
 		_debugStream->println((int)resp);
 	  } else {
@@ -824,28 +815,4 @@ int LoRaAT::commitSettings() {
   }
   
   return(-1);
-}
-
-/*----------------------------------------------------------------------------------|
-| A simple find the substring function... Because strstr() didn't work how it was   |
-| expected in some instances.                                                       |
------------------------------------------------------------------------------------*/
-bool LoRaAT::_find(char* haystack, char* needle, char* ptr) {
-  int result;
-  _debugStream->print(F("LaT:F : MEMLOC: "));
-  _debugStream->println((int)haystack);
-  _debugStream->print(F("LaT:F : MEMLOC: "));
-  _debugStream->println((int)ptr);
-  ptr = haystack;
-  _debugStream->print(F("LaT:F : MEMLOC: "));
-  _debugStream->println((int)ptr);
-  if( sizeof(haystack) >= sizeof(needle)) {
-    for(uint16_t i = 0; i <= sizeof(haystack)-sizeof(needle); i++) {
-      result = memcmp(&haystack[i], needle, sizeof(needle) );	
-      if( result == 0 ) {
-        return true;
-      }
-    }
-  }
-  return false;
 }

@@ -89,8 +89,6 @@ class LoRaAT
 	//void _createFragmentBuffer(char*);
 	//int _processBuffer();
 	
-	bool _find(char*, char*, char*);
-	
     uint8_t _u8SerialPort;                                 //AT Command serial port selection by user
 	Stream* _debugStream;                                  //Debugging serial port initialized in constructor
 };
