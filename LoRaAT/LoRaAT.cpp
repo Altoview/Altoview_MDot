@@ -155,25 +155,40 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
         _response[_length++] = ATSerial->read();
 	  }
     }
-	
+  
     if (strstr(_response, ans1) != '\0') {
-	  if (resp != NULL) {
+      if (resp != NULL) {
         *resp = strstr(_response,command);
-		*resp += strlen(command);
-		*resp += sizeof(TERMINATOR);             //3
-	  }
+        *resp += strlen(command);
+        *resp += sizeof(TERMINATOR);               //3
+      }
       return (1);
     }
 	
     if (strstr(_response, ans2) != '\0') {
+      if (resp != NULL) {
+        *resp = strstr(_response,command);
+        *resp += strlen(command);
+        *resp += sizeof(TERMINATOR);               //3
+      }
       return (2);
     }
 	
     if (strstr(_response, ans3) != '\0') {
+      if (resp != NULL) {
+        *resp = strstr(_response,command);
+        *resp += strlen(command);
+        *resp += sizeof(TERMINATOR);               //3
+      }
       return (3);
     }
 	
     if (strstr(_response, ans4) != '\0') {
+      if (resp != NULL) {
+        *resp = strstr(_response,command);
+        *resp += strlen(command);
+        *resp += sizeof(TERMINATOR);               //3
+      }
       return (4);
     }
 	
