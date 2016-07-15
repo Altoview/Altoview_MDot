@@ -123,7 +123,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 | once a recognised response is received it returns the corresponding interger,     |
 | if no recognised response is recieved in the timout specified return 0.           |
 -----------------------------------------------------------------------------------*/
-uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char* resp) {
+uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char** resp) {
   ///_debugStream->println(F("LaT:sc: enter"));
   static const char TERMINATOR[3] = {'\r','\n','\0'};
    
@@ -152,7 +152,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   
   //While something is available get it
   ///_debugStream->println(F("LaT:sc: Loop collecting response"));
-  resp = NULL;
+  *resp = NULL;
   do {
     if (ATSerial->available() != 0) {
 	  if (_length < (_MAX_MDOT_RESPONSE - 1)) {
@@ -166,9 +166,11 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
       _debugStream->print(F("LaT:sc: MEMLOC: "));
 	  _debugStream->println((int)strstr(_response,command));
       _debugStream->print(F("LaT:sc: MEMLOC: "));
-      resp = strstr(_response,command);
 	  if (resp != NULL) {
-		_debugStream->println((int)resp);
+        *resp = strstr(_response,command);
+	  }
+	  if (*resp != NULL) {
+		_debugStream->println((int)*resp);
 	  } else {
 		_debugStream->println("NULL");
 	  }
@@ -585,15 +587,18 @@ int LoRaAT::setFrequencySubBand(char fsb) {
 int LoRaAT::getFrequencySubBand() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+FSB?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
   ///_debugStream->println(_response);
+  _debugStream->print(F("LaT:sc: MEMLOC: "));
+  _debugStream->println((int)r);
   
   if (ansCode == 1) {
 	//AT+FSB?<CR><LF><FSB>
-	frequencySubBand = _response[10];
+	frequencySubBand = r[0];
     return (0);
   }
   
@@ -636,15 +641,16 @@ int LoRaAT::setPublicNetwork(char pn) {
 int LoRaAT::getPublicNetwork() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+PN?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
     //AT+PN?<CR><LF><FSB>
-    publicNetwork = _response[9];
+    publicNetwork = r[0];
     return (0);
   }
   
@@ -686,15 +692,15 @@ int LoRaAT::setNetworkID(char* id) {
 int LoRaAT::getNetworkID() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+NI?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-	char* ptr = &_response[9];
-	strncpy(networkId,ptr,sizeof(networkId)-1);
+	strncpy(networkId,r,sizeof(networkId)-1);
 	networkId[23] = '\0';
     return (0);
   }
@@ -737,15 +743,15 @@ int LoRaAT::setNetworkKey(char* key) {
 int LoRaAT::getNetworkKey() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+NK?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-	char* ptr = &_response[9];
-	strncpy(networkKey,ptr,(sizeof(networkKey)-1));
+	strncpy(networkKey,r,(sizeof(networkKey)-1));
 	networkKey[47] = '\0';
     return (0);
   }
@@ -784,14 +790,15 @@ int LoRaAT::setDataRate(char txdr) {
 int LoRaAT::getDataRate() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+TXDR?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-	dataRate = _response[11];
+	dataRate = r[0];
     return (0);
   }
   
