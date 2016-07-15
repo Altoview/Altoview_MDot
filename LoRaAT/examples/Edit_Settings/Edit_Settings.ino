@@ -1,10 +1,10 @@
 /*
- This is a test program writen for the Seeeduino Stalker v2.3 and 
- uses the Multitech mDOT LoRa module running the Australian compatable AT
- enabled firmware.
- 
- This program,
-  * Gets and sets settings on the mDot
+  This is a test program writen for the Seeeduino Stalker v2.3 and
+  uses the Multitech mDOT LoRa module running the Australian compatable AT
+  enabled firmware.
+
+  This program,
+    Gets and sets settings on the mDot
 */
 
 /*--------------------------------------------------------------------------------------
@@ -32,11 +32,22 @@ LoRaAT mdot(0, &debugSerial);           //Instantiate a LoRaAT object
   --------------------------------------------------------------------------------------*/
 void setup() {
   int responseCode;
-  
+
   debugSerial.begin(38400);             //Debug output. Listen on this ports for debugging info
   mdot.begin(38400);                    //Begin (possibly amongst other things) opens serial comms with MDOT
-  
+
   debugSerial.println("\r\n\r\n++ START ++\r\n\r\n");
+
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.frequencySubBand);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.publicNetwork);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkId);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkKey);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.dataRate);
 
   //Get all the initial settings
   mdot.getFrequencySubBand();
@@ -44,24 +55,56 @@ void setup() {
   mdot.getNetworkID();
   mdot.getNetworkKey();
   mdot.getDataRate();
-  mdot.getRXOutput();
+
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.frequencySubBand);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.publicNetwork);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkId);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkKey);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.dataRate);
 
   //Set some settings
   mdot.setFrequencySubBand('2');
   mdot.setPublicNetwork('1');
-  char id[] = "00:00:aa:00:00:00:00:01";
+  char id[] = "00:00:bb:00:00:00:00:01";
   mdot.setNetworkID(id);
   char key[] = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
   mdot.setNetworkKey(key);
-  
+  mdot.setDataRate('3');
+
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.frequencySubBand);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.publicNetwork);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkId);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkKey);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.dataRate);
+
   //Get the settings
   mdot.getFrequencySubBand();
   mdot.getPublicNetwork();
   mdot.getNetworkID();
   mdot.getNetworkKey();
   mdot.getDataRate();
-  mdot.getRXOutput();
-  
+
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.frequencySubBand);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.publicNetwork);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkId);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkKey);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.dataRate);
+
   //Set to defaults
 
   //Get the settings
