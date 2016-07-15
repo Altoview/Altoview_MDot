@@ -23,7 +23,13 @@
 class LoRaAT
 {
   public:
-    LoRaAT();				        //Use default serial port
+    char networkKey[48] = {'\0'};	//00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01
+    char networkId[24] = {'\0'};    //00:00:aa:00:00:00:00:01
+	char frequencySubBand = '\0';   //0-8
+	char publicNetwork = '\0';		//0,1
+	char dataRate = '\0';			//0-3
+	
+	LoRaAT();				        //Use default serial port
 	LoRaAT(uint8_t);		        //Use specified serial port.
 	LoRaAT(uint8_t,Stream*);        //Use specified serial port and a debugging stream.
 	
@@ -50,9 +56,9 @@ class LoRaAT
     int getNetworkID();				//Also referred to as the AppEUI
     int setNetworkKey(char*);		//Also referred to as the AppKey
     int getNetworkKey();			//Also referred to as the AppKey
-    int setDataRate();
+    int setDataRate(char);
     int getDataRate();
-    int setRXOutput();
+    int setRXOutput(uint8_t);
     int getRXOutput();
     int commitSettings();			//Not yet implemented
   
@@ -69,14 +75,15 @@ class LoRaAT
 	uint8_t _txPutter = 0;
 	uint8_t _txGetter = 0;
 	
-	static const uint8_t _MAX_MDOT_RESPONSE = 120;			//Max number of bytes the mdot might return
+	static const uint8_t _MAX_MDOT_RESPONSE = 200;			//Max number of bytes the mdot might return
 	char _response[_MAX_MDOT_RESPONSE];						//mDot response buffer
 	uint8_t _length;										//Lenght of a response
 	
 	static const uint8_t _MAX_MDOT_COMMAND = 120;			//TODO: Check against the manual for mDot
 	char _command[_MAX_MDOT_COMMAND];
 	
-	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);             //Generic serial out get response wrapper
+	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
+	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char**);             //Generic serial out get response wrapper
 	
 	void _pairsToJSON(char*, char*);
 	void _createFragmentBuffer(char*);

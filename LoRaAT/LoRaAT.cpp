@@ -116,7 +116,16 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 | if no recognised response is recieved in the timout specified return 0.           |
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout) {
+  return _sendCommand(command, ans1, ans2, ans3, ans4, timeout, NULL);
+}
+/*----------------------------------------------------------------------------------|
+| the send command method, sends a command to the mDot and waits for a response.    |
+| once a recognised response is received it returns the corresponding interger,     |
+| if no recognised response is recieved in the timout specified return 0.           |
+-----------------------------------------------------------------------------------*/
+uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char** resp) {
   ///_debugStream->println(F("LaT:sc: enter"));
+  static const char TERMINATOR[3] = {'\r','\n','\0'};
    
   unsigned long maxEndTime = 0;
 
@@ -129,34 +138,57 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   
   //Send command
   _debugStream->print(F("LaT:sc: "));
-  _debugStream->println(command);
-  ATSerial->println(command);
+  _debugStream->print(command);
+  _debugStream->print(TERMINATOR);
+  ATSerial->print(command);
+  ATSerial->print(TERMINATOR);
   
   //Set timeout time
   maxEndTime = millis() + timeout;
   
   //While something is available get it
   ///_debugStream->println(F("LaT:sc: Loop collecting response"));
+  *resp = NULL;
   do {
     if (ATSerial->available() != 0) {
 	  if (_length < (_MAX_MDOT_RESPONSE - 1)) {
         _response[_length++] = ATSerial->read();
 	  }
     }
-	
+  
     if (strstr(_response, ans1) != '\0') {
+      if (resp != NULL) {
+        *resp = strstr(_response,command);
+        *resp += strlen(command);
+        *resp += sizeof(TERMINATOR);               //3
+      }
       return (1);
     }
 	
     if (strstr(_response, ans2) != '\0') {
+      if (resp != NULL) {
+        *resp = strstr(_response,command);
+        *resp += strlen(command);
+        *resp += sizeof(TERMINATOR);               //3
+      }
       return (2);
     }
 	
     if (strstr(_response, ans3) != '\0') {
+      if (resp != NULL) {
+        *resp = strstr(_response,command);
+        *resp += strlen(command);
+        *resp += sizeof(TERMINATOR);               //3
+      }
       return (3);
     }
 	
     if (strstr(_response, ans4) != '\0') {
+      if (resp != NULL) {
+        *resp = strstr(_response,command);
+        *resp += strlen(command);
+        *resp += sizeof(TERMINATOR);               //3
+      }
       return (4);
     }
 	
@@ -523,12 +555,14 @@ int LoRaAT::_processBuffer() {
   return(response);
 }
 
+
 /*----------------------------------------------------------------------------------|
 | Sets the frequency sub band                                                       |
 |                                                                                   |
+| AT+FSB ?                                                                          |
+| AT+FSB: (0-8)                                                                     |
+|                                                                                   |
 | TODO:                                                                             |
-|  * parse the response                                                             |
-|  * Return something meaningfull (based on response)                               |
 |  * Overload to accept, string, int, uint, byte, maybe others, maybe less.         |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setFrequencySubBand(char fsb) {
@@ -540,8 +574,10 @@ int LoRaAT::setFrequencySubBand(char fsb) {
   _command[8] = '\0';
 
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
+	frequencySubBand = fsb;
     return (0);
   }
   
@@ -550,20 +586,18 @@ int LoRaAT::setFrequencySubBand(char fsb) {
 
 /*----------------------------------------------------------------------------------|
 | Gets the frequency sub band                                                       |
-|                                                                                   |
-| TODO:                                                                             |
-|  * parse the response                                                             |
-|  * Return something meaningfull (based on response)                               |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getFrequencySubBand() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+FSB?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
-
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  
   if (ansCode == 1) {
+	frequencySubBand = r[0];
     return (0);
   }
   
@@ -592,6 +626,7 @@ int LoRaAT::setPublicNetwork(char pn) {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
+	publicNetwork = pn;
     return (0);
   }
   
@@ -600,41 +635,23 @@ int LoRaAT::setPublicNetwork(char pn) {
 
 /*----------------------------------------------------------------------------------|
 | Gets the public network                                                           |
-|                                                                                   |
-| TODO:                                                                             |
-|  * parse the response                                                             |
-|  * Return something meaningfull (based on response)                               |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getPublicNetwork() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+PN?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
+    publicNetwork = r[0];
     return (0);
   }
   
   return(-1);
 }
-
-/*----------------------------------------------------------------------------------|
-| Sets the network ID                                                               |
-|                                                                                   |
-| AT+NI ?                                                                           |
-| AT+NI: (0,(hex:8)),(1,(string:128))                                               |
-|                                                                                   |
-| Examples:                                                                         |
-|  * AT+NI 0,00:00:aa:00:00:00:00:01                                                |
-|  * AT+NI 0,00-00-aa-00-00-00-00-01                                                |
------------------------------------------------------------------------------------*/
-/* int LoRaAT::setNetworkID(String id) {
-  char idc[24];
-  id.toCharArray(idc, 24);
-  LoRaAT::setNetworkID(idc);
-} */
 
 /*----------------------------------------------------------------------------------|
 | Sets the network ID                                                               |
@@ -656,6 +673,8 @@ int LoRaAT::setNetworkID(char* id) {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
+	strncpy(networkId,id,sizeof(networkId)-1);
+	networkId[23] = '\0';
     return (0);
   }
   
@@ -664,41 +683,24 @@ int LoRaAT::setNetworkID(char* id) {
 
 /*----------------------------------------------------------------------------------|
 | Gets the network ID                                                               |
-|                                                                                   |
-| TODO:                                                                             |
-|  * parse the response                                                             |
-|  * Return something meaningfull (based on response)                               |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getNetworkID() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+NI?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
+	strncpy(networkId,r,sizeof(networkId)-1);
+	networkId[23] = '\0';
     return (0);
   }
   
   return(-1);
 }
-
-/*----------------------------------------------------------------------------------|
-| Sets the network key                                                              |
-|                                                                                   |
-| AT+NK ?                                                                           |
-| AT+NK: (0,(hex:8)),(1,(string:128))                                               |
-|                                                                                   |
-| Examples:                                                                         |
-|  * AT+NK 0,00:00:aa:00:00:00:00:01                                                |
-|  * AT+NK 0,00-00-aa-00-00-00-00-01                                                |
------------------------------------------------------------------------------------*/
-/* int LoRaAT::setNetworkKey(String key) {
-  char keyc[48];
-  key.toCharArray(keyc, 48);
-  LoRaAT::setNetworkID(keyc);
-} */
 
 /*----------------------------------------------------------------------------------|
 | Sets the network key                                                              |
@@ -708,18 +710,21 @@ int LoRaAT::getNetworkID() {
 |                                                                                   |
 | Examples:                                                                         |
 |  * AT+NK 0,00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01                        |
-|  * AT+NK 0,00-00-00-00-00-00-00-00- 00-00-00-00-00-00-00-01                       |
+|  * AT+NK 0,00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-01                        |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setNetworkKey(char* key) {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char ansX[] PROGMEM = "BUG";
   
   sprintf_P(_command,(char*)F("AT+NK 0,"));
   strcat(_command,key);                          //Append key to command
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000);
 
   if (ansCode == 1) {
+	strncpy(networkKey,key,sizeof(networkKey)-1);
+	networkKey[47] = '\0';
     return (0);
   }
   
@@ -728,20 +733,20 @@ int LoRaAT::setNetworkKey(char* key) {
 
 /*----------------------------------------------------------------------------------|
 | Gets the network key                                                              |
-|                                                                                   |
-| TODO:                                                                             |
-|  * parse the response                                                             |
-|  * Return something meaningfull (based on response)                               |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::getNetworkKey() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char ansX[] PROGMEM = "BUG";
+  char* r;
   
   sprintf_P(_command,(char*)F("AT+NK?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
-
+  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000, &r);
+  
   if (ansCode == 1) {
+	strncpy(networkKey,r,(sizeof(networkKey)-1));
+	networkKey[47] = '\0';
     return (0);
   }
   
@@ -751,30 +756,21 @@ int LoRaAT::getNetworkKey() {
 /*----------------------------------------------------------------------------------|
 | Sets the data rate                                                                |
 |                                                                                   |
-| this function can be used to set a specific data rate or set the data rate to     |
-| adaptive.                                                                         |
+| AT+TXDR ?                                                                         |
+| AT+TXDR: (0-3|10-7|DR0-DR4|DR8-DR13)                                              |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::setDataRate() {
-
-  return(0);
-}
-
-/*----------------------------------------------------------------------------------|
-| Gets the data rate                                                                |
-|                                                                                   |
-| TODO:                                                                             |
-|  * parse the response                                                             |
-|  * Return something meaningfull (based on response)                               |
------------------------------------------------------------------------------------*/
-int LoRaAT::getDataRate() {
+int LoRaAT::setDataRate(char txdr) {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
   
-  sprintf_P(_command,(char*)F("AT+ADR?"));
+  sprintf_P(_command,(char*)F("AT+TXDR "));
+  _command[9] = txdr;
+  _command[10] = '\0';
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
+	dataRate = txdr;
     return (0);
   }
   
@@ -782,29 +778,19 @@ int LoRaAT::getDataRate() {
 }
 
 /*----------------------------------------------------------------------------------|
-| Sets the ???                                                                      |
+| Gets the data rate                                                                |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::setRXOutput() {
-
-  return(0);
-}
-
-/*----------------------------------------------------------------------------------|
-| Gets the ???                                                                      |
-|                                                                                   |
-| TODO:                                                                             |
-|  * parse the response                                                             |
-|  * Return something meaningfull (based on response)                               |
------------------------------------------------------------------------------------*/
-int LoRaAT::getRXOutput() {
+int LoRaAT::getDataRate() {
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char* r;
   
-  sprintf_P(_command,(char*)F("AT+RXO?"));
+  sprintf_P(_command,(char*)F("AT+TXDR?"));
   
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
+	dataRate = r[2];
     return (0);
   }
   
@@ -815,6 +801,16 @@ int LoRaAT::getRXOutput() {
 | Writes the current settings of the mDot to it's memory                            |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::commitSettings() {
+  uint8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  
+  sprintf_P(_command,(char*)F("AT&W"));
+  
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
-  return(0);
+  if (ansCode == 1) {
+    return (0);
+  }
+  
+  return(-1);
 }
