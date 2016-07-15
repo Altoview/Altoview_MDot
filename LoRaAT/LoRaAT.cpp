@@ -116,12 +116,23 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 | if no recognised response is recieved in the timout specified return 0.           |
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout) {
+  _sendCommand(command, ans1, ans2, ans3, ans4, timeout, NULL);
+}
+/*----------------------------------------------------------------------------------|
+| the send command method, sends a command to the mDot and waits for a response.    |
+| once a recognised response is received it returns the corresponding interger,     |
+| if no recognised response is recieved in the timout specified return 0.           |
+-----------------------------------------------------------------------------------*/
+uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char * resp) {
   ///_debugStream->println(F("LaT:sc: enter"));
+  static const char TERMINATOR[3] = {'\r','\n','\0'};
    
   unsigned long maxEndTime = 0;
 
   //flush receive buffer before transmitting request
+  delay(200);
   while (ATSerial->read() != -1);
+  delay(200);
   
   //Blank string
   memset(_response,0x00,_MAX_MDOT_RESPONSE);
@@ -129,14 +140,17 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   
   //Send command
   _debugStream->print(F("LaT:sc: "));
-  _debugStream->println(command);
-  ATSerial->println(command);
+  _debugStream->print(command);
+  _debugStream->print(TERMINATOR);
+  ATSerial->print(command);
+  ATSerial->print(TERMINATOR);
   
   //Set timeout time
   maxEndTime = millis() + timeout;
   
   //While something is available get it
   ///_debugStream->println(F("LaT:sc: Loop collecting response"));
+  resp = 'A';
   do {
     if (ATSerial->available() != 0) {
 	  if (_length < (_MAX_MDOT_RESPONSE - 1)) {
@@ -144,7 +158,13 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 	  }
     }
 	
+	if (resp = strstr(_response,command)) {
+      resp += strlen(command)+strlen(TERMINATOR);
+    }
+	
     if (strstr(_response, ans1) != '\0') {
+      _debugStream->print(F("LaT:sc: CHECK"));
+      _debugStream->println(resp);
       return (1);
     }
 	
@@ -683,7 +703,7 @@ int LoRaAT::getNetworkID() {
 |                                                                                   |
 | Examples:                                                                         |
 |  * AT+NK 0,00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01                        |
-|  * AT+NK 0,00-00-00-00-00-00-00-00- 00-00-00-00-00-00-00-01                       |
+|  * AT+NK 0,00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-01                        |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setNetworkKey(char* key) {
   uint8_t ansCode;
@@ -696,7 +716,8 @@ int LoRaAT::setNetworkKey(char* key) {
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-	//TODO: set the NK public member
+	strncpy(networkKey,key,sizeof(networkKey)-1);
+	networkKey[47] = '\0';
     return (0);
   }
   
@@ -716,7 +737,9 @@ int LoRaAT::getNetworkKey() {
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-	//TODO: Look in _response for NK and set a public member
+	char* ptr = &_response[9];
+	strncpy(networkKey,ptr,(sizeof(networkKey)-1));
+	networkKey[47] = '\0';
     return (0);
   }
   
@@ -741,7 +764,7 @@ int LoRaAT::setDataRate(char txdr) {
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-	//TODO: set the txdr public member
+	dataRate = txdr;
     return (0);
   }
   
@@ -761,7 +784,7 @@ int LoRaAT::getDataRate() {
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-	//TODO: Look in _response for TXDR and set the public member
+	dataRate = _response[11];
     return (0);
   }
   

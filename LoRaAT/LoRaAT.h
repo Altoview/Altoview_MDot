@@ -28,6 +28,7 @@ class LoRaAT
 	char networkId[24] = {'\0'};    //00:00:aa:00:00:00:00:01
 	char networkKey[48] = {'\0'};	//00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01
     char dataRate = '\0';			//0-3
+	
 	LoRaAT();				        //Use default serial port
 	LoRaAT(uint8_t);		        //Use specified serial port.
 	LoRaAT(uint8_t,Stream*);        //Use specified serial port and a debugging stream.
@@ -81,7 +82,8 @@ class LoRaAT
 	static const uint8_t _MAX_MDOT_COMMAND = 120;			//TODO: Check against the manual for mDot
 	char _command[_MAX_MDOT_COMMAND];
 	
-	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);             //Generic serial out get response wrapper
+	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
+	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char*);             //Generic serial out get response wrapper
 	
 	void _pairsToJSON(char*, char*);
 	void _createFragmentBuffer(char*);
