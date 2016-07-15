@@ -140,12 +140,10 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   
   //Send command
   _debugStream->print(F("LaT:sc: "));
-  _debugStream->println(command);
-  //_debugStream->print(command);
-  //_debugStream->print(TERMINATOR);
-  ATSerial->println(command);
-  //ATSerial->print(command);
-  //ATSerial->print(TERMINATOR);
+  _debugStream->print(command);
+  _debugStream->print(TERMINATOR);
+  ATSerial->print(command);
+  ATSerial->print(TERMINATOR);
   
   //Set timeout time
   maxEndTime = millis() + timeout;
