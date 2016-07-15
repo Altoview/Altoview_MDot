@@ -213,7 +213,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 |                                                                                   |
 | uses a default of 10,000ms (10sec) timeout                                        |
 -----------------------------------------------------------------------------------*/
-/*int LoRaAT::join() {
+int LoRaAT::join() {
   return(join(10000));
 }
 
@@ -233,7 +233,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 | takes the parameter timeout, which is the number of milliseconds you want it      |
 | to wait for a response.                                                           |
 -----------------------------------------------------------------------------------*/
-/*int LoRaAT::join(unsigned int timeout) {
+int LoRaAT::join(unsigned int timeout) {
   ///_debugStream->println(F("LaT:j : enter"));
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
@@ -252,7 +252,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 /*----------------------------------------------------------------------------------|
 | Leave a LoRa(WAN?) network                                                        |
 -----------------------------------------------------------------------------------*/
-/*void LoRaAT::leave() {
+void LoRaAT::leave() {
   ///_debugStream->println(F("LaT:l: not implemented"));
 }
 
@@ -277,7 +277,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 |                                                                                   |
 | uses a default of 10,000ms (10sec) timeout                                        |
 -----------------------------------------------------------------------------------*/
-/*int LoRaAT::send(char* message) {
+int LoRaAT::send(char* message) {
   ///_debugStream->println(F("LaT:s : enter, w/ default timeout"));
   return(send(message,10000));
 }
@@ -301,7 +301,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 |      + Replace with something else?                                               |
 |      + Return error?                                                              |
 -----------------------------------------------------------------------------------*/
-/*int LoRaAT::send(char* message, unsigned int timeout) {
+int LoRaAT::send(char* message, unsigned int timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
@@ -321,7 +321,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 /*----------------------------------------------------------------------------------|
 | Not yet implemented.                                                              |
 -----------------------------------------------------------------------------------*/
-/*uint8_t LoRaAT::ping() {
+uint8_t LoRaAT::ping() {
   ///_debugStream->println(F("LaT:p: not implemented"));
 }
 
@@ -334,7 +334,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 |                                                                                   |
 | //TODO: If not recieved in that format return an error                            |
 -----------------------------------------------------------------------------------*/
-/*int LoRaAT::sendPairs(String pairs) 
+int LoRaAT::sendPairs(String pairs) 
 {
   ///_debugStream->println(F("LaT:sp: enter"));
   char pairsC[_MAX_PAIRS_SIZE];
@@ -352,7 +352,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 |                                                                                   |
 | //TODO: If not recieved in that format return an error                            |
 -----------------------------------------------------------------------------------*/
-/*int LoRaAT::sendPairs(char* pairs) {
+int LoRaAT::sendPairs(char* pairs) {
   ///_debugStream->println(F("LaT:sp: enter"));
   ///_debugStream->println(F("LaT:sp: pairs:"));
   ///_debugStream->print(F("LaT:sp: "));
@@ -386,7 +386,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 | This function will take any correctly formatted char array of key:value pairs     |
 | and return a JSON formatted String.                                               |
 -----------------------------------------------------------------------------------*/
-/*void LoRaAT::_pairsToJSON(char* json, char* pairs) {
+void LoRaAT::_pairsToJSON(char* json, char* pairs) {
   ///_debugStream->println(F("LaT:pj: enter"));
   char* jsonPtr = json;
   char temp[20];
@@ -463,7 +463,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 |                                                                                   |
 | header is of the format [fragment number][total number of fragments]              |
 -----------------------------------------------------------------------------------*/
-/*void LoRaAT::_createFragmentBuffer(char* message) {
+void LoRaAT::_createFragmentBuffer(char* message) {
   ///_debugStream->println(F("LaT:fb: enter"));
 
   int strLength = strlen(message);
@@ -526,7 +526,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 /*----------------------------------------------------------------------------------|
 | Buffer processing function, which will send out all data currently in the buffer  |
 -----------------------------------------------------------------------------------*/
-/*int LoRaAT::_processBuffer() {
+int LoRaAT::_processBuffer() {
   char temp[_MAX_MDOT_COMMAND - 8];
   ///_debugStream->println(F("LaT:pb: enter"));
 
