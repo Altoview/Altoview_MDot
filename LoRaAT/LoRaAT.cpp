@@ -123,8 +123,9 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 | once a recognised response is received it returns the corresponding interger,     |
 | if no recognised response is recieved in the timout specified return 0.           |
 -----------------------------------------------------------------------------------*/
-uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char * resp) {
+uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char* resp) {
   ///_debugStream->println(F("LaT:sc: enter"));
+  //char* resp;
   static const char TERMINATOR[3] = {'\r','\n','\0'};
    
   unsigned long maxEndTime = 0;
@@ -150,7 +151,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   
   //While something is available get it
   ///_debugStream->println(F("LaT:sc: Loop collecting response"));
-  resp = 'A';
+  resp = NULL;
   do {
     if (ATSerial->available() != 0) {
 	  if (_length < (_MAX_MDOT_RESPONSE - 1)) {
@@ -158,13 +159,28 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 	  }
     }
 	
-	if (resp = strstr(_response,command)) {
-      resp += strlen(command)+strlen(TERMINATOR);
-    }
+	//if (resp = strstr(_response,command)) {
+      //resp += strlen(command)+strlen(TERMINATOR) + 3;
+    //}
+	
+	//char* resp = (char*)strstr(_response,command);
+	//resp = _response;
+	//_find(_response,command,resp);
 	
     if (strstr(_response, ans1) != '\0') {
-      _debugStream->print(F("LaT:sc: CHECK"));
-      _debugStream->println(resp);
+      resp = strstr(_response,command);
+      _debugStream->print(F("LaT:sc: MEMLOC: "));
+      _debugStream->println((int)ans1);
+      _debugStream->print(F("LaT:sc: MEMLOC: "));
+      _debugStream->println((int)_response);
+      _debugStream->print(F("LaT:sc: MEMLOC: "));
+	  _debugStream->println((int)strstr(_response,command));
+      _debugStream->print(F("LaT:sc: MEMLOC: "));
+	  if (resp != NULL) {
+		_debugStream->println((int)resp);
+	  } else {
+		_debugStream->println("NULL");
+	  }
       return (1);
     }
 	
@@ -201,7 +217,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 |                                                                                   |
 | uses a default of 10,000ms (10sec) timeout                                        |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::join() {
+/*int LoRaAT::join() {
   return(join(10000));
 }
 
@@ -221,7 +237,7 @@ int LoRaAT::join() {
 | takes the parameter timeout, which is the number of milliseconds you want it      |
 | to wait for a response.                                                           |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::join(unsigned int timeout) {
+/*int LoRaAT::join(unsigned int timeout) {
   ///_debugStream->println(F("LaT:j : enter"));
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
@@ -240,7 +256,7 @@ int LoRaAT::join(unsigned int timeout) {
 /*----------------------------------------------------------------------------------|
 | Leave a LoRa(WAN?) network                                                        |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::leave() {
+/*void LoRaAT::leave() {
   ///_debugStream->println(F("LaT:l: not implemented"));
 }
 
@@ -265,7 +281,7 @@ void LoRaAT::leave() {
 |                                                                                   |
 | uses a default of 10,000ms (10sec) timeout                                        |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::send(char* message) {
+/*int LoRaAT::send(char* message) {
   ///_debugStream->println(F("LaT:s : enter, w/ default timeout"));
   return(send(message,10000));
 }
@@ -289,7 +305,7 @@ int LoRaAT::send(char* message) {
 |      + Replace with something else?                                               |
 |      + Return error?                                                              |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::send(char* message, unsigned int timeout) {
+/*int LoRaAT::send(char* message, unsigned int timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
@@ -309,7 +325,7 @@ int LoRaAT::send(char* message, unsigned int timeout) {
 /*----------------------------------------------------------------------------------|
 | Not yet implemented.                                                              |
 -----------------------------------------------------------------------------------*/
-uint8_t LoRaAT::ping() {
+/*uint8_t LoRaAT::ping() {
   ///_debugStream->println(F("LaT:p: not implemented"));
 }
 
@@ -322,7 +338,7 @@ uint8_t LoRaAT::ping() {
 |                                                                                   |
 | //TODO: If not recieved in that format return an error                            |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::sendPairs(String pairs) 
+/*int LoRaAT::sendPairs(String pairs) 
 {
   ///_debugStream->println(F("LaT:sp: enter"));
   char pairsC[_MAX_PAIRS_SIZE];
@@ -340,7 +356,7 @@ int LoRaAT::sendPairs(String pairs)
 |                                                                                   |
 | //TODO: If not recieved in that format return an error                            |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::sendPairs(char* pairs) {
+/*int LoRaAT::sendPairs(char* pairs) {
   ///_debugStream->println(F("LaT:sp: enter"));
   ///_debugStream->println(F("LaT:sp: pairs:"));
   ///_debugStream->print(F("LaT:sp: "));
@@ -374,7 +390,7 @@ int LoRaAT::sendPairs(char* pairs) {
 | This function will take any correctly formatted char array of key:value pairs     |
 | and return a JSON formatted String.                                               |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::_pairsToJSON(char* json, char* pairs) {
+/*void LoRaAT::_pairsToJSON(char* json, char* pairs) {
   ///_debugStream->println(F("LaT:pj: enter"));
   char* jsonPtr = json;
   char temp[20];
@@ -451,7 +467,7 @@ void LoRaAT::_pairsToJSON(char* json, char* pairs) {
 |                                                                                   |
 | header is of the format [fragment number][total number of fragments]              |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::_createFragmentBuffer(char* message) {
+/*void LoRaAT::_createFragmentBuffer(char* message) {
   ///_debugStream->println(F("LaT:fb: enter"));
 
   int strLength = strlen(message);
@@ -514,7 +530,7 @@ void LoRaAT::_createFragmentBuffer(char* message) {
 /*----------------------------------------------------------------------------------|
 | Buffer processing function, which will send out all data currently in the buffer  |
 -----------------------------------------------------------------------------------*/
-int LoRaAT::_processBuffer() {
+/*int LoRaAT::_processBuffer() {
   char temp[_MAX_MDOT_COMMAND - 8];
   ///_debugStream->println(F("LaT:pb: enter"));
 
@@ -808,4 +824,28 @@ int LoRaAT::commitSettings() {
   }
   
   return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| A simple find the substring function... Because strstr() didn't work how it was   |
+| expected in some instances.                                                       |
+-----------------------------------------------------------------------------------*/
+bool LoRaAT::_find(char* haystack, char* needle, char* ptr) {
+  int result;
+  _debugStream->print(F("LaT:F : MEMLOC: "));
+  _debugStream->println((int)haystack);
+  _debugStream->print(F("LaT:F : MEMLOC: "));
+  _debugStream->println((int)ptr);
+  ptr = haystack;
+  _debugStream->print(F("LaT:F : MEMLOC: "));
+  _debugStream->println((int)ptr);
+  if( sizeof(haystack) >= sizeof(needle)) {
+    for(uint16_t i = 0; i <= sizeof(haystack)-sizeof(needle); i++) {
+      result = memcmp(&haystack[i], needle, sizeof(needle) );	
+      if( result == 0 ) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
