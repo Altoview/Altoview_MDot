@@ -157,20 +157,10 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
     }
 	
     if (strstr(_response, ans1) != '\0') {
-      _debugStream->print(F("LaT:sc: MEMLOC: "));
-      _debugStream->println((int)_response);
-      _debugStream->print(F("LaT:sc: MEMLOC: "));
-	  _debugStream->println((int)strstr(_response,command));
-      _debugStream->print(F("LaT:sc: MEMLOC: "));
 	  if (resp != NULL) {
         *resp = strstr(_response,command);
 		*resp += strlen(command);
 		*resp += sizeof(TERMINATOR);             //3
-	  }
-	  if (*resp != NULL) {
-		_debugStream->println((int)*resp);
-	  } else {
-		_debugStream->println("NULL");
 	  }
       return (1);
     }
@@ -590,12 +580,8 @@ int LoRaAT::getFrequencySubBand() {
   sprintf_P(_command,(char*)F("AT+FSB?"));
 
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
-  ///_debugStream->println(_response);
-  _debugStream->print(F("LaT:sc: MEMLOC: "));
-  _debugStream->println((int)r);
   
   if (ansCode == 1) {
-	//AT+FSB?<CR><LF><FSB>
 	frequencySubBand = r[0];
     return (0);
   }
@@ -623,7 +609,6 @@ int LoRaAT::setPublicNetwork(char pn) {
   _command[7] = '\0';
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
 	publicNetwork = pn;
@@ -644,10 +629,8 @@ int LoRaAT::getPublicNetwork() {
   sprintf_P(_command,(char*)F("AT+PN?"));
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-    //AT+PN?<CR><LF><FSB>
     publicNetwork = r[0];
     return (0);
   }
@@ -673,7 +656,6 @@ int LoRaAT::setNetworkID(char* id) {
   strcat(_command,id);                           //Append ID to command
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
 	strncpy(networkId,id,sizeof(networkId)-1);
@@ -695,7 +677,6 @@ int LoRaAT::getNetworkID() {
   sprintf_P(_command,(char*)F("AT+NI?"));
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
 	strncpy(networkId,r,sizeof(networkId)-1);
@@ -724,7 +705,6 @@ int LoRaAT::setNetworkKey(char* key) {
   strcat(_command,key);                          //Append key to command
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
 	strncpy(networkKey,key,sizeof(networkKey)-1);
@@ -746,7 +726,6 @@ int LoRaAT::getNetworkKey() {
   sprintf_P(_command,(char*)F("AT+NK?"));
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
 	strncpy(networkKey,r,(sizeof(networkKey)-1));
@@ -772,7 +751,6 @@ int LoRaAT::setDataRate(char txdr) {
   _command[10] = '\0';
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
 	dataRate = txdr;
@@ -793,7 +771,6 @@ int LoRaAT::getDataRate() {
   sprintf_P(_command,(char*)F("AT+TXDR?"));
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
 	dataRate = r[0];
@@ -813,7 +790,6 @@ int LoRaAT::commitSettings() {
   sprintf_P(_command,(char*)F("AT&W"));
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
-  ///_debugStream->println(_response);
 
   if (ansCode == 1) {
     return (0);
