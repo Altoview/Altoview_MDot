@@ -46,8 +46,6 @@ class LoRaAT
     int sendPairs(String); 	        //Takes key,value pairs, forms a message, and sends to the LoRa server.
 	uint8_t ping();			        //Not yet implemented
 	
-	//Getter and setter functions for mDot Settings.
-	//NOT FULLY TESTED AND IMPLEMENTED
 	int setFrequencySubBand(char);
     int getFrequencySubBand();
     int setPublicNetwork(char);
@@ -58,8 +56,6 @@ class LoRaAT
     int getNetworkKey();			//Also referred to as the AppKey
     int setDataRate(char);
     int getDataRate();
-    int setRXOutput(uint8_t);
-    int getRXOutput();
     int commitSettings();			//Not yet implemented
   
   private:
