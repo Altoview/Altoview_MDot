@@ -108,6 +108,12 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
   }
 
   ATSerial->begin(u32BaudRate);
+  
+  getFrequencySubBand();
+  getPublicNetwork();
+  getNetworkID();                                //Also referred to as the AppEUI
+  getNetworkKey();                               //Also referred to as the AppKey
+  getDataRate();
 }
 
 /*----------------------------------------------------------------------------------|
@@ -160,7 +166,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);               //3
+        *resp += sizeof(TERMINATOR);             //3
       }
       return (1);
     }
@@ -169,7 +175,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);               //3
+        *resp += sizeof(TERMINATOR);             //3
       }
       return (2);
     }
@@ -178,7 +184,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);               //3
+        *resp += sizeof(TERMINATOR);             //3
       }
       return (3);
     }
@@ -187,7 +193,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);               //3
+        *resp += sizeof(TERMINATOR);             //3
       }
       return (4);
     }
