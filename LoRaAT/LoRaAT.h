@@ -46,6 +46,7 @@ class LoRaAT
     int sendPairs(String); 	        //Takes key,value pairs, forms a message, and sends to the LoRa server.
 	uint8_t ping();			        //Not yet implemented
 	
+	int setDefaults();
 	int setFrequencySubBand(char);
     int getFrequencySubBand();
     int setPublicNetwork(char);

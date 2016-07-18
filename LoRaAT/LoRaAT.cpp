@@ -561,6 +561,38 @@ int LoRaAT::_processBuffer() {
   return(response);
 }
 
+/*----------------------------------------------------------------------------------|
+| Sets default settings recomended by Campbell Scientific Australia                 |
+|                                                                                   |
+| Some of these default settings may be required for successful communication with  |
+| out server.																		|
+-----------------------------------------------------------------------------------*/
+int LoRaAT::setDefaults() {
+  uint8_t result = 0;
+
+  char key[] = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+  char id[] = "00:00:aa:00:00:00:00:01";
+  
+  if (setFrequencySubBand('1') != 0) {
+    result = -1;
+  }
+  if (setPublicNetwork('1') != 0) {
+    result = -1;
+  }
+  if (setNetworkID(id) != 0) {
+    result = -1;
+  }
+  if (setNetworkKey(key) != 0) {
+    result = -1;
+  }
+  /*if (setDataRate('1') != 0) {
+    result = -1;
+  }*/
+  
+  commitSettings();
+  
+  return(-1);
+}
 
 /*----------------------------------------------------------------------------------|
 | Sets the frequency sub band                                                       |
