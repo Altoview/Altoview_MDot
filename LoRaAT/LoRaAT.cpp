@@ -109,7 +109,7 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 
   ATSerial->begin(u32BaudRate);
   
-  //setDefaults();
+  setDefaults();
 }
 
 /*----------------------------------------------------------------------------------|
@@ -372,7 +372,7 @@ int LoRaAT::sendPairs(char* pairs) {
   }
 
   ///_debugStream->println(F("LaT:sp: convert to JSON"));
-  _pairsToJSON(json, pairs);
+  _pairsToJSON(json, _MAX_PAIRS_SIZE, pairs);
   _debugStream->println(F("LaT:sp: pairs as JSON"));
   _debugStream->print(F("LaT:sp: "));
   _debugStream->println(json);
@@ -385,14 +385,18 @@ int LoRaAT::sendPairs(char* pairs) {
 }
 
 /*----------------------------------------------------------------------------------|
-| This function will take any correctly formatted char array of key:value pairs     |
-| and return a JSON formatted String.                                               |
+| This function will take any correctly formatted null terminated char array of     |
+| key:value pairs and pass back a JSON formatted char array with a maximum size of  |
+| jsonLength.                                                                       |
+|                                                                                   |
+| In the case the the maximum JSON length is reached, the loop will exit, any       |
+| partially created pair will be removed, and the JSON closed and returned.         |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::_pairsToJSON(char* json, char* pairs) {
+void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   ///_debugStream->println(F("LaT:pj: enter"));
   char* jsonPtr;
   int len = strlen(pairs);
-
+  
   //Set everything in JSON buffer to null
   for (jsonPtr = json; jsonPtr < json + sizeof(json); jsonPtr++) {
     *jsonPtr = '\0';

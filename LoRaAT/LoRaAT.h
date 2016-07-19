@@ -82,7 +82,7 @@ class LoRaAT
 	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
 	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char**);             //Generic serial out get response wrapper
 	
-	void _pairsToJSON(char*, char*);
+	void _pairsToJSON(char*, uint8_t, char*);
 	void _createFragmentBuffer(char*);
 	int _processBuffer();
 	
