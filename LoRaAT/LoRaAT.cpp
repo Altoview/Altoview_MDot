@@ -109,11 +109,7 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 
   ATSerial->begin(u32BaudRate);
   
-  getFrequencySubBand();
-  getPublicNetwork();
-  getNetworkID();                                //Also referred to as the AppEUI
-  getNetworkKey();                               //Also referred to as the AppKey
-  getDataRate();
+  setDefaults();
 }
 
 /*----------------------------------------------------------------------------------|
