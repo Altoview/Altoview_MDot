@@ -114,7 +114,7 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 
 /*----------------------------------------------------------------------------------|
 | the send command method, sends a command to the mDot and waits for a response.    |
-| once a recognised response is received it returns the corresponding interger,     |
+| once a recognised response is received it returns the corresponding integer,      |
 | if no recognised response is recieved in the timout specified return 0.           |
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout) {
