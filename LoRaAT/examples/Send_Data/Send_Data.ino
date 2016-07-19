@@ -43,10 +43,10 @@ void setup() {
   debugSerial.println(F("\r\n\r\n++ START ++\r\n\r\n"));
 
 
-  do {
+  //do {
     responseCode = mdot.join();
-    delay(10000);
-  } while (responseCode != 0);
+    //delay(10000);
+  //} while (responseCode != 0);
   debugSerial.print(F("SETUP : Join result: "));
   debugSerial.println(String(responseCode));
 }
@@ -60,16 +60,16 @@ void loop() {
   String testMessage = "";  //Test message sent via debugSerial
   
   //Build the message to send:
-  String rtcTemp = F("Temp1:");
+  String rtcTemp = F("Temp RTC:");
   testMessage = rtcTemp;
   RTC.convertTemperature(); //convert current temperature into registers
   testMessage += RTC.getTemperature();
 
-  String atTemp = F(",Temp2:");
+  String atTemp = F(",Temp ATmega:");
   testMessage += atTemp;
   testMessage += GetTemp();
   
-  String count = F(",Loop:");
+  String count = F(",Loop Count:");
   testMessage += count;
   testMessage += loopNum;
 
