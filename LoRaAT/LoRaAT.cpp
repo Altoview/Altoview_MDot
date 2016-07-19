@@ -390,65 +390,37 @@ int LoRaAT::sendPairs(char* pairs) {
 -----------------------------------------------------------------------------------*/
 void LoRaAT::_pairsToJSON(char* json, char* pairs) {
   ///_debugStream->println(F("LaT:pj: enter"));
-  char* jsonPtr = json;
-  char temp[20];
+  char* jsonPtr;
   int len = strlen(pairs);
-  char* tempPtr = temp;
 
-  for (jsonPtr = json; jsonPtr < json + sizeof(json); jsonPtr++) 
-  {
-    *jsonPtr= '\0';
+  //Set everything in JSON buffer to null
+  for (jsonPtr = json; jsonPtr < json + sizeof(json); jsonPtr++) {
+    *jsonPtr = '\0';
   }
 
-  for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
-  {
-    *tempPtr = '\0';
-  }
-
+  //Set the pointer back to beginning of JSON
   jsonPtr = json;
-  tempPtr = temp;
 
-  // Adds the first {
+  // Adds the first { and "
   *jsonPtr++ = '{';
+  *jsonPtr++ = '\"';
 
   //Loop through each of the characters, when getting to a delimiter, act accordingly
-  for (int i = 0; i < len; i++) 
-  {
+  for (int i = 0; i < len; i++) {
     char c = pairs[i];
-    if (c == ':') 
-    {
-      *jsonPtr++ = '\"';
-      int no = tempPtr-temp;
-      strncpy(jsonPtr, temp, no);
-      jsonPtr += no;
+    if (c == ':') {
+      //Check if we're about to overrun memory
       *jsonPtr++ = '\"';
       *jsonPtr++ = ':';
-      for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
-      {
-        *tempPtr = '\0';
-      }
-      tempPtr = temp;
-    } 
-    else if (c == ',') 
-    {
-      int no = tempPtr-temp;
-      strncpy(jsonPtr, temp, no);
-      jsonPtr += no;
+    } else if (c == ',') {
+      //Check if we're about to overrun memory
       *jsonPtr++ = ',';
-      for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
-      {
-        *tempPtr = '\0';
-      }
-      tempPtr = temp;
-    } 
-    else 
-    {
-      *tempPtr++ = c;
+      *jsonPtr++ = '\"';
+    } else {
+      //Check if we're about to overrun memory
+      *jsonPtr++ = c;
     }
   }
-  int no = tempPtr-temp;
-  strncpy(jsonPtr, temp, no);
-  jsonPtr += no;
   //no comma at the end of last JSON value
   *jsonPtr++ = '}';
   *jsonPtr++ = '\0';
