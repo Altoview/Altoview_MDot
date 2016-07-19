@@ -139,9 +139,9 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   _length = 0;
   
   //Send command
-  _debugStream->print(F("LaT:sc: "));
-  _debugStream->print(command);
-  _debugStream->print(TERMINATOR);
+  ///_debugStream->print(F("LaT:sc: "));
+  ///_debugStream->print(command);
+  ///_debugStream->print(TERMINATOR);
   ATSerial->print(command);
   ATSerial->print(TERMINATOR);
   
@@ -196,7 +196,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 	
   } while (millis() <= maxEndTime);
   
-  _debugStream->println(F("LaT:sc: Timed out"));
+  ///_debugStream->println(F("LaT:sc: Timed out"));
   return (0);
 }
 
@@ -374,8 +374,8 @@ int LoRaAT::sendPairs(char* pairs) {
   ///_debugStream->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, pairs);
   ///_debugStream->println(F("LaT:sp: pairs as JSON"));
-  _debugStream->print(F("LaT:sp: "));
-  _debugStream->println(json);
+  ///_debugStream->print(F("LaT:sp: "));
+  ///_debugStream->println(json);
   ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
   _createFragmentBuffer(json);
   ///_debugStream->println(F("LaT:sp: process buffer"));
