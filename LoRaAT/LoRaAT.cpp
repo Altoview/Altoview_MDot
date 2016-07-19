@@ -404,17 +404,9 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
 
   //Set the pointer back to beginning of JSON
   jsonPtr = json;
-  _debugStream->print(F("LaT:pj: json   : "));
-  _debugStream->println((uint16_t)json);
-  _debugStream->print(F("LaT:pj: jsonPtr: "));
-  _debugStream->println((uint16_t)jsonPtr);
   // Adds the first { and "
   for (int i = 0; i < sizeof(JSON_BEGIN); i++) {
 	*jsonPtr++ = JSON_BEGIN[i];
-	_debugStream->print(F("LaT:pj: jsonPtr: "));
-    _debugStream->print((uint16_t)(jsonPtr-1));
-    _debugStream->print(F(" - "));
-    _debugStream->println(*(jsonPtr-1));
   }
    
   //Loop through each of the characters, when getting to a delimiter, act accordingly
@@ -424,29 +416,17 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
       for (int i = 0; i < sizeof(JSON_STR_VAL); i++) {
         if ((jsonPtr - json) < jsonLength) {
 	      *jsonPtr++ = JSON_STR_VAL[i];
-	      _debugStream->print(F("LaT:pj: jsonPtr: "));
-          _debugStream->print((uint16_t)(jsonPtr-1));
-          _debugStream->print(F(" - "));
-          _debugStream->println(*(jsonPtr-1));
 	    }
       }
     } else if (c == ',') {
       for (int i = 0; i < sizeof(JSON_PAIR_PAIR); i++) {
         if ((jsonPtr - json) < jsonLength) {
 	      *jsonPtr++ = JSON_PAIR_PAIR[i];
-	      _debugStream->print(F("LaT:pj: jsonPtr: "));
-          _debugStream->print((uint16_t)(jsonPtr-1));
-          _debugStream->print(F(" - "));
-          _debugStream->println(*(jsonPtr-1));
 	    }
       }
     } else {
       if ((jsonPtr - json) < jsonLength) {
         *jsonPtr++ = c;
-		_debugStream->print(F("LaT:pj: jsonPtr: "));
-        _debugStream->print((uint16_t)(jsonPtr-1));
-        _debugStream->print(F(" - "));
-        _debugStream->println(*(jsonPtr-1));
 	  }
     }
   }
@@ -454,38 +434,17 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   if ((jsonPtr - json + sizeof(JSON_END)) >= jsonLength) {
     //Have to at least go back two characters
 	jsonPtr--;
-	_debugStream->print(F("LaT:pj: jsonPtr: "));
-    _debugStream->print((uint16_t)jsonPtr);
-    _debugStream->print(F(" - "));
-    _debugStream->println(*jsonPtr);
 	jsonPtr--;
-	_debugStream->print(F("LaT:pj: jsonPtr: "));
-    _debugStream->print((uint16_t)jsonPtr);
-    _debugStream->print(F(" - "));
-    _debugStream->println(*jsonPtr);
 	for (int i = (jsonPtr - json); i > 0; i--) {
       if (*jsonPtr == ',') {
 	    break;
 	  }
       *jsonPtr-- = '\0';
-	  _debugStream->print(F("LaT:pj: jsonPtr: "));
-      _debugStream->print((uint16_t)jsonPtr);
-      _debugStream->print(F(" - "));
-      _debugStream->println(*jsonPtr);
 	}
   }
   for (int i = 0; i < sizeof(JSON_END); i++) {
 	*jsonPtr++ = JSON_END[i];
-	_debugStream->print(F("LaT:pj: jsonPtr: "));
-    _debugStream->print((uint16_t)(jsonPtr-1));
-    _debugStream->print(F(" - "));
-    _debugStream->println(*(jsonPtr-1));
   }
-
-  _debugStream->print(F("LaT:pj: json   : "));
-  _debugStream->println((uint16_t)json);
-  _debugStream->print(F("LaT:pj: jsonPtr: "));
-  _debugStream->println((uint16_t)jsonPtr);
   
   ///_debugStream->println(F("LaT:pj: exit"));
   return;
