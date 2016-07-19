@@ -394,41 +394,99 @@ int LoRaAT::sendPairs(char* pairs) {
 -----------------------------------------------------------------------------------*/
 void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   ///_debugStream->println(F("LaT:pj: enter"));
-  char* jsonPtr;
+  char* jsonPtr;                                 //Points to the next free location
   int len = strlen(pairs);
   
-  //Set everything in JSON buffer to null
-  for (jsonPtr = json; jsonPtr < json + sizeof(json); jsonPtr++) {
-    *jsonPtr = '\0';
-  }
+  static const char JSON_BEGIN[2] = {'{','\"'};
+  static const char JSON_STR_VAL[2] = {'\"',':'};
+  static const char JSON_PAIR_PAIR[2] = {',','\"'};
+  static const char JSON_END[2] = {'}','\0'};
 
   //Set the pointer back to beginning of JSON
   jsonPtr = json;
-
+  _debugStream->print(F("LaT:pj: json   : "));
+  _debugStream->println((uint16_t)json);
+  _debugStream->print(F("LaT:pj: jsonPtr: "));
+  _debugStream->println((uint16_t)jsonPtr);
   // Adds the first { and "
-  *jsonPtr++ = '{';
-  *jsonPtr++ = '\"';
-
+  for (int i = 0; i < sizeof(JSON_BEGIN); i++) {
+	*jsonPtr++ = JSON_BEGIN[i];
+	_debugStream->print(F("LaT:pj: jsonPtr: "));
+    _debugStream->print((uint16_t)(jsonPtr-1));
+    _debugStream->print(F(" - "));
+    _debugStream->println(*(jsonPtr-1));
+  }
+   
   //Loop through each of the characters, when getting to a delimiter, act accordingly
-  for (int i = 0; i < len; i++) {
-    char c = pairs[i];
+  for (int j = 0; j < len && ((jsonPtr - json) < jsonLength); j++) {
+    char c = pairs[j];
     if (c == ':') {
-      //Check if we're about to overrun memory
-      *jsonPtr++ = '\"';
-      *jsonPtr++ = ':';
+      for (int i = 0; i < sizeof(JSON_STR_VAL); i++) {
+        if ((jsonPtr - json) < jsonLength) {
+	      *jsonPtr++ = JSON_STR_VAL[i];
+	      _debugStream->print(F("LaT:pj: jsonPtr: "));
+          _debugStream->print((uint16_t)(jsonPtr-1));
+          _debugStream->print(F(" - "));
+          _debugStream->println(*(jsonPtr-1));
+	    }
+      }
     } else if (c == ',') {
-      //Check if we're about to overrun memory
-      *jsonPtr++ = ',';
-      *jsonPtr++ = '\"';
+      for (int i = 0; i < sizeof(JSON_PAIR_PAIR); i++) {
+        if ((jsonPtr - json) < jsonLength) {
+	      *jsonPtr++ = JSON_PAIR_PAIR[i];
+	      _debugStream->print(F("LaT:pj: jsonPtr: "));
+          _debugStream->print((uint16_t)(jsonPtr-1));
+          _debugStream->print(F(" - "));
+          _debugStream->println(*(jsonPtr-1));
+	    }
+      }
     } else {
-      //Check if we're about to overrun memory
-      *jsonPtr++ = c;
+      if ((jsonPtr - json) < jsonLength) {
+        *jsonPtr++ = c;
+		_debugStream->print(F("LaT:pj: jsonPtr: "));
+        _debugStream->print((uint16_t)(jsonPtr-1));
+        _debugStream->print(F(" - "));
+        _debugStream->println(*(jsonPtr-1));
+	  }
     }
   }
   //no comma at the end of last JSON value
-  *jsonPtr++ = '}';
-  *jsonPtr++ = '\0';
+  if ((jsonPtr - json + sizeof(JSON_END)) >= jsonLength) {
+    //Have to at least go back two characters
+	jsonPtr--;
+	_debugStream->print(F("LaT:pj: jsonPtr: "));
+    _debugStream->print((uint16_t)jsonPtr);
+    _debugStream->print(F(" - "));
+    _debugStream->println(*jsonPtr);
+	jsonPtr--;
+	_debugStream->print(F("LaT:pj: jsonPtr: "));
+    _debugStream->print((uint16_t)jsonPtr);
+    _debugStream->print(F(" - "));
+    _debugStream->println(*jsonPtr);
+	for (int i = (jsonPtr - json); i > 0; i--) {
+      if (*jsonPtr == ',') {
+	    break;
+	  }
+      *jsonPtr-- = '\0';
+	  _debugStream->print(F("LaT:pj: jsonPtr: "));
+      _debugStream->print((uint16_t)jsonPtr);
+      _debugStream->print(F(" - "));
+      _debugStream->println(*jsonPtr);
+	}
+  }
+  for (int i = 0; i < sizeof(JSON_END); i++) {
+	*jsonPtr++ = JSON_END[i];
+	_debugStream->print(F("LaT:pj: jsonPtr: "));
+    _debugStream->print((uint16_t)(jsonPtr-1));
+    _debugStream->print(F(" - "));
+    _debugStream->println(*(jsonPtr-1));
+  }
 
+  _debugStream->print(F("LaT:pj: json   : "));
+  _debugStream->println((uint16_t)json);
+  _debugStream->print(F("LaT:pj: jsonPtr: "));
+  _debugStream->println((uint16_t)jsonPtr);
+  
   ///_debugStream->println(F("LaT:pj: exit"));
   return;
 }
