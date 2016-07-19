@@ -109,7 +109,7 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 
   ATSerial->begin(u32BaudRate);
   
-  setDefaults();
+  //setDefaults();
 }
 
 /*----------------------------------------------------------------------------------|
@@ -139,9 +139,9 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   _length = 0;
   
   //Send command
-  ///_debugStream->print(F("LaT:sc: "));
-  ///_debugStream->print(command);
-  ///_debugStream->print(TERMINATOR);
+  _debugStream->print(F("LaT:sc: "));
+  _debugStream->print(command);
+  _debugStream->print(TERMINATOR);
   ATSerial->print(command);
   ATSerial->print(TERMINATOR);
   
@@ -356,9 +356,9 @@ int LoRaAT::sendPairs(String pairs)
 -----------------------------------------------------------------------------------*/
 int LoRaAT::sendPairs(char* pairs) {
   ///_debugStream->println(F("LaT:sp: enter"));
-  ///_debugStream->println(F("LaT:sp: pairs:"));
-  ///_debugStream->print(F("LaT:sp: "));
-  ///_debugStream->println(pairs);
+  _debugStream->println(F("LaT:sp: pairs:"));
+  _debugStream->print(F("LaT:sp: "));
+  _debugStream->println(pairs);
   //Return constants
   const byte UNKNOWN_FORMAT = 4;
   int response = 0;
@@ -373,9 +373,9 @@ int LoRaAT::sendPairs(char* pairs) {
 
   ///_debugStream->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, pairs);
-  ///_debugStream->println(F("LaT:sp: pairs as JSON"));
-  ///_debugStream->print(F("LaT:sp: "));
-  ///_debugStream->println(json);
+  _debugStream->println(F("LaT:sp: pairs as JSON"));
+  _debugStream->print(F("LaT:sp: "));
+  _debugStream->println(json);
   ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
   _createFragmentBuffer(json);
   ///_debugStream->println(F("LaT:sp: process buffer"));
