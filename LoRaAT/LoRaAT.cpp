@@ -405,24 +405,21 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   //Set the pointer back to beginning of JSON
   jsonPtr = json;
   // Adds the first { and "
-  for (int i = 0; i < sizeof(JSON_BEGIN); i++) {
-	*jsonPtr++ = JSON_BEGIN[i];
-  }
+  memcpy(jsonPtr,JSON_BEGIN,sizeof(JSON_BEGIN));
+  jsonPtr += sizeof(JSON_BEGIN);
    
   //Loop through each of the characters, when getting to a delimiter, act accordingly
   for (int j = 0; j < len && ((jsonPtr - json) < jsonLength); j++) {
     char c = pairs[j];
     if (c == ':') {
-      for (int i = 0; i < sizeof(JSON_STR_VAL); i++) {
-        if ((jsonPtr - json) < jsonLength) {
-	      *jsonPtr++ = JSON_STR_VAL[i];
-	    }
+      if (jsonPtr - json + sizeof(JSON_STR_VAL) < jsonLength) {
+        memcpy(jsonPtr,JSON_STR_VAL,sizeof(JSON_STR_VAL));
+        jsonPtr += sizeof(JSON_STR_VAL);
       }
     } else if (c == ',') {
-      for (int i = 0; i < sizeof(JSON_PAIR_PAIR); i++) {
-        if ((jsonPtr - json) < jsonLength) {
-	      *jsonPtr++ = JSON_PAIR_PAIR[i];
-	    }
+      if (jsonPtr - json + sizeof(JSON_PAIR_PAIR) < jsonLength) {
+        memcpy(jsonPtr,JSON_PAIR_PAIR,sizeof(JSON_PAIR_PAIR));
+        jsonPtr += sizeof(JSON_PAIR_PAIR);
       }
     } else {
       if ((jsonPtr - json) < jsonLength) {
@@ -430,21 +427,18 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
 	  }
     }
   }
-  //no comma at the end of last JSON value
+  
+  //If we can't fit the JSON termination i.e. }\0, make room, then check for a partial pair, removing it if exists
   if ((jsonPtr - json + sizeof(JSON_END)) >= jsonLength) {
-    //Have to at least go back two characters
-	jsonPtr--;
-	jsonPtr--;
-	for (int i = (jsonPtr - json); i > 0; i--) {
-      if (*jsonPtr == ',') {
-	    break;
-	  }
+	jsonPtr -= sizeof(JSON_END);
+	//"jsonPtr > json" so not to delete the open curly brace '{'
+	while (jsonPtr > json && *jsonPtr != ',') {
       *jsonPtr-- = '\0';
-	}
+    }
   }
-  for (int i = 0; i < sizeof(JSON_END); i++) {
-	*jsonPtr++ = JSON_END[i];
-  }
+  
+  memcpy(jsonPtr,JSON_END,sizeof(JSON_END));
+  jsonPtr += sizeof(JSON_END);
   
   ///_debugStream->println(F("LaT:pj: exit"));
   return;
