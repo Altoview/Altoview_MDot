@@ -43,10 +43,10 @@ void setup() {
   debugSerial.println(F("\r\n\r\n++ START ++\r\n\r\n"));
 
 
-  //do {
+  do {
     responseCode = mdot.join();
-    //delay(10000);
-  //} while (responseCode != 0);
+    delay(10000);
+  } while (responseCode != 0);
   debugSerial.print(F("SETUP : Join result: "));
   debugSerial.println(String(responseCode));
 }
@@ -104,7 +104,7 @@ void loop() {
 
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
-  delay(30000);
+  delay(600000);
   loopNum++;
 }
 

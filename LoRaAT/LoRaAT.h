@@ -28,6 +28,7 @@ class LoRaAT
 	char frequencySubBand = '\0';   //0-8
 	char publicNetwork = '\0';		//0,1
 	char dataRate = '\0';			//0-3
+	char adaptiveDataRate = '\0';	//0,1
 	
 	LoRaAT();				        //Use default serial port
 	LoRaAT(uint8_t);		        //Use specified serial port.
@@ -57,7 +58,9 @@ class LoRaAT
     int getNetworkKey();			//Also referred to as the AppKey
     int setDataRate(char);
     int getDataRate();
-    int commitSettings();			//Not yet implemented
+    int setAdaptiveDataRate(char);
+    int getAdaptiveDataRate();
+    int commitSettings();
   
   private:
 	static const uint8_t _MAX_FRAGMENTS = 16;

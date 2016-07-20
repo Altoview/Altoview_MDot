@@ -1,7 +1,7 @@
 # TODO
 ## Version 1 Goal
-- [ ] Get and Set ADR.
-- [ ] Default to set Data Rate to [?] and turn ADR on
+- [x] Get and Set ADR.
+- [x] Default to set Data Rate to [?] and turn ADR on
 - [ ] Check mDot Data rate before send.
 - [ ] Send multiple fragments based on Data Rate.
 - [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not to have a baud rate of u32BaudRate set it to u32BaudRate.
@@ -30,6 +30,7 @@
    * Comma found with just enough space
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b c d e f g h i             U  V  W  ,  Y  Z
+- [ ] Check what Data Rate should default to.
 	 
 ## Future Version Goals
 - [ ] Overload send() function so it can also accept a char* and length. For when we don't want to read until null.

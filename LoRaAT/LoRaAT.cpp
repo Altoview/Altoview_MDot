@@ -530,10 +530,13 @@ int LoRaAT::setDefaults() {
   if (setNetworkKey(key) == 0) {
     result = 0;
   }
-  /*if (setDataRate('1') == 0) {
+  if (setDataRate('2') == 0) {
     result = 0;
-  }*/
-  
+  }
+  if (setAdaptiveDataRate('1') == 0) {
+    result = 0;
+  }
+
   commitSettings();
   
   return(result);
@@ -744,8 +747,8 @@ int LoRaAT::setDataRate(char txdr) {
   char ans1[] PROGMEM = "OK";
   
   sprintf_P(_command,(char*)F("AT+TXDR "));
-  _command[9] = txdr;
-  _command[10] = '\0';
+  _command[8] = txdr;
+  _command[9] = '\0';
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
@@ -771,6 +774,52 @@ int LoRaAT::getDataRate() {
 
   if (ansCode == 1) {
 	dataRate = r[2];
+    return (0);
+  }
+  
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Turns adaptive data rate off/on.                                                  |
+|                                                                                   |
+| AT+ADR ?                                                                          |
+| AT+ADR: (0,1)                                                                     |
+|  0 - off                                                                          |
+|  1 - on                                                                           |
+-----------------------------------------------------------------------------------*/
+int LoRaAT::setAdaptiveDataRate(char adr) {
+  uint8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  
+  sprintf_P(_command,(char*)F("AT+ADR "));
+  _command[7] = adr;
+  _command[8] = '\0';
+  
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+
+  if (ansCode == 1) {
+	adaptiveDataRate = adr;
+    return (0);
+  }
+  
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Gets the state of the adaptive data rate.                                         |
+-----------------------------------------------------------------------------------*/
+int LoRaAT::getAdaptiveDataRate() {
+  uint8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  char* r;
+  
+  sprintf_P(_command,(char*)F("AT+ADR?"));
+  
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+
+  if (ansCode == 1) {
+	adaptiveDataRate = r[0];
     return (0);
   }
   
