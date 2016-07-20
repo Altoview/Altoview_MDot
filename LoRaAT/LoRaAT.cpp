@@ -167,9 +167,9 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
   *resp = NULL;
   do {
     if (ATSerial->available() != 0) {
-	  if (_length < (_MAX_MDOT_RESPONSE - 1)) {
+      if (_length < (_MAX_MDOT_RESPONSE - 1)) {
         _response[_length++] = ATSerial->read();
-	  }
+      }
     }
 
     if (strstr(_response, ans1) != '\0') {
@@ -277,7 +277,7 @@ int8_t LoRaAT::send(char* message, uint16_t timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
   uint8_t l;
 
-  l = sizeof(_command);				             //Will only send char array up to null, or l (max size of _command buffer)
+  l = sizeof(_command);                     //Will only send char array up to null, or l (max size of _command buffer)
 
   return(send(message,l,10000));
 }
@@ -389,25 +389,25 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
           memcpy(jsonPtr,JSON_STR_VAL,sizeof(JSON_STR_VAL));
           jsonPtr += sizeof(JSON_STR_VAL);
         }
-		break;
-	  case ',':
+        break;
+      case ',':
         if (jsonPtr - json + sizeof(JSON_PAIR_PAIR) < jsonLength) {
           memcpy(jsonPtr,JSON_PAIR_PAIR,sizeof(JSON_PAIR_PAIR));
           jsonPtr += sizeof(JSON_PAIR_PAIR);
         }
-		break;
-	  default:
+        break;
+      default:
         if ((jsonPtr - json) < jsonLength) {
           *jsonPtr++ = c;
-	    }
+        }
     }
   }
 
   //If we can't fit the JSON termination i.e. }\0, make room, then check for a partial pair, removing it if exists
   if ((jsonPtr - json + sizeof(JSON_END)) >= jsonLength) {
-	jsonPtr -= sizeof(JSON_END);
-	//"jsonPtr > json" so not to delete the open curly brace '{'
-	while (jsonPtr > json && *jsonPtr != ',') {
+    jsonPtr -= sizeof(JSON_END);
+    //"jsonPtr > json" so not to delete the open curly brace '{'
+    while (jsonPtr > json && *jsonPtr != ',') {
       *jsonPtr-- = '\0';
     }
   }
@@ -530,7 +530,7 @@ int8_t LoRaAT::_processBuffer() {
       length = (char*)_txBuffer + buffLength - txGtr;
     }
 
-	result = send(txGtr,length,10000);
+    result = send(txGtr,length,10000);
 
     txGtr += length;
   }
@@ -592,7 +592,7 @@ int8_t LoRaAT::setFrequencySubBand(char fsb) {
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
-	frequencySubBand = fsb;
+    frequencySubBand = fsb;
     return (0);
   }
 
@@ -612,7 +612,7 @@ int8_t LoRaAT::getFrequencySubBand() {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-	frequencySubBand = r[0];
+    frequencySubBand = r[0];
     return (0);
   }
 
@@ -641,7 +641,7 @@ int8_t LoRaAT::setPublicNetwork(char pn) {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
-	publicNetwork = pn;
+    publicNetwork = pn;
     return (0);
   }
 
@@ -688,8 +688,8 @@ int8_t LoRaAT::setNetworkID(char* id) {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
-	strncpy(networkId,id,sizeof(networkId)-1);
-	networkId[23] = '\0';
+    strncpy(networkId,id,sizeof(networkId)-1);
+    networkId[23] = '\0';
     return (0);
   }
 
@@ -709,8 +709,8 @@ int8_t LoRaAT::getNetworkID() {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-	strncpy(networkId,r,sizeof(networkId)-1);
-	networkId[23] = '\0';
+    strncpy(networkId,r,sizeof(networkId)-1);
+    networkId[23] = '\0';
     return (0);
   }
 
@@ -738,8 +738,8 @@ int8_t LoRaAT::setNetworkKey(char* key) {
   ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000);
 
   if (ansCode == 1) {
-	strncpy(networkKey,key,sizeof(networkKey)-1);
-	networkKey[47] = '\0';
+    strncpy(networkKey,key,sizeof(networkKey)-1);
+    networkKey[47] = '\0';
     return (0);
   }
 
@@ -760,8 +760,8 @@ int8_t LoRaAT::getNetworkKey() {
   ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000, &r);
 
   if (ansCode == 1) {
-	strncpy(networkKey,r,(sizeof(networkKey)-1));
-	networkKey[47] = '\0';
+    strncpy(networkKey,r,(sizeof(networkKey)-1));
+    networkKey[47] = '\0';
     return (0);
   }
 
@@ -785,7 +785,7 @@ int8_t LoRaAT::setDataRate(char txdr) {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
-	dataRate = txdr;
+    dataRate = txdr;
     return (0);
   }
 
@@ -805,7 +805,7 @@ int8_t LoRaAT::getDataRate() {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-	dataRate = r[2];
+    dataRate = r[2];
     return (0);
   }
 
@@ -831,7 +831,7 @@ int8_t LoRaAT::setAdaptiveDataRate(char adr) {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
-	adaptiveDataRate = adr;
+    adaptiveDataRate = adr;
     return (0);
   }
 
@@ -851,7 +851,7 @@ int8_t LoRaAT::getAdaptiveDataRate() {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-	adaptiveDataRate = r[0];
+    adaptiveDataRate = r[0];
     return (0);
   }
 

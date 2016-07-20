@@ -8,7 +8,7 @@
 - [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not to have a baud rate of u32BaudRate set it to u32BaudRate.
 - [ ] Public Member to indicate last get/set result.
    * What if we do multiple get/sets in a row, and all fail expect the last?
-- [ ] Check _pairToJson() works for the following cases:
+- [ ] Check pairToJson() works for the following cases:
    * Pairs expand out leaving ample space to finish JSON with }\0
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b : d e f , h i             :  V
@@ -21,7 +21,7 @@
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b c d e f g h i             U  V  W  X  Y  Z
 	 + Cycle all the way back to beginning and add {}\0
-   * Comma found in last two 
+   * Comma found in last two
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b c d e f g h i             U  V  W  X  ,  Z
 	 - [ ] If end is reached, always delete last two before looking for comma. Mention this explicitly in comments.
@@ -32,10 +32,10 @@
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b c d e f g h i             U  V  W  ,  Y  Z
 - [ ] Check what Data Rate should default to.
-	 
+
 ## Future Version Goals
 - [x] Overload send() function so it can also accept a char* and length. For when we don't want to read until null.
-- [ ] Change _txPutter to number of bytes, not number of fragments. Or change name to be more meaningful.
+- [ ] Change txPutter to number of bytes, not number of fragments. Or change name to be more meaningful.
 - [ ] Ensure pairs[] and json[] are released after they're used. They are big chunks of memory on the stack.
    - [ ] Consider other ways to handle pairs[] and json[]
 - [ ] Handle a fragment failing to send?
@@ -53,7 +53,7 @@
    * The user could also pass a non-null terminated char array of any lenght and also cause the same fault.
 - [ ] Handle JSON buffer smaller than 2?
 - [ ] Max end time rollover bug
-- [ ] unsigned int, and similar needs to be explicitly an uintx_t
+- [x] unsigned int, and similar needs to be explicitly an uintx_t
 - [ ] Server expects a new join request every 5 days
    - [ ] long term timer to monitor, time since last join
    - [ ] Check timer before send(), and join if time condition met
