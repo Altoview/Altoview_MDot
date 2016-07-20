@@ -411,20 +411,23 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   //Loop through each of the characters, when getting to a delimiter, act accordingly
   for (int j = 0; j < len && ((jsonPtr - json) < jsonLength); j++) {
     char c = pairs[j];
-    if (c == ':') {
-      if (jsonPtr - json + sizeof(JSON_STR_VAL) < jsonLength) {
-        memcpy(jsonPtr,JSON_STR_VAL,sizeof(JSON_STR_VAL));
-        jsonPtr += sizeof(JSON_STR_VAL);
-      }
-    } else if (c == ',') {
-      if (jsonPtr - json + sizeof(JSON_PAIR_PAIR) < jsonLength) {
-        memcpy(jsonPtr,JSON_PAIR_PAIR,sizeof(JSON_PAIR_PAIR));
-        jsonPtr += sizeof(JSON_PAIR_PAIR);
-      }
-    } else {
-      if ((jsonPtr - json) < jsonLength) {
-        *jsonPtr++ = c;
-	  }
+    switch (c) {
+      case ':':
+        if (jsonPtr - json + sizeof(JSON_STR_VAL) < jsonLength) {
+          memcpy(jsonPtr,JSON_STR_VAL,sizeof(JSON_STR_VAL));
+          jsonPtr += sizeof(JSON_STR_VAL);
+        }
+		break;
+	  case ',':
+        if (jsonPtr - json + sizeof(JSON_PAIR_PAIR) < jsonLength) {
+          memcpy(jsonPtr,JSON_PAIR_PAIR,sizeof(JSON_PAIR_PAIR));
+          jsonPtr += sizeof(JSON_PAIR_PAIR);
+        }
+		break;
+	  default:
+        if ((jsonPtr - json) < jsonLength) {
+          *jsonPtr++ = c;
+	    }
     }
   }
   
