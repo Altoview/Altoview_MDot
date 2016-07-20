@@ -3,7 +3,7 @@
 
   Version: v0.0.1.1
 
-  Brief: Arduino library for controlling Multitech mDot LoRa modules using 
+  Brief: Arduino library for controlling Multitech mDot LoRa modules using
          AT commands.
 
   Copyright: This library is published under GNU AGPLv3 license.
@@ -37,32 +37,32 @@ class LoRaAT
     void begin();                                 //Use default baud
     void begin(uint32_t);                         //Use specified baud rate.
 
-    int join();                                   //Join a LoRa network.
-    int join(unsigned int);                       //Join with a specific timeout
+    int8_t join();                                //Join a LoRa network.
+    int8_t join(uint16_t);                        //Join with a specific timeout
     void leave();                                 //Leave a LoRa network, Not yet implemented
 
-    int send(char*);                              //Generic send command, using AT+SEND
-    int send(char*, unsigned int);                //Use specific timeout.
-    int send(char*, uint8_t, unsigned int);       //Use specific message length.
-    int sendPairs(char*);                         //Takes key,value pairs, forms a message, and sends to the LoRa server.
-    int sendPairs(String);                        //Takes key,value pairs, forms a message, and sends to the LoRa server.
-    uint8_t ping();                               //Not yet implemented
+    int8_t send(char*);                           //Generic send command, using AT+SEND
+    int8_t send(char*, uint16_t);                 //Use specific timeout.
+    int8_t send(char*, uint8_t, uint16_t);        //Use specific message length.
+    int8_t sendPairs(char*);                      //Takes key,value pairs, forms a message, and sends to the LoRa server.
+    int8_t sendPairs(String);                     //Takes key,value pairs, forms a message, and sends to the LoRa server.
+    int8_t ping();                                //Not yet implemented
 
-    int setDefaults();
-    int setFrequencySubBand(char);
-    int getFrequencySubBand();
-    int setPublicNetwork(char);
-    int getPublicNetwork();
-    int setNetworkID(char*);                      //Also referred to as the AppEUI
-    int getNetworkID();                           //Also referred to as the AppEUI
-    int setNetworkKey(char*);                     //Also referred to as the AppKey
-    int getNetworkKey();                          //Also referred to as the AppKey
-    int setDataRate(char);
-    int getDataRate();
-    int setAdaptiveDataRate(char);
-    int getAdaptiveDataRate();
-    int commitSettings();
-  
+    int8_t setDefaults();
+    int8_t setFrequencySubBand(char);
+    int8_t getFrequencySubBand();
+    int8_t setPublicNetwork(char);
+    int8_t getPublicNetwork();
+    int8_t setNetworkID(char*);                   //Also referred to as the AppEUI
+    int8_t getNetworkID();                        //Also referred to as the AppEUI
+    int8_t setNetworkKey(char*);                  //Also referred to as the AppKey
+    int8_t getNetworkKey();                       //Also referred to as the AppKey
+    int8_t setDataRate(char);
+    int8_t getDataRate();
+    int8_t setAdaptiveDataRate(char);
+    int8_t getAdaptiveDataRate();
+    int8_t commitSettings();
+
   private:
     static const uint8_t _MAX_FRAGMENTS = 16;
     static const uint8_t _PACKET_SIZE = 11;
@@ -74,7 +74,7 @@ class LoRaAT
 
     char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
     uint8_t _txPutter = 0;
-	
+
     static const uint8_t _MAX_MDOT_RESPONSE = 200;//Max number of bytes the mdot might return
     char _response[_MAX_MDOT_RESPONSE];           //mDot response buffer
     uint8_t _length;                              //Lenght of a response
@@ -87,7 +87,7 @@ class LoRaAT
 
     void _pairsToJSON(char*, uint8_t, char*);
     void _createFragmentBuffer(char*);
-    int _processBuffer();
+    int8_t _processBuffer();
 
     uint8_t _u8SerialPort;                        //AT Command serial port selection by user
     Stream* _debugStream;                         //Debugging serial port initialized in constructor
