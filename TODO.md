@@ -1,4 +1,4 @@
-### TODO
+# TODO
 ## Version 1 Goal
 - [ ] Get and Set ADR.
 - [ ] Default to set Data Rate to [?] and turn ADR on
