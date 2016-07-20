@@ -121,9 +121,11 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   return _sendCommand(command, ans1, ans2, ans3, ans4, timeout, NULL);
 }
 /*----------------------------------------------------------------------------------|
-| the send command method, sends a command to the mDot and waits for a response.    |
-| once a recognised response is received it returns the corresponding interger,     |
-| if no recognised response is recieved in the timout specified return 0.           |
+| the send command method, takes a null terminated char array and sends a command   |
+| to the mDot and waits for a response, ans1, ans2, ans3 or ans4. once a recognised |
+| response is received it returns the corresponding interger, and can return a      |
+| pointer to the beginning of the actual response. if no recognised response is     |
+| recieved in the timout specified return 0.                                        |
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char** resp) {
   ///_debugStream->println(F("LaT:sc: enter"));
@@ -448,8 +450,8 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
 }
 
 /*----------------------------------------------------------------------------------|
-| This function will take and ASCII String message and fragment it into 11 byte     |
-| packets.                                                                          |
+| This function will take and null terminated ASCII String message and fragment it  |
+| into 11 byte packets.                                                             |
 |                                                                                   |
 | 2 bytes of header, and 9 bytes of payloads                                        |
 |                                                                                   |

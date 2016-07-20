@@ -18,9 +18,12 @@
    - [ ] Skip the rest?
    - [ ] Try every one?
    - [ ] Give a general failure or a specific one?
-- [ ] Check we're not using sizeof on pointers
+- [x] Check we're not using sizeof on pointers
    * Size of a pointer is 2bytes, not the size of the array it points to.
-- [ ] Check when we're using strlen it's alwyas on a null terminated array.
+- [x] Check when we're using strlen it's alwyas on a null terminated array.
+- [ ] strlen is used on pairs[] which may not be null terminated.
+   * If a user passes a string bigger than the buffer. The program reads in that string up to the size of the buffer, in that case the last character will be what's in the string at that point (not nessicarly a null).
+   * The user could also pass a non-null terminated char array of any lenght and also cause the same fault.
 - [ ] Ensure returns are consistant
    - [ ] Ensure errors always negative, warnings and success are always positive.
    - [ ] Time outs always throw -1.
