@@ -82,8 +82,8 @@ class LoRaAT
     static const uint8_t _MAX_MDOT_COMMAND = 120; //TODO: Check against the manual for mDot
     char _command[_MAX_MDOT_COMMAND];
 
-    uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
-    uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char**);   //Generic serial out get response wrapper
+    int8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
+    int8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char**);   //Generic serial out get response wrapper
 
     void _pairsToJSON(char*, uint8_t, char*);
     void _createFragmentBuffer(char*);
