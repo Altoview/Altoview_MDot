@@ -275,11 +275,24 @@ int LoRaAT::send(char* message) {
 -----------------------------------------------------------------------------------*/
 int LoRaAT::send(char* message, unsigned int timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
+  uint8_t l;
+  
+  l = sizeof(_command);				             //Will only send char array up to null, or l (max size of _command buffer)
+  
+  return(send(message,l,10000));
+}
+
+/*----------------------------------------------------------------------------------|
+| Send method, takes a char array and length and sends that over the LoRaWAN        |
+| network. Using a specified timeout.                                               |
+-----------------------------------------------------------------------------------*/
+int LoRaAT::send(char* message, uint8_t length, unsigned int timeout) {
+  ///_debugStream->println(F("LaT:s : enter"));
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
   
   sprintf_P(_command,(char*)F("AT+SEND "));
-  strcat(_command,message);                      //Append message to command
+  strncat(_command,message,length);              //Append message to command
 
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,timeout);
 
