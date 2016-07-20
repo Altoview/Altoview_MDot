@@ -199,7 +199,7 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
   } while (millis() <= maxEndTime);
   
   ///_debugStream->println(F("LaT:sc: Timed out"));
-  return (0);
+  return (-1);
 }
 
 /*----------------------------------------------------------------------------------|
@@ -361,17 +361,11 @@ int LoRaAT::sendPairs(char* pairs) {
   _debugStream->println(F("LaT:sp: pairs:"));
   _debugStream->print(F("LaT:sp: "));
   _debugStream->println(pairs);
-  //Return constants
-  const byte UNKNOWN_FORMAT = 4;
-  int response = 0;
 
   //String json;      
   char json[_MAX_PAIRS_SIZE];      
   
   //TODO: Check the string is actually pairs
-  if (false) { //TODO: if format not recognised
-    return(UNKNOWN_FORMAT);
-  }
 
   ///_debugStream->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, _MAX_PAIRS_SIZE, pairs);
@@ -381,9 +375,8 @@ int LoRaAT::sendPairs(char* pairs) {
   ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
   _createFragmentBuffer(json);
   ///_debugStream->println(F("LaT:sp: process buffer"));
-  response = _processBuffer();
 
-  return(response);
+  return(_processBuffer());
 }
 
 /*----------------------------------------------------------------------------------|
@@ -556,30 +549,30 @@ int LoRaAT::_processBuffer() {
 | out server.																		|
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setDefaults() {
-  uint8_t result = 0;
+  uint8_t result = -1;
 
   char key[] = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
   char id[] = "00:00:aa:00:00:00:00:01";
   
-  if (setFrequencySubBand('1') != 0) {
-    result = -1;
+  if (setFrequencySubBand('1') == 0) {
+    result = 0;
   }
-  if (setPublicNetwork('1') != 0) {
-    result = -1;
+  if (setPublicNetwork('1') == 0) {
+    result = 0;
   }
-  if (setNetworkID(id) != 0) {
-    result = -1;
+  if (setNetworkID(id) == 0) {
+    result = 0;
   }
-  if (setNetworkKey(key) != 0) {
-    result = -1;
+  if (setNetworkKey(key) == 0) {
+    result = 0;
   }
-  /*if (setDataRate('1') != 0) {
-    result = -1;
+  /*if (setDataRate('1') == 0) {
+    result = 0;
   }*/
   
   commitSettings();
   
-  return(-1);
+  return(result);
 }
 
 /*----------------------------------------------------------------------------------|

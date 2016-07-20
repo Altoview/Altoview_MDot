@@ -12,11 +12,11 @@
    - [ ] Consider other ways to handle pairs[] and json[]
 - [ ] Handle a fragment failing to send?
    - [ ] Skip the rest?
-   - [ ] Try every one?
+   - [ ] Try every one? Give the last result? **This is the current state**
    - [ ] Give a general failure or a specific one?
 - [ ] Handle failing setting/getting one setting/getting
    - [ ] Skip the rest?
-   - [ ] Try every one?
+   - [ ] Try every one? Give the last result? **This is the current state**
    - [ ] Give a general failure or a specific one?
 - [x] Check we're not using sizeof on pointers
    * Size of a pointer is 2bytes, not the size of the array it points to.
@@ -24,10 +24,10 @@
 - [ ] strlen is used on pairs[] which may not be null terminated.
    * If a user passes a string bigger than the buffer. The program reads in that string up to the size of the buffer, in that case the last character will be what's in the string at that point (not nessicarly a null).
    * The user could also pass a non-null terminated char array of any lenght and also cause the same fault.
-- [ ] Ensure returns are consistant
-   - [ ] Ensure errors always negative, warnings and success are always positive.
-   - [ ] Time outs always throw -1.
-   - [ ] General or undefined success is always 0.
+- [x] Ensure returns are consistant
+   - [x] Ensure errors always negative, warnings and success are always positive or 0.
+   - [x] Time outs always throw -1.
+   - [x] General or undefined success is always 0.
 - [ ] Check method header comments for accuracy.
    - [ ] Improve return explanations.
    - [ ] e.g. begin header "Anything not a valid option for serial will be set to 0"
