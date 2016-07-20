@@ -1,7 +1,5 @@
-- [x] Init mDot by default
-   - [ ] Set Data Rate and turn ADR on
+- [ ] Set Data Rate and turn ADR on
 - [ ] Get and Set ADR.
-- [x] Default library baud rate 38400
 - [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not to have a baud rate of u32BaudRate set it to u32BaudRate.
 - [ ] Check mDot Data rate before send.
 - [ ] Send multiple fragments based on Data Rate.
@@ -18,18 +16,11 @@
    - [ ] Skip the rest?
    - [ ] Try every one? Give the last result? **This is the current state**
    - [ ] Give a general failure or a specific one?
-- [x] Check we're not using sizeof on pointers
-   * Size of a pointer is 2bytes, not the size of the array it points to.
 - [ ] Check for invalid characters user could pass to pairs?
 - [ ] Check pairs is a valid entry?
-- [x] Check when we're using strlen it's alwyas on a null terminated array.
 - [ ] strlen is used on pairs[] which may not be null terminated.
    * If a user passes a string bigger than the buffer. The program reads in that string up to the size of the buffer, in that case the last character will be what's in the string at that point (not nessicarly a null).
    * The user could also pass a non-null terminated char array of any lenght and also cause the same fault.
-- [x] Ensure returns are consistant
-   - [x] Ensure errors always negative, warnings and success are always positive or 0.
-   - [x] Time outs always throw -1.
-   - [x] General or undefined success is always 0.
 - [ ] Check method header comments for accuracy.
    - [ ] Improve return explanations.
    - [ ] e.g. begin header "Anything not a valid option for serial will be set to 0"
@@ -65,8 +56,4 @@
    - [ ] Check timer before send(), and join if time condition met
 - [ ] Always save session after join.
 - [ ] Always initialise response to error, before stepping though function.
-- [x] use memcpy more in createJson().
-   - [x] Don't forget to increment pointer
-- [X] json if/else can be switch
-- [X] for/if can be merged, put if in for loop conditional statement
 - [ ] Look at overloading some of the setters
