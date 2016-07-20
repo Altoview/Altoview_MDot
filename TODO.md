@@ -30,10 +30,10 @@
    - [x] Ensure errors always negative, warnings and success are always positive or 0.
    - [x] Time outs always throw -1.
    - [x] General or undefined success is always 0.
-- [ ] Check method header comments for accuracy.
-   - [ ] Improve return explanations.
-   - [ ] e.g. begin header "Anything not a valid option for serial will be set to 0"
-- [ ] If the command can't be found in _response return null, explain this will be the case in the header
+- [x] Check method header comments for accuracy.
+   - [x] Improve return explanations.
+   - [x] e.g. begin header "Anything not a valid option for serial will be set to 0"
+- [x] If the command can't be found in _response return null, explain this will be the case in the header
 - [ ] Handle JSON buffer smaller than 2?
 - [ ] Check _pairToJson() works for the following cases:
    * Pairs expand out leaving ample space to finish JSON with }\0
@@ -64,9 +64,9 @@
    - [ ] long term timer to monitor, time since last join
    - [ ] Check timer before send(), and join if time condition met
 - [ ] Always save session after join.
-- [ ] Always initialise response to error, before stepping though function.
+- [x] Always initialise response to error, before stepping though function.
 - [x] use memcpy more in createJson().
    - [x] Don't forget to increment pointer
-- [X] json if/else can be switch
-- [X] for/if can be merged, put if in for loop conditional statement
+- [x] json if/else can be switch
+- [x] for/if can be merged, put if in for loop conditional statement
 - [ ] Look at overloading some of the setters
