@@ -3,7 +3,7 @@
 
   Version: v0.0.1.1
 
-  Breif: Arduino library for controlling Multitech mDot LoRa modules using 
+  Brief: Arduino library for controlling Multitech mDot LoRa modules using 
          AT commands.
 
   Copyright: This library is published under GNU AGPLv3 license.
@@ -28,6 +28,7 @@ class LoRaAT
 	char frequencySubBand = '\0';   //0-8
 	char publicNetwork = '\0';		//0,1
 	char dataRate = '\0';			//0-3
+	char adaptiveDataRate = '\0';	//0,1
 	
 	LoRaAT();				        //Use default serial port
 	LoRaAT(uint8_t);		        //Use specified serial port.
@@ -42,10 +43,12 @@ class LoRaAT
 	
 	int send(char*);		        //Generic send command, using AT+SEND
 	int send(char*, unsigned int);  //Use specific timeout.
+	int send(char*, uint8_t, unsigned int);  //Use specific message length.
 	int sendPairs(char*);	        //Takes key,value pairs, forms a message, and sends to the LoRa server.
     int sendPairs(String); 	        //Takes key,value pairs, forms a message, and sends to the LoRa server.
 	uint8_t ping();			        //Not yet implemented
 	
+	int setDefaults();
 	int setFrequencySubBand(char);
     int getFrequencySubBand();
     int setPublicNetwork(char);
@@ -56,7 +59,9 @@ class LoRaAT
     int getNetworkKey();			//Also referred to as the AppKey
     int setDataRate(char);
     int getDataRate();
-    int commitSettings();			//Not yet implemented
+    int setAdaptiveDataRate(char);
+    int getAdaptiveDataRate();
+    int commitSettings();
   
   private:
 	static const uint8_t _MAX_FRAGMENTS = 16;
@@ -69,7 +74,6 @@ class LoRaAT
     
 	char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
 	uint8_t _txPutter = 0;
-	uint8_t _txGetter = 0;
 	
 	static const uint8_t _MAX_MDOT_RESPONSE = 200;			//Max number of bytes the mdot might return
 	char _response[_MAX_MDOT_RESPONSE];						//mDot response buffer
@@ -81,7 +85,7 @@ class LoRaAT
 	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
 	uint8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char**);             //Generic serial out get response wrapper
 	
-	void _pairsToJSON(char*, char*);
+	void _pairsToJSON(char*, uint8_t, char*);
 	void _createFragmentBuffer(char*);
 	int _processBuffer();
 	

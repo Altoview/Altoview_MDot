@@ -3,7 +3,7 @@
 
   Version: v0.0.1.1
 
-  Breif: Arduino library for controlling Multitech mDot LoRa modules using 
+  Brief: Arduino library for controlling Multitech mDot LoRa modules using 
          AT commands.
 
   Copyright: This library is published under GNU AGPLv3 license.
@@ -53,7 +53,7 @@
 
 /*----------------------------------------------------------------------------------|
 | CONSTRUCTOR: Creates class object using a specified serial port, and passing it a |
-| specificed debug stream. This stream can be used to pass debug info to a serial   |
+| specified debug stream. This stream can be used to pass debug info to a serial    |
 | port, either hardware serial or software serial.                                  |
 -----------------------------------------------------------------------------------*/
 LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
@@ -65,21 +65,24 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 /*----------------------------------------------------------------------------------|
 | Initialize class object.                                                          |
 |                                                                                   |
-| Sets up the serial port using default 19200 baud rate.                            |
+| Sets up the serial port specified in instantiation using default 38400 baud rate. |
+| Then configure the mDot with some default settings.                               |
+|                                                                                   |
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
 void LoRaAT::begin(void) {
   //TODO: Input checking??
-  begin(19200);
+  begin(38400);
 }
 
 /*----------------------------------------------------------------------------------|
 | Initialize class object.                                                          |
 |                                                                                   |
-| Call once class has been instantiated, typically within setup().                  |
+| Sets up the serial port specified in instantiation with a user specified baud     |
+| rate. Then configure the mDot with some default settings. If the serial port      |
+| specific is not a valid one the serial port with default to 0.                    |
 |                                                                                   |
-| TODO: Think about what we should set here, what should be defaults. Datarates,    |
-| adaptive data rates? Other things?                                                |
+| Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
 void LoRaAT::begin(uint32_t u32BaudRate) {
   switch(_u8SerialPort) {
@@ -109,25 +112,32 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 
   ATSerial->begin(u32BaudRate);
   
-  getFrequencySubBand();
-  getPublicNetwork();
-  getNetworkID();                                //Also referred to as the AppEUI
-  getNetworkKey();                               //Also referred to as the AppKey
-  getDataRate();
+  setDefaults();
 }
 
 /*----------------------------------------------------------------------------------|
-| the send command method, sends a command to the mDot and waits for a response.    |
-| once a recognised response is received it returns the corresponding interger,     |
-| if no recognised response is recieved in the timout specified return 0.           |
+| The send command method, takes a null terminated command, some responses, and a   |
+| timeout.                                                                          |
+|                                                                                   |
+| The command is sent to the mDot and waits for a response. once a recognised       |
+| response is received it returns the corresponding integer. If no recognised       |
+| response is received within the timeout period a -1 is returned.                  |
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout) {
   return _sendCommand(command, ans1, ans2, ans3, ans4, timeout, NULL);
 }
 /*----------------------------------------------------------------------------------|
-| the send command method, sends a command to the mDot and waits for a response.    |
-| once a recognised response is received it returns the corresponding interger,     |
-| if no recognised response is recieved in the timout specified return 0.           |
+| The send command method, takes a null terminated command, some responses, a       |
+| timeout and a pointer to a response.                                              |
+|                                                                                   |
+| The command is sent to the mDot and waits for a response. once a recognised       |
+| response is received it returns the corresponding integer, and can return a       |
+| pointer to the beginning of the actual response. If no recognised response is     |
+| received within the timeout period a -1 is returned.                              |
+|                                                                                   |
+| The “actual response” is considered to begin just after the echoed termination of |
+| the command. If the command is not found in the mDot response, the “actual        |
+| response” is set to null.                                                         |
 -----------------------------------------------------------------------------------*/
 uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char** resp) {
   ///_debugStream->println(F("LaT:sc: enter"));
@@ -200,24 +210,18 @@ uint8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, 
 	
   } while (millis() <= maxEndTime);
   
-  _debugStream->println(F("LaT:sc: Timed out"));
-  return (0);
+  ///_debugStream->println(F("LaT:sc: Timed out"));
+  return (-1);
 }
 
 /*----------------------------------------------------------------------------------|
 | Join a LoRa(WAN?) network                                                         |
 |                                                                                   |
-| TODO: Review returns, can we return something more meaningfull?                   |
-| Currently, zero is a success, negative integers are generic errors, and positive  |
-| integers are a specific failure.                                                  |
+| Uses a default of 10,000ms (10sec) timeout                                        |
+|                                                                                   |
+| Returns                                                                           |
 |   0 - success                                                                     |
-|   1 - mdot responds with failure to join network response                         |
-|  -1 - mdot responds with "ERROR"                                                  |
-|  -2 - Timeout error                                                               |
-|                                                                                   |
-| //TODO: parameters, saying something about network we want to join?               |
-|                                                                                   |
-| uses a default of 10,000ms (10sec) timeout                                        |
+|  -1 - Timeout error                                                               |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::join() {
   return(join(10000));
@@ -225,19 +229,13 @@ int LoRaAT::join() {
 
 /*----------------------------------------------------------------------------------|
 | Join a LoRa(WAN?) network                                                         |
-|                                                                                   | 
-| TODO: Review returns, can we return something more meaningfull?                   |
-| Currently, zero is a success, negative integers are generic errors, and positive  |
-| integers are a specific failure.                                                  |
+|                                                                                   |
+| Takes the parameter timeout, which is the number of milliseconds to wait for a    |
+| response.                                                                         |
+|                                                                                   |
+| Returns                                                                           |
 |   0 - success                                                                     |
-|   1 - mdot responds with failure to join network response                         |
 |  -1 - Timeout error                                                               |
-|  -2 - mdot responds with "ERROR"                                                  |
-|                                                                                   |
-| //TODO: parameters, saying something about network we want to join?               |
-|                                                                                   |
-| takes the parameter timeout, which is the number of milliseconds you want it      |
-| to wait for a response.                                                           |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::join(unsigned int timeout) {
   ///_debugStream->println(F("LaT:j : enter"));
@@ -263,25 +261,8 @@ void LoRaAT::leave() {
 }
 
 /*----------------------------------------------------------------------------------|
-| In general we send strings using the AT command, TODO: we could have overloaded   |
-| functions to accept other things?                                                 |
-|                                                                                   | 
-| TODO: Input checking?                                                             |
-|   - Too long?                                                                     |
-|      + Return error?                                                              |
-|      + Break it up?                                                               |
-|      + Send first part?                                                           |
-|    - Too short?                                                                   |
-|      + Is it even a problem?                                                      |
-|      + Pad it out?                                                                |
-|      + Return error?                                                              |
-|    - Invalid characters?                                                          |
-|      + Is it even a problem?                                                      |
-|      + Send anyway?                                                               |
-|      + Replace with something else?                                               |
-|      + Return error?                                                              |
-|                                                                                   |
-| uses a default of 10,000ms (10sec) timeout                                        |
+| Send method, takes a null terminated char array and sends that over the LoRaWAN   |
+| network. Using a default timeout of 10,000ms (10sec).                             |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::send(char* message) {
   ///_debugStream->println(F("LaT:s : enter, w/ default timeout"));
@@ -289,31 +270,29 @@ int LoRaAT::send(char* message) {
 }
 
 /*----------------------------------------------------------------------------------|
-| In general we send strings using the AT command, TODO: we could have overloaded   |
-| functions to accept other things?                                                 |
-|                                                                                   | 
-| TODO: Input checking?                                                             |
-|   - Too long?                                                                     |
-|      + Return error?                                                              |
-|      + Break it up?                                                               |
-|      + Send first part?                                                           |
-|    - Too short?                                                                   |
-|      + Is it even a problem?                                                      |
-|      + Pad it out?                                                                |
-|      + Return error?                                                              |
-|    - Invalid characters?                                                          |
-|      + Is it even a problem?                                                      |
-|      + Send anyway?                                                               |
-|      + Replace with something else?                                               |
-|      + Return error?                                                              |
+| Send method, takes a null terminated char array and sends that over the LoRaWAN   |
+| network. Using a specified timeout.                                               |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::send(char* message, unsigned int timeout) {
+  ///_debugStream->println(F("LaT:s : enter"));
+  uint8_t l;
+  
+  l = sizeof(_command);				             //Will only send char array up to null, or l (max size of _command buffer)
+  
+  return(send(message,l,10000));
+}
+
+/*----------------------------------------------------------------------------------|
+| Send method, takes a char array and length and sends that over the LoRaWAN        |
+| network. Using a specified timeout.                                               |
+-----------------------------------------------------------------------------------*/
+int LoRaAT::send(char* message, uint8_t length, unsigned int timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
   uint8_t ansCode;
   char ans1[] PROGMEM = "OK";
   
   sprintf_P(_command,(char*)F("AT+SEND "));
-  strcat(_command,message);                      //Append message to command
+  strncat(_command,message,length);              //Append message to command
 
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,timeout);
 
@@ -332,13 +311,11 @@ uint8_t LoRaAT::ping() {
 }
 
 /*----------------------------------------------------------------------------------|
-| Recieves a string in the format key:value,key:value,...                           |
+| Receives a string in the format key:value,key:value,...                           |
 |                                                                                   |
-| 1. The csv is translated to a json,                                               |
-| 2. The json is added to the _txBuffer                                             |
-| 3. The _txBuffer is processed                                                     |
-|                                                                                   |
-| //TODO: If not recieved in that format return an error                            |
+| 1. The csv is translated to a JSON.                                               |
+| 2. The json is fragmented to the _txBuffer .                                      |
+| 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::sendPairs(String pairs) 
 {
@@ -350,124 +327,105 @@ int LoRaAT::sendPairs(String pairs)
 }
 
 /*----------------------------------------------------------------------------------|
-| Recieves a char array in the format key:value,key:value,...                       |
+| Receives a null terminated char array in the format key:value,key:value,...       |
 |                                                                                   |
-| 1. The csv is translated to a json,                                               |
-| 2. The json is added to the _txBuffer                                             |
-| 3. The _txBuffer is processed                                                     |
-|                                                                                   |
-| //TODO: If not recieved in that format return an error                            |
+| 1. The csv is translated to a JSON.                                               |
+| 2. The json is fragmented to the _txBuffer .                                      |
+| 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::sendPairs(char* pairs) {
   ///_debugStream->println(F("LaT:sp: enter"));
-  ///_debugStream->println(F("LaT:sp: pairs:"));
-  ///_debugStream->print(F("LaT:sp: "));
-  ///_debugStream->println(pairs);
-  //Return constants
-  const byte UNKNOWN_FORMAT = 4;
-  int response = 0;
+  _debugStream->println(F("LaT:sp: pairs:"));
+  _debugStream->print(F("LaT:sp: "));
+  _debugStream->println(pairs);
 
   //String json;      
   char json[_MAX_PAIRS_SIZE];      
   
   //TODO: Check the string is actually pairs
-  if (false) { //TODO: if format not recognised
-    return(UNKNOWN_FORMAT);
-  }
 
   ///_debugStream->println(F("LaT:sp: convert to JSON"));
-  _pairsToJSON(json, pairs);
-  ///_debugStream->println(F("LaT:sp: pairs as JSON"));
+  _pairsToJSON(json, _MAX_PAIRS_SIZE, pairs);
+  _debugStream->println(F("LaT:sp: pairs as JSON"));
   _debugStream->print(F("LaT:sp: "));
   _debugStream->println(json);
   ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
   _createFragmentBuffer(json);
   ///_debugStream->println(F("LaT:sp: process buffer"));
-  response = _processBuffer();
 
-  return(response);
+  return(_processBuffer());
 }
 
 /*----------------------------------------------------------------------------------|
-| This function will take any correctly formatted char array of key:value pairs     |
-| and return a JSON formatted String.                                               |
+| This function will take any correctly formatted null terminated char array of     |
+| key:value pairs and pass back a JSON formatted char array with a maximum size of  |
+| jsonLength.                                                                       |
+|                                                                                   |
+| In the case the maximum JSON length is reached, the loop will exit, any partially |
+| created pair will be removed, and the JSON closed and returned.                   |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::_pairsToJSON(char* json, char* pairs) {
+void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   ///_debugStream->println(F("LaT:pj: enter"));
-  char* jsonPtr = json;
-  char temp[20];
+  char* jsonPtr;                                 //Points to the next free location
   int len = strlen(pairs);
-  char* tempPtr = temp;
+  
+  static const char JSON_BEGIN[2] = {'{','\"'};
+  static const char JSON_STR_VAL[2] = {'\"',':'};
+  static const char JSON_PAIR_PAIR[2] = {',','\"'};
+  static const char JSON_END[2] = {'}','\0'};
 
-  for (jsonPtr = json; jsonPtr < json + sizeof(json); jsonPtr++) 
-  {
-    *jsonPtr= '\0';
-  }
-
-  for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
-  {
-    *tempPtr = '\0';
-  }
-
+  //Set the pointer back to beginning of JSON
   jsonPtr = json;
-  tempPtr = temp;
-
-  // Adds the first {
-  *jsonPtr++ = '{';
-
+  // Adds the first { and "
+  memcpy(jsonPtr,JSON_BEGIN,sizeof(JSON_BEGIN));
+  jsonPtr += sizeof(JSON_BEGIN);
+   
   //Loop through each of the characters, when getting to a delimiter, act accordingly
-  for (int i = 0; i < len; i++) 
-  {
-    char c = pairs[i];
-    if (c == ':') 
-    {
-      *jsonPtr++ = '\"';
-      int no = tempPtr-temp;
-      strncpy(jsonPtr, temp, no);
-      jsonPtr += no;
-      *jsonPtr++ = '\"';
-      *jsonPtr++ = ':';
-      for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
-      {
-        *tempPtr = '\0';
-      }
-      tempPtr = temp;
-    } 
-    else if (c == ',') 
-    {
-      int no = tempPtr-temp;
-      strncpy(jsonPtr, temp, no);
-      jsonPtr += no;
-      *jsonPtr++ = ',';
-      for (tempPtr = temp; tempPtr < temp + sizeof(temp); tempPtr++) 
-      {
-        *tempPtr = '\0';
-      }
-      tempPtr = temp;
-    } 
-    else 
-    {
-      *tempPtr++ = c;
+  for (int j = 0; j < len && ((jsonPtr - json) < jsonLength); j++) {
+    char c = pairs[j];
+    switch (c) {
+      case ':':
+        if (jsonPtr - json + sizeof(JSON_STR_VAL) < jsonLength) {
+          memcpy(jsonPtr,JSON_STR_VAL,sizeof(JSON_STR_VAL));
+          jsonPtr += sizeof(JSON_STR_VAL);
+        }
+		break;
+	  case ',':
+        if (jsonPtr - json + sizeof(JSON_PAIR_PAIR) < jsonLength) {
+          memcpy(jsonPtr,JSON_PAIR_PAIR,sizeof(JSON_PAIR_PAIR));
+          jsonPtr += sizeof(JSON_PAIR_PAIR);
+        }
+		break;
+	  default:
+        if ((jsonPtr - json) < jsonLength) {
+          *jsonPtr++ = c;
+	    }
     }
   }
-  int no = tempPtr-temp;
-  strncpy(jsonPtr, temp, no);
-  jsonPtr += no;
-  //no comma at the end of last JSON value
-  *jsonPtr++ = '}';
-  *jsonPtr++ = '\0';
-
+  
+  //If we can't fit the JSON termination i.e. }\0, make room, then check for a partial pair, removing it if exists
+  if ((jsonPtr - json + sizeof(JSON_END)) >= jsonLength) {
+	jsonPtr -= sizeof(JSON_END);
+	//"jsonPtr > json" so not to delete the open curly brace '{'
+	while (jsonPtr > json && *jsonPtr != ',') {
+      *jsonPtr-- = '\0';
+    }
+  }
+  
+  memcpy(jsonPtr,JSON_END,sizeof(JSON_END));
+  jsonPtr += sizeof(JSON_END);
+  
   ///_debugStream->println(F("LaT:pj: exit"));
   return;
 }
 
 /*----------------------------------------------------------------------------------|
-| This function will take and ASCII String message and fragment it into 11 byte     |
-| packets.                                                                          |
+| This function will take and null terminated ASCII char array message and fragment |
+| it into 11 byte packets.                                                          |
 |                                                                                   |
-| 2 bytes of header, and 9 bytes of payloads                                        |
+| 2 bytes of header, and 9 bytes of payload.                                        |
 |                                                                                   |
-| header is of the format [fragment number][total number of fragments]              |
+| Header is of the format [fragment number][total number of fragments]              |
 -----------------------------------------------------------------------------------*/
 void LoRaAT::_createFragmentBuffer(char* message) {
   ///_debugStream->println(F("LaT:fb: enter"));
@@ -518,7 +476,7 @@ void LoRaAT::_createFragmentBuffer(char* message) {
         // padding the rest of the fragment if not fitting 100% with space
         while (j < _PAYLOAD_SIZE)
         {
-          _txBuffer[_txPutter][j + _HEADER_SIZE]   = ' ';
+          _txBuffer[_txPutter][j + _HEADER_SIZE]   = '.';//TODO:DEBUG:undothis
           j++;
         }
         break;
@@ -531,45 +489,96 @@ void LoRaAT::_createFragmentBuffer(char* message) {
 
 /*----------------------------------------------------------------------------------|
 | Buffer processing function, which will send out all data currently in the buffer  |
+|                                                                                   |
+| This method gets a pointer to the fragment buffer, it then checks the mDot data   |
+| rate, uses that value to set the length of bytes to send (from the fragment       |
+| buffer). It checks to see if it will read past the end of the buffer, if it does  |
+| it will reduce length to read only to the end of the buffer.                      |
+|                                                                                   |
+| The send function is then called with a reference to where in the fragment buffer |
+| to start from and the number of bytes to send. After the send the pointer in the  |
+| fragment buffer is updated. If we are pointing to the end of the buffer (or past  |
+| it, which should never happen if we ever point past it, the length gets reduced   |
+| accordingly) the loop is exited.                                                  |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::_processBuffer() {
-  char temp[_MAX_MDOT_COMMAND - 8];
   ///_debugStream->println(F("LaT:pb: enter"));
+  char* txGtr = (char*)_txBuffer;                //Pointer to where in the buffer we're up to
+  uint8_t length = 0;                            //Number of bytes to send from buffer
+  uint8_t buffLength = _txPutter * _PACKET_SIZE; //Number of bytes in _txBuffer
+  uint8_t result = -1;
 
-  int response;
-  for(_txGetter; _txGetter < _txPutter; _txGetter++ )
-  {
-    ///_debugStream->print(F("LaT:pb: putter: "));
-    ///_debugStream->print(_txPutter);
-    ///_debugStream->print(F(" getter: "));
-    ///_debugStream->println(_txGetter);
-    ///_debugStream->println(F("LaT:pb: packet as HEX:"));
-    ///_debugStream->print(F("LaT:pb: "));
-    for (int j=0; j < _PACKET_SIZE; j++)
-    {
-      ///_debugStream->print(_txBuffer[_txGetter][j], HEX);
-      temp[j] = _txBuffer[_txGetter][j];
-      temp[j+1] = '\0';
+  while (txGtr < (char*)_txBuffer + buffLength) {
+    getDataRate();                               //Update data rate public member
+    switch (dataRate) {
+      case '3':
+        length = _PACKET_SIZE * 4;               //TODO: Calcualte actual byte capacity
+        break;
+      case '2':
+        length = _PACKET_SIZE * 3;               //TODO: Calcualte actual byte capacity
+        break;
+      case '1':
+        length = _PACKET_SIZE * 2;               //TODO: Calcualte actual byte capacity
+        break;
+      case '0':
+      default:
+        length = _PACKET_SIZE * 1;               //TODO: Calcualte actual byte capacity
     }
-    ///_debugStream->println();
-    response = send(temp);
-    ///_debugStream->print(F("LaT:pb: sent. response: "));
-    ///_debugStream->println(response, DEC);
+	
+    //Ensure the program doesn't read past the allocated memory
+    if (txGtr + length > (char*)_txBuffer + buffLength) {
+      length = (char*)_txBuffer + buffLength - txGtr;
+    }
+	
+	result = send(txGtr,length,10000);
+    
+    txGtr += length;
   }
-  _txPutter = 0;
-  _txGetter = 0;
-  return(response);
+  
+  return(0);
 }
 
+/*----------------------------------------------------------------------------------|
+| Sets default settings recomended by Campbell Scientific Australia                 |
+|                                                                                   |
+| Some of these default settings may be required for successful communication with  |
+| the Campbell Scientific Australia LoRaWAN server.                                 |
+-----------------------------------------------------------------------------------*/
+int LoRaAT::setDefaults() {
+  uint8_t result = -1;
+
+  char key[] = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+  char id[] = "00:00:aa:00:00:00:00:01";
+  
+  if (setFrequencySubBand('1') == 0) {
+    result = 0;
+  }
+  if (setPublicNetwork('1') == 0) {
+    result = 0;
+  }
+  if (setNetworkID(id) == 0) {
+    result = 0;
+  }
+  if (setNetworkKey(key) == 0) {
+    result = 0;
+  }
+  if (setDataRate('2') == 0) {
+    result = 0;
+  }
+  if (setAdaptiveDataRate('1') == 0) {
+    result = 0;
+  }
+
+  commitSettings();
+  
+  return(result);
+}
 
 /*----------------------------------------------------------------------------------|
 | Sets the frequency sub band                                                       |
 |                                                                                   |
 | AT+FSB ?                                                                          |
 | AT+FSB: (0-8)                                                                     |
-|                                                                                   |
-| TODO:                                                                             |
-|  * Overload to accept, string, int, uint, byte, maybe others, maybe less.         |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::setFrequencySubBand(char fsb) {
   uint8_t ansCode;
@@ -770,8 +779,8 @@ int LoRaAT::setDataRate(char txdr) {
   char ans1[] PROGMEM = "OK";
   
   sprintf_P(_command,(char*)F("AT+TXDR "));
-  _command[9] = txdr;
-  _command[10] = '\0';
+  _command[8] = txdr;
+  _command[9] = '\0';
   
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
 
@@ -797,6 +806,52 @@ int LoRaAT::getDataRate() {
 
   if (ansCode == 1) {
 	dataRate = r[2];
+    return (0);
+  }
+  
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Turns adaptive data rate off/on.                                                  |
+|                                                                                   |
+| AT+ADR ?                                                                          |
+| AT+ADR: (0,1)                                                                     |
+|  0 - off                                                                          |
+|  1 - on                                                                           |
+-----------------------------------------------------------------------------------*/
+int LoRaAT::setAdaptiveDataRate(char adr) {
+  uint8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  
+  sprintf_P(_command,(char*)F("AT+ADR "));
+  _command[7] = adr;
+  _command[8] = '\0';
+  
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+
+  if (ansCode == 1) {
+	adaptiveDataRate = adr;
+    return (0);
+  }
+  
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Gets the state of the adaptive data rate.                                         |
+-----------------------------------------------------------------------------------*/
+int LoRaAT::getAdaptiveDataRate() {
+  uint8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  char* r;
+  
+  sprintf_P(_command,(char*)F("AT+ADR?"));
+  
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+
+  if (ansCode == 1) {
+	adaptiveDataRate = r[0];
     return (0);
   }
   
