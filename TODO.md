@@ -1,5 +1,6 @@
 - [x] Init mDot by default
    - [ ] Set Data Rate and turn ADR on
+- [ ] Get and Set ADR.
 - [x] Default library baud rate 38400
 - [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not have a baud rate of 38400 set it to 38400.
 - [ ] Check mDot Data rate before send.
