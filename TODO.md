@@ -2,7 +2,7 @@
    - [ ] Set Data Rate and turn ADR on
 - [ ] Get and Set ADR.
 - [x] Default library baud rate 38400
-- [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not have a baud rate of 38400 set it to 38400.
+- [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not to have a baud rate of u32BaudRate set it to u32BaudRate.
 - [ ] Check mDot Data rate before send.
 - [ ] Send multiple fragments based on Data Rate.
 - [ ] Overload send() function so it can also accept a char* and length. For when we don't want to read until null.
@@ -20,6 +20,8 @@
    - [ ] Give a general failure or a specific one?
 - [x] Check we're not using sizeof on pointers
    * Size of a pointer is 2bytes, not the size of the array it points to.
+- [ ] Check for invalid characters user could pass to pairs?
+- [ ] Check pairs is a valid entry?
 - [x] Check when we're using strlen it's alwyas on a null terminated array.
 - [ ] strlen is used on pairs[] which may not be null terminated.
    * If a user passes a string bigger than the buffer. The program reads in that string up to the size of the buffer, in that case the last character will be what's in the string at that point (not nessicarly a null).
@@ -67,3 +69,4 @@
    - [x] Don't forget to increment pointer
 - [X] json if/else can be switch
 - [X] for/if can be merged, put if in for loop conditional statement
+- [ ] Look at overloading some of the setters

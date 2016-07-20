@@ -3,7 +3,7 @@
 
   Version: v0.0.1.1
 
-  Breif: Arduino library for controlling Multitech mDot LoRa modules using 
+  Brief: Arduino library for controlling Multitech mDot LoRa modules using 
          AT commands.
 
   Copyright: This library is published under GNU AGPLv3 license.
