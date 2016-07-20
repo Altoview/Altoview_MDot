@@ -476,7 +476,7 @@ void LoRaAT::_createFragmentBuffer(char* message) {
         // padding the rest of the fragment if not fitting 100% with space
         while (j < _PAYLOAD_SIZE)
         {
-          _txBuffer[_txPutter][j + _HEADER_SIZE]   = ' ';
+          _txBuffer[_txPutter][j + _HEADER_SIZE]   = '.';//TODO:DEBUG:undothis
           j++;
         }
         break;
@@ -491,32 +491,57 @@ void LoRaAT::_createFragmentBuffer(char* message) {
 | Buffer processing function, which will send out all data currently in the buffer  |
 -----------------------------------------------------------------------------------*/
 int LoRaAT::_processBuffer() {
-  char temp[_MAX_MDOT_COMMAND - 8];
   ///_debugStream->println(F("LaT:pb: enter"));
+  char* txGtr = (char*)_txBuffer;                //Pointer to where in the buffer we're up to
+  uint8_t length = 0;                            //Number of bytes to send from buffer
+  uint8_t buffLength = _txPutter * _PACKET_SIZE; //Number of bytes in _txBuffer
 
-  int response;
-  for(_txGetter; _txGetter < _txPutter; _txGetter++ )
-  {
-    ///_debugStream->print(F("LaT:pb: putter: "));
-    ///_debugStream->print(_txPutter);
-    ///_debugStream->print(F(" getter: "));
-    ///_debugStream->println(_txGetter);
-    ///_debugStream->println(F("LaT:pb: packet as HEX:"));
-    ///_debugStream->print(F("LaT:pb: "));
-    for (int j=0; j < _PACKET_SIZE; j++)
-    {
-      ///_debugStream->print(_txBuffer[_txGetter][j], HEX);
-      temp[j] = _txBuffer[_txGetter][j];
-      temp[j+1] = '\0';
+  while (txGtr < (char*)_txBuffer + buffLength) {
+    getDataRate();                               //Update data rate public member
+    _debugStream->print(F("LaT:pb: DR: "));
+	_debugStream->println(dataRate);
+    switch (dataRate) {
+      case '3':
+        length = _PACKET_SIZE * 4;               //TODO: Calcualte actual byte capacity
+        break;
+      case '2':
+        length = _PACKET_SIZE * 3;               //TODO: Calcualte actual byte capacity
+        break;
+      case '1':
+        length = _PACKET_SIZE * 2;               //TODO: Calcualte actual byte capacity
+        break;
+      case '0':
+      default:
+        length = _PACKET_SIZE * 1;               //TODO: Calcualte actual byte capacity
     }
-    ///_debugStream->println();
-    response = send(temp);
-    ///_debugStream->print(F("LaT:pb: sent. response: "));
-    ///_debugStream->println(response, DEC);
+	
+    //Ensure the program doesn't read past the allocated memory
+    if (txGtr + length > (char*)_txBuffer + buffLength) {
+      length = (char*)_txBuffer + buffLength - txGtr;
+    }
+	
+/* 	_debugStream->print(F("LaT:pb: DR: "));
+	_debugStream->print(dataRate);
+	_debugStream->print(F(", LEN: "));
+	_debugStream->print(length);
+	_debugStream->print(F(", buf: "));
+	_debugStream->print((int) _txBuffer);
+	_debugStream->print(F(", gtr: "));
+	_debugStream->println((int) txGtr); */
+	
+	send(txGtr,length,10000);
+    
+    txGtr += length;
+	
+/* 	_debugStream->print(F("LaT:pb: ngtr: "));
+	_debugStream->print((int) txGtr);
+	_debugStream->print(F(", ptr: "));
+	_debugStream->print(buffLength);
+	_debugStream->print(F(", mgtr: "));
+	_debugStream->println((int) ((char*)_txBuffer + buffLength)); */
   }
-  _txPutter = 0;
-  _txGetter = 0;
-  return(response);
+  
+  return(0);
 }
 
 /*----------------------------------------------------------------------------------|

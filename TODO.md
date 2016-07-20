@@ -2,8 +2,9 @@
 ## Version 1 Goal
 - [x] Get and Set ADR.
 - [x] Default to set Data Rate to [?] and turn ADR on
-- [ ] Check mDot Data rate before send.
-- [ ] Send multiple fragments based on Data Rate.
+- [x] Check mDot Data rate before send.
+- [x] Send multiple fragments based on Data Rate.
+- [ ] Send correct number of fragments based on Data Rate.
 - [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not to have a baud rate of u32BaudRate set it to u32BaudRate.
 - [ ] Public Member to indicate last get/set result.
    * What if we do multiple get/sets in a row, and all fail expect the last?
@@ -34,6 +35,7 @@
 	 
 ## Future Version Goals
 - [x] Overload send() function so it can also accept a char* and length. For when we don't want to read until null.
+- [ ] Change _txPutter to number of bytes, not number of fragments. Or change name to be more meaningful.
 - [ ] Ensure pairs[] and json[] are released after they're used. They are big chunks of memory on the stack.
    - [ ] Consider other ways to handle pairs[] and json[]
 - [ ] Handle a fragment failing to send?
