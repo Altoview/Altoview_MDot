@@ -702,7 +702,7 @@ int8_t LoRaAT::setNetworkID(char* id) {
 
   if (ansCode == 1) {
     strncpy(networkId,id,sizeof(networkId)-1);
-    networkId[23] = '\0';
+    networkId[(sizeof(networkId)-1)] = '\0';
     return (0);
   }
 
@@ -722,8 +722,8 @@ int8_t LoRaAT::getNetworkID() {
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-    strncpy(networkId,r,sizeof(networkId)-1);
-    networkId[23] = '\0';
+    strncpy(networkId,r,(sizeof(networkId)-1));
+    networkId[(sizeof(networkId)-1)] = '\0';
     return (0);
   }
 
@@ -752,7 +752,7 @@ int8_t LoRaAT::setNetworkKey(char* key) {
 
   if (ansCode == 1) {
     strncpy(networkKey,key,sizeof(networkKey)-1);
-    networkKey[47] = '\0';
+    networkKey[(sizeof(networkKey)-1)] = '\0';
     return (0);
   }
 
@@ -774,7 +774,7 @@ int8_t LoRaAT::getNetworkKey() {
 
   if (ansCode == 1) {
     strncpy(networkKey,r,(sizeof(networkKey)-1));
-    networkKey[47] = '\0';
+    networkKey[(sizeof(networkKey)-1)] = '\0';
     return (0);
   }
 
@@ -865,6 +865,90 @@ int8_t LoRaAT::getAdaptiveDataRate() {
 
   if (ansCode == 1) {
     adaptiveDataRate = r[0];
+    return (0);
+  }
+
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Gets the device ID                                                                |
+-----------------------------------------------------------------------------------*/
+int8_t LoRaAT::getDeviceId() {
+  int8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  char* r;
+
+  sprintf_P(_command,(char*)F("AT+DI?"));
+
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+
+  if (ansCode == 1) {
+    strncpy(deviceId,r,(sizeof(deviceId)-1));
+    deviceId[(sizeof(deviceId)-1)] = '\0';
+    return (0);
+  }
+
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Gets the network address                                                          |
+-----------------------------------------------------------------------------------*/
+int8_t LoRaAT::getNetworkAddress() {
+  int8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  char* r;
+
+  sprintf_P(_command,(char*)F("AT+NA?"));
+
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+
+  if (ansCode == 1) {
+    strncpy(networkAddress,r,(sizeof(networkAddress)-1));
+    networkAddress[(sizeof(networkAddress)-1)] = '\0';
+    return (0);
+  }
+
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Gets the network session key                                                      |
+-----------------------------------------------------------------------------------*/
+int8_t LoRaAT::getNetworkSessionKey() {
+  int8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  char* r;
+
+  sprintf_P(_command,(char*)F("AT+NSK?"));
+
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+
+  if (ansCode == 1) {
+    strncpy(networkSessionKey,r,(sizeof(networkSessionKey)-1));
+    networkSessionKey[(sizeof(networkSessionKey)-1)] = '\0';
+    return (0);
+  }
+
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Gets the data session key                                                         |
+-----------------------------------------------------------------------------------*/
+int8_t LoRaAT::getDataSessionKey() {
+  int8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+  char* r;
+
+  sprintf_P(_command,(char*)F("AT+DSK?"));
+
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+
+  if (ansCode == 1) {
+    strncpy(dataSessionKey,r,(sizeof(dataSessionKey)-1));
+    dataSessionKey[(sizeof(dataSessionKey)-1)] = '\0';
     return (0);
   }
 
