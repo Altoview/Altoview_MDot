@@ -401,7 +401,7 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   _debugStream->println(json);
 
   //Loop through each of the characters, when getting to a delimiter, act accordingly
-  for (uint8_t j = 0; j < len && ((jsonPtr - json) < jsonLength); j++) {
+  for (uint8_t j = 0; j < len && (jsonPtr - json + sizeof(JSON_END)) < jsonLength; j++) {
     char c = pairs[j];
     switch (c) {
       case ':':
