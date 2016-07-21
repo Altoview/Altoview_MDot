@@ -28,11 +28,11 @@
 /*--------------------------------------------------------------------------------------
   Definitions
   --------------------------------------------------------------------------------------*/
-SoftwareSerial debugSerial(10, 11);              // RX, TX
+SoftwareSerial debugSerial(10, 11);              //RX, TX
 LoRaAT mdot(0, &debugSerial);                    //Instantiate a LoRaAT object
 DS3231 RTC;                                      //Create the DS3231 object
 
-const uint32_t MAX_SESSION_AGE = 4*24*60*60;     //Max session age allowed in seconds.
+const uint32_t MAX_SESSION_AGE = 345600;         //Max session age allowed in seconds. e.g. 4 days => 4*24*60*60 = 345600
 DateTime loraSessionStart;                       //Time the LoRa session began
 
 /*--- setup() --------------------------------------------------------------------------
