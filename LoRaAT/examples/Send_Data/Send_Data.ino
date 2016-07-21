@@ -43,10 +43,10 @@ void setup() {
   debugSerial.println(F("\r\n\r\n++ START ++\r\n\r\n"));
 
 
-  //do {
-    //responseCode = mdot.join();
-    //delay(10000);
-  //} while (responseCode != 0);
+  do {
+    responseCode = mdot.join();
+    delay(10000);
+  } while (responseCode != 0);
   debugSerial.print(F("SETUP : Join result: "));
   debugSerial.println(String(responseCode));
 }
@@ -104,26 +104,7 @@ void loop() {
 
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
-  //To test different data rates
-  switch ( loopNum % 5) {
-    case 1:
-      mdot.setDataRate('1');
-      break;
-    case 2:
-      mdot.setDataRate('2');
-      break;
-    case 3:
-      mdot.setDataRate('3');
-      break;
-    case 4:
-      mdot.setDataRate('4');
-      break;
-    case 0:
-    default:
-      mdot.setDataRate('0');
-  }
-
-  delay(10000);
+  delay(120000);
   loopNum++;
 }
 
