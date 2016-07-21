@@ -16,28 +16,28 @@
 - [ ] Public Member to indicate last get/set result.
    * What if we do multiple get/sets in a row, and all fail except the last?
 - [x] Check pairToJson() works for the following cases:
-   [x] Pairs expand out leaving ample space to finish JSON with }\0
+   - [x] Pairs expand out leaving ample space to finish JSON with }\0
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b : d e f , h i             :  V
      + Simply add }\0 to end
-   [x] Pairs expand out leaving just enough space to finish JSON with }\0
+   - [x] Pairs expand out leaving just enough space to finish JSON with }\0
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b : d e f , h i             U  V  :  X
      + Simply add }\0 to end
-   [x] No comma found
+   - [x] No comma found
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b c d e f g h i             U  V  W  X  Y  Z
      + Cycle all the way back to beginning and add {}\0
-   [x] Comma found in last two
+   - [x] Comma found in last two
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b c d e f g h i             U  V  W  X  ,  Z
-     - [x] If end is reached, always delete last two before looking for comma. Mention this explicitly in comments.
-   [x] Comma found with ample space
+   - [x] Comma found with ample space
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b c d e f g h i             ,  V  W  X  Y  Z
-   [x] Comma found with just enough space
+   - [x] Comma found with just enough space
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100
      + { a b c d e f g h i             U  V  W  X  ,  Z
+   - [x] If end is reached, always delete last two before looking for comma. Mention this explicitly in comments.
 - [ ] Check what Data Rate should default to.
 
 ## Future Version Goals
