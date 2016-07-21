@@ -15,8 +15,10 @@
   --------------------------------------------------------------------------------------*/
 #include <LoRaAT.h>               //Include LoRa AT libraray
 #include <SoftwareSerial.h>       //Software serial for debug
+#include <EEPROM.h>
 #include <Wire.h>
-#include "DS3231.h"
+#include "DS3231.h"  //http://www.seeedstudio.com/wiki/Seeeduino_Stalker_v2.3#Real_Time_Clock_.28RTC.29_Related
+                     //https://github.com/bpg/DS3231
 
 /*--------------------------------------------------------------------------------------
   Definitions
@@ -33,28 +35,54 @@ DS3231 RTC;                             //Create the DS3231 object
    - Opens serial communication with MDOT
   --------------------------------------------------------------------------------------*/
 void setup() {
-  int responseCode;
+  const uint32_t MAX_SESSION_AGE = 240;        //Max session age allowed in seconds.
+  int responseCode;            //Response of mDot commands
+  DateTime loraSessionStart;   //Time the LoRa session began
+  DateTime beginTime = RTC.now();
+
+  debugSerial.println(F("\r\n\r\n++ START ++\r\n\r\n"));
   
   debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
   mdot.begin(38400);          //Begin (possibly amongst other things) opens serial comms with MDOT
   Wire.begin();
   RTC.begin();
-  
-  debugSerial.println(F("\r\n\r\n++ START ++\r\n\r\n"));
 
+  //First restore any saved session
+  mdot.restoreLoraSession();
 
-  do {
-    responseCode = mdot.join();
-    delay(10000);
-  } while (responseCode != 0);
-  debugSerial.print(F("SETUP : Join result: "));
-  debugSerial.println(String(responseCode));
-
+  //Debug feedback to check what happened
   debugSerial.print(F("SETUP : Network Session Key: "));
   debugSerial.println(mdot.networkSessionKey);
-
   debugSerial.print(F("SETUP :   Data Sesstion Key: "));
   debugSerial.println(mdot.dataSessionKey);
+
+  if (mdot.networkSessionKey != "00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00") {
+    //If we have a valid saved session key, check the Arduino saved timestamp
+    EEPROM.get(1,loraSessionStart);
+    debugSerial.print(F("SETUP : Timestamp mem: "));
+    debugSerial.println(loraSessionStart.get());
+    debugSerial.print(F("SETUP : Timestamp now: "));
+    debugSerial.println(RTC.now().get());
+  }
+
+//  //If we have a blank session key, or an old session key, rejoin the LoRa network
+//  if ((mdot.networkSessionKey == "00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00") || ((RTC.now.get() - loraSessionStart.get() > MAX_SESSION_AGE))) {
+//    do {
+//      responseCode = mdot.join();
+//      delay(10000);
+//    } while (responseCode != 0);
+//    debugSerial.print(F("SETUP : Join result: "));
+//    debugSerial.println(String(responseCode));
+//  
+//    debugSerial.print(F("SETUP : Network Session Key: "));
+//    debugSerial.println(mdot.networkSessionKey);
+//  
+//    debugSerial.print(F("SETUP :   Data Sesstion Key: "));
+//    debugSerial.println(mdot.dataSessionKey);
+//  
+//    loraSessionStart = RTC.now();
+//    EEPROM.put(1,loraSessionStart);
+//  }
 }
 
 /*--- loop() ---------------------------------------------------------------------------
