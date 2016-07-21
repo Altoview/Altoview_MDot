@@ -64,6 +64,12 @@ class LoRaAT
     int8_t commitSettings();
 
   private:
+    static const uint8_t _DR0_PAYLOAD_USAGE = 11;     //Use 11 of 11 available bytes in payload
+    static const uint8_t _DR1_PAYLOAD_USAGE = 53;     //Use 53 of 53 available bytes in payload
+    static const uint8_t _DR2_PAYLOAD_USAGE = 126;    //Use 126 of 126 available bytes in payload
+    static const uint8_t _DR3_PAYLOAD_USAGE = 126;    //Use 126 of 242 available bytes in payload
+    static const uint8_t _DR4_PAYLOAD_USAGE = 126;    //Use 126 of 242 available bytes in payload
+
     static const uint8_t _MAX_FRAGMENTS = 16;
     static const uint8_t _PACKET_SIZE = 11;
     static const uint8_t _HEADER_SIZE = 2;
@@ -73,13 +79,13 @@ class LoRaAT
     static const uint8_t _MAX_PAIRS_SIZE = 100;
 
     char _txBuffer[_MAX_FRAGMENTS][_PACKET_SIZE];
-    uint8_t _txPutter = 0;
+    uint8_t _txPutter = 0;                        //Number of fragments in buffer. TODO: Replace/rename
 
     static const uint8_t _MAX_MDOT_RESPONSE = 200;//Max number of bytes the mdot might return
     char _response[_MAX_MDOT_RESPONSE];           //mDot response buffer
     uint8_t _length;                              //Lenght of a response
 
-    static const uint8_t _MAX_MDOT_COMMAND = 120; //TODO: Check against the manual for mDot
+    static const uint8_t _MAX_MDOT_COMMAND = 150; //TODO: Check against the manual for mDot
     char _command[_MAX_MDOT_COMMAND];
 
     int8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);

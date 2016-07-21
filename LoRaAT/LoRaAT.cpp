@@ -511,18 +511,21 @@ int8_t LoRaAT::_processBuffer() {
   while (txGtr < (char*)_txBuffer + buffLength) {
     getDataRate();                               //Update data rate public member
     switch (dataRate) {
+      case '4':
+        length = floor(_DR4_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
+        break;
       case '3':
-        length = _PACKET_SIZE * 4;               //TODO: Calcualte actual byte capacity
+        length = floor(_DR3_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
         break;
       case '2':
-        length = _PACKET_SIZE * 3;               //TODO: Calcualte actual byte capacity
+        length = floor(_DR2_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
         break;
       case '1':
-        length = _PACKET_SIZE * 2;               //TODO: Calcualte actual byte capacity
+        length = floor(_DR1_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
         break;
       case '0':
       default:
-        length = _PACKET_SIZE * 1;               //TODO: Calcualte actual byte capacity
+        length = floor(_DR0_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
     }
 
     //Ensure the program doesn't read past the allocated memory
