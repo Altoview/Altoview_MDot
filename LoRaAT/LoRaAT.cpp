@@ -321,8 +321,8 @@ int8_t LoRaAT::sendPairs(String pairs)
 {
   ///_debugStream->println(F("LaT:sp: enter"));
   char pairsC[_MAX_PAIRS_SIZE];
-  ///_debugStream->println(F("LaT:sp: string to char[]"));
   pairs.toCharArray(pairsC, _MAX_PAIRS_SIZE);
+  pairsC[_MAX_PAIRS_SIZE-1] = '\0';
   LoRaAT::sendPairs(pairsC);
 }
 
