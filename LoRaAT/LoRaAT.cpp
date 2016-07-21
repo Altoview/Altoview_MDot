@@ -335,7 +335,6 @@ int8_t LoRaAT::sendPairs(String pairs)
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::sendPairs(char* pairs) {
   ///_debugStream->println(F("LaT:sp: enter"));
-  _debugStream->println(F("LaT:sp: pairs:"));
   _debugStream->print(F("LaT:sp: "));
   _debugStream->println(pairs);
 
@@ -346,7 +345,6 @@ int8_t LoRaAT::sendPairs(char* pairs) {
 
   ///_debugStream->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, _MAX_PAIRS_SIZE, pairs);
-  _debugStream->println(F("LaT:sp: pairs as JSON"));
   _debugStream->print(F("LaT:sp: "));
   _debugStream->println(json);
   ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
