@@ -5,6 +5,13 @@
 - [x] Check mDot Data rate before send.
 - [x] Send multiple fragments based on Data Rate.
 - [x] Send correct number of fragments based on Data Rate.
+- [ ] strlen is used on pairs[] which may not be null terminated.
+   * If a user passes a string bigger than the buffer. The program reads in that string up to the size of the buffer, in that case the last character will be what's in the string at that point (not necessarily a null).
+   * The user could also pass a non-null terminated char array of any length and also cause the same fault.
+- [ ] Always save session after join.
+- [ ] Server expects a new join request every 5 days
+   - [ ] long term timer to monitor, time since last join
+   - [ ] Check timer before send(), and join if time condition met
 - [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not to have a baud rate of u32BaudRate set it to u32BaudRate.
 - [ ] Public Member to indicate last get/set result.
    * What if we do multiple get/sets in a row, and all fail except the last?
@@ -49,14 +56,7 @@
    - [ ] Give a general failure or a specific one?
 - [ ] Check for invalid characters user could pass to pairs?
 - [ ] Check pairs is a valid entry?
-- [ ] strlen is used on pairs[] which may not be null terminated.
-   * If a user passes a string bigger than the buffer. The program reads in that string up to the size of the buffer, in that case the last character will be what's in the string at that point (not nessicarly a null).
-   * The user could also pass a non-null terminated char array of any lenght and also cause the same fault.
 - [ ] Handle JSON buffer smaller than 2?
 - [ ] Max end time rollover bug
 - [x] unsigned int, and similar needs to be explicitly an uintx_t
-- [ ] Server expects a new join request every 5 days
-   - [ ] long term timer to monitor, time since last join
-   - [ ] Check timer before send(), and join if time condition met
-- [ ] Always save session after join.
 - [ ] Look at overloading some of the setters
