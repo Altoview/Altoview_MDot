@@ -60,4 +60,4 @@
 - [ ] Max end time rollover bug
 - [x] unsigned int, and similar needs to be explicitly an uintx_t
 - [ ] Look at overloading some of the setters
-- [ ] Bug fix, seems to be a null in getNetworkKey
+- [ ] Bug fix, seems to be a null in any long response gets
