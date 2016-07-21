@@ -44,8 +44,9 @@ class LoRaAT
     int8_t send(char*);                           //Generic send command, using AT+SEND
     int8_t send(char*, uint16_t);                 //Use specific timeout.
     int8_t send(char*, uint8_t, uint16_t);        //Use specific message length.
-    int8_t sendPairs(char*);                      //Takes key,value pairs, forms a message, and sends to the LoRa server.
     int8_t sendPairs(String);                     //Takes key,value pairs, forms a message, and sends to the LoRa server.
+    int8_t sendPairs(String*);                    //Takes key,value pairs, forms a message, and sends to the LoRa server.
+    int8_t sendPairs(char*);                      //Takes key,value pairs, forms a message, and sends to the LoRa server.
     int8_t ping();                                //Not yet implemented
 
     int8_t setDefaults();

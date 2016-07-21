@@ -317,11 +317,21 @@ int8_t LoRaAT::ping() {
 | 2. The json is fragmented to the _txBuffer .                                      |
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::sendPairs(String pairs)
-{
+int8_t LoRaAT::sendPairs(String pairs) {
+  return(sendPairs(&pairs));
+}
+
+/*----------------------------------------------------------------------------------|
+| Receives a string in the format key:value,key:value,...                           |
+|                                                                                   |
+| 1. The csv is translated to a JSON.                                               |
+| 2. The json is fragmented to the _txBuffer .                                      |
+| 3. The _txBuffer is processed (sent).                                             |
+-----------------------------------------------------------------------------------*/
+int8_t LoRaAT::sendPairs(String* pairs) {
   ///_debugStream->println(F("LaT:sp: enter"));
   char pairsC[_MAX_PAIRS_SIZE];
-  pairs.toCharArray(pairsC, _MAX_PAIRS_SIZE);
+  pairs->toCharArray(pairsC, _MAX_PAIRS_SIZE);
   pairsC[_MAX_PAIRS_SIZE-1] = '\0';
   return(sendPairs(pairsC));
 }
