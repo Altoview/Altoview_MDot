@@ -4,7 +4,7 @@
 - [x] Default to set Data Rate to [?] and turn ADR on
 - [x] Check mDot Data rate before send.
 - [x] Send multiple fragments based on Data Rate.
-- [ ] Send correct number of fragments based on Data Rate.
+- [x] Send correct number of fragments based on Data Rate.
 - [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not to have a baud rate of u32BaudRate set it to u32BaudRate.
 - [ ] Public Member to indicate last get/set result.
    * What if we do multiple get/sets in a row, and all fail expect the last?
