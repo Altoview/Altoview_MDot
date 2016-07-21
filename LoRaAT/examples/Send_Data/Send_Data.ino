@@ -98,13 +98,13 @@ void loop() {
   testMessage += Sec;
   testMessage += now.second();
   
-  debugSerial.println("MAIN  : testMsg: " + testMessage);
+  debugSerial.println("MAIN  : " + testMessage);
 
   responseCode = mdot.sendPairs(testMessage);
 
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
-  delay(600000);
+  delay(120000);
   loopNum++;
 }
 
