@@ -1,32 +1,39 @@
 /*
- This is a test program writen for the Seeeduino Stalker v2.3 and 
+ This is an example program writen for the Seeeduino Stalker v2.3 and 
  uses the Multitech mDOT LoRa module running the Australian compatable AT
  enabled firmware.
  
  This program,
-  * Joins the LoRa Network.
-  * Sends predicitable data (a loop count), and temperature  (The DS3231
- does a temperature conversion once every 64 seconds. This is also the
- default for the DS3232.)
+  * Checks for saved sessions.
+  * Joins the LoRa Network if:
+    * There is no saved session, or
+    * The saveed session is too old.
+  * Sends example data:
+    * Temperature from the DS3231,
+    * Temperature from the ATmega382p,
+    * The loop count, and
+    * Time from the DS3231
 */
 
 /*--------------------------------------------------------------------------------------
   Includes
   --------------------------------------------------------------------------------------*/
-#include <LoRaAT.h>               //Include LoRa AT libraray
-#include <SoftwareSerial.h>       //Software serial for debug
+#include <LoRaAT.h>                              //Include LoRa AT libraray
+#include <SoftwareSerial.h>                      //Software serial for debug
 #include <EEPROM.h>
 #include <Wire.h>
-#include "DS3231.h"  //http://www.seeedstudio.com/wiki/Seeeduino_Stalker_v2.3#Real_Time_Clock_.28RTC.29_Related
-                     //https://github.com/bpg/DS3231
+#include "DS3231.h"                              //http://www.seeedstudio.com/wiki/Seeeduino_Stalker_v2.3#Real_Time_Clock_.28RTC.29_Related
+                                                 //https://github.com/bpg/DS3231
 
 /*--------------------------------------------------------------------------------------
   Definitions
   --------------------------------------------------------------------------------------*/
+SoftwareSerial debugSerial(10, 11);              // RX, TX
+LoRaAT mdot(0, &debugSerial);                    //Instantiate a LoRaAT object
+DS3231 RTC;                                      //Create the DS3231 object
 
-SoftwareSerial debugSerial(10, 11);     // RX, TX
-LoRaAT mdot(0, &debugSerial);           //Instantiate a LoRaAT object
-DS3231 RTC;                             //Create the DS3231 object
+const uint32_t MAX_SESSION_AGE = 4*24*60*60;     //Max session age allowed in seconds.
+DateTime loraSessionStart;                       //Time the LoRa session began
 
 /*--- setup() --------------------------------------------------------------------------
   Called by the Arduino framework once, before the main loop begins.
@@ -37,26 +44,24 @@ DS3231 RTC;                             //Create the DS3231 object
 void setup() {
   debugSerial.println(F("\r\n\r\n++ START ++\r\n\r\n"));
 
-  const uint32_t MAX_SESSION_AGE = 240;        //Max session age allowed in seconds.
-  int responseCode;                            //Response of mDot commands
-  DateTime loraSessionStart;                   //Time the LoRa session began
+  int responseCode;                              //Response of mDot commands
   
-  debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
-  mdot.begin(38400);          //Begin (possibly amongst other things) opens serial comms with MDOT
+  debugSerial.begin(38400);                      //Debug output. Listen on this software serial port for debugging info
+  mdot.begin(38400);                             //Opens serial comms with MDOT
   Wire.begin();
   RTC.begin();
 
-  //First restore any saved session
-  mdot.restoreLoraSession();
+  mdot.restoreLoraSession();                     //Restore any saved session on mDot
 
-  //Debug feedback to check what happened
+  //Debug feedback for the developer to double check the session information obtained by the Arduino
   debugSerial.print(F("SETUP : Network Session Key: "));
   debugSerial.println(mdot.networkSessionKey);
   debugSerial.print(F("SETUP :   Data Sesstion Key: "));
   debugSerial.println(mdot.dataSessionKey);
 
-  //Check the Arduino EEPROM for a saved timestamp
-  EEPROM.get(1,loraSessionStart);
+  EEPROM.get(1,loraSessionStart);                //Check the Arduino EEPROM for a saved timestamp
+  
+  //Debug feedback for the developer to double check the time information obtained from the EEPROM
   debugSerial.print(F("SETUP : Timestamp mem: "));
   debugSerial.println(loraSessionStart.get());
   debugSerial.print(F("SETUP : Timestamp now: "));
@@ -64,22 +69,26 @@ void setup() {
 
   //If we have a blank session key, or an old session key, rejoin the LoRa network
   if ((mdot.networkSessionKey == "00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00") || ((RTC.now().get() - loraSessionStart.get() > MAX_SESSION_AGE))) {
-    //do {
+    do {
       responseCode = mdot.join();
+
+      //Debug feedback for the developer to double check the result of the join() instruction
+      debugSerial.print(F("SETUP : Join result: "));
+      debugSerial.println(String(responseCode));
+      
       delay(10000);
-    //} while (responseCode != 0);
-    debugSerial.print(F("SETUP : Join result: "));
-    debugSerial.println(String(responseCode));
-  
+    } while (responseCode != 0);
+
+    //Debug feedback for the developer to double check the *new* session information obtained by the Arduino
     debugSerial.print(F("SETUP : Network Session Key: "));
     debugSerial.println(mdot.networkSessionKey);
-  
     debugSerial.print(F("SETUP :   Data Sesstion Key: "));
     debugSerial.println(mdot.dataSessionKey);
   
     loraSessionStart = RTC.now();
     EEPROM.put(1,loraSessionStart);
 
+    //Debug feedback for the developer to double check the session information obtained by the Arduino
     debugSerial.print(F("SETUP : Timestamp mem: "));
     debugSerial.println(loraSessionStart.get());
   }
@@ -90,13 +99,13 @@ void setup() {
   --------------------------------------------------------------------------------------*/
 int loopNum = 0;
 void loop() {
-  int responseCode;         //Response code from the mdot
-  String testMessage = "";  //Test message sent via debugSerial
+  int responseCode;                              //Response code from the mdot
+  String testMessage = "";                       //Test message sent via debugSerial
   
   //Build the message to send:
   String rtcTemp = F("Temp RTC:");
   testMessage = rtcTemp;
-  RTC.convertTemperature(); //convert current temperature into registers
+  RTC.convertTemperature();                      //convert current temperature into registers
   testMessage += RTC.getTemperature();
 
   String atTemp = F(",Temp ATmega:");
@@ -107,7 +116,7 @@ void loop() {
   testMessage += count;
   testMessage += loopNum;
 
-  DateTime now = RTC.now(); //get the current date-time
+  DateTime now = RTC.now();                      //get the current date-time
   String Year = F(",Year:");
   testMessage += Year;
   testMessage += now.year();
@@ -131,14 +140,16 @@ void loop() {
   String Sec = F(",Sec:");
   testMessage += Sec;
   testMessage += now.second();
-  
+
+  //Debug feedback for the developer to double check what the library will try to send over the LoRaWAN
   debugSerial.println("MAIN  : " + testMessage);
 
   responseCode = mdot.sendPairs(testMessage);
 
+  //Debug feedback for the developer to double check what the result of the send
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
-  delay(30000);
+  delay(120000);
   loopNum++;
 }
 
