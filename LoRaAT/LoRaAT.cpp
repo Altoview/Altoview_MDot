@@ -167,8 +167,9 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
   *resp = NULL;
   do {
     if (ATSerial->available() != 0) {
-      if (_length < (_MAX_MDOT_RESPONSE - 1)) {
+      if (_length < (_MAX_MDOT_RESPONSE - 2)) {
         _response[_length++] = ATSerial->read();
+        _response[_length] = '\0';               //Ensure response buffer is null terminated
       }
     }
 
@@ -919,11 +920,12 @@ int8_t LoRaAT::getNetworkAddress() {
 int8_t LoRaAT::getNetworkSessionKey() {
   int8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char ansX[] PROGMEM = "BUG";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+NSK?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkSessionKey,r,(sizeof(networkSessionKey)-1));
@@ -940,11 +942,12 @@ int8_t LoRaAT::getNetworkSessionKey() {
 int8_t LoRaAT::getDataSessionKey() {
   int8_t ansCode;
   char ans1[] PROGMEM = "OK";
+  char ansX[] PROGMEM = "BUG";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+DSK?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000, &r);
 
   if (ansCode == 1) {
     strncpy(dataSessionKey,r,(sizeof(dataSessionKey)-1));
