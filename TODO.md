@@ -7,7 +7,7 @@
 - [x] Send correct number of fragments based on Data Rate.
 - [ ] Check mDot for response on 38400, 115200, 9600 and some others. If mDot detected not to have a baud rate of u32BaudRate set it to u32BaudRate.
 - [ ] Public Member to indicate last get/set result.
-   * What if we do multiple get/sets in a row, and all fail expect the last?
+   * What if we do multiple get/sets in a row, and all fail except the last?
 - [ ] Check pairToJson() works for the following cases:
    * Pairs expand out leaving ample space to finish JSON with }\0
      + 0 1 2 3 4 5 6 7 8 9 ...... .... 95 96 97 98 99 100

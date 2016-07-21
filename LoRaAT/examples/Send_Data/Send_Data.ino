@@ -104,7 +104,26 @@ void loop() {
 
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
-  delay(120000);
+  //To test different data rates
+  switch ( loopNum % 5) {
+    case 1:
+      mdot.setDataRate('1');
+      break;
+    case 2:
+      mdot.setDataRate('2');
+      break;
+    case 3:
+      mdot.setDataRate('3');
+      break;
+    case 4:
+      mdot.setDataRate('4');
+      break;
+    case 0:
+    default:
+      mdot.setDataRate('0');
+  }
+
+  delay(30000);
   loopNum++;
 }
 
