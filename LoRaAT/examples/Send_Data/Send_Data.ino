@@ -101,6 +101,34 @@ int loopNum = 0;
 void loop() {
   int responseCode;                              //Response code from the mdot
   String testMessage = "";                       //Test message sent via debugSerial
+
+  DateTime now = RTC.now();                      //get the current date-time
+
+  //If we have an old session key, rejoin the LoRa network
+  if (now.get() - loraSessionStart.get() > MAX_SESSION_AGE) {
+    do {
+      responseCode = mdot.join();
+
+      //Debug feedback for the developer to double check the result of the join() instruction
+      debugSerial.print(F("SETUP : Join result: "));
+      debugSerial.println(String(responseCode));
+      
+      delay(10000);
+    } while (responseCode != 0);
+
+    //Debug feedback for the developer to double check the *new* session information obtained by the Arduino
+    debugSerial.print(F("SETUP : Network Session Key: "));
+    debugSerial.println(mdot.networkSessionKey);
+    debugSerial.print(F("SETUP :   Data Sesstion Key: "));
+    debugSerial.println(mdot.dataSessionKey);
+  
+    loraSessionStart = RTC.now();
+    EEPROM.put(1,loraSessionStart);
+
+    //Debug feedback for the developer to double check the session information obtained by the Arduino
+    debugSerial.print(F("SETUP : Timestamp mem: "));
+    debugSerial.println(loraSessionStart.get());
+  }
   
   //Build the message to send:
   String rtcTemp = F("Temp RTC:");
@@ -116,7 +144,6 @@ void loop() {
   testMessage += count;
   testMessage += loopNum;
 
-  DateTime now = RTC.now();                      //get the current date-time
   String Year = F(",Year:");
   testMessage += Year;
   testMessage += now.year();
