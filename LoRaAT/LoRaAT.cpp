@@ -323,7 +323,7 @@ int8_t LoRaAT::sendPairs(String pairs)
   char pairsC[_MAX_PAIRS_SIZE];
   pairs.toCharArray(pairsC, _MAX_PAIRS_SIZE);
   pairsC[_MAX_PAIRS_SIZE-1] = '\0';
-  LoRaAT::sendPairs(pairsC);
+  return(sendPairs(pairsC));
 }
 
 /*----------------------------------------------------------------------------------|
