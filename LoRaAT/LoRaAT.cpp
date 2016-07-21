@@ -246,6 +246,10 @@ int8_t LoRaAT::join(uint16_t timeout) {
   sprintf_P(_command,(char*)F("AT+JOIN"));
 
   ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,timeout);
+  if (ansCode < 0 ) {
+    return(-1);
+  }
+  ansCode = saveLoraSession();
 
   if (ansCode == 1) {
     return (0);
@@ -952,6 +956,58 @@ int8_t LoRaAT::getDataSessionKey() {
   if (ansCode == 1) {
     strncpy(dataSessionKey,r,(sizeof(dataSessionKey)-1));
     dataSessionKey[(sizeof(dataSessionKey)-1)] = '\0';
+    return (0);
+  }
+
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Saves the current session information in the mDot.                                |
+-----------------------------------------------------------------------------------*/
+int8_t LoRaAT::saveLoraSession() {
+  int8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+
+  sprintf_P(_command,(char*)F("AT+SS"));
+
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  if (ansCode < 0 ) {
+    return(-1);
+  }
+  ansCode = getNetworkSessionKey();
+  if (ansCode < 0 ) {
+    return(-1);
+  }
+  ansCode = getDataSessionKey();
+
+  if (ansCode == 1) {
+    return (0);
+  }
+
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Saves the current session information in the mDot.                                |
+-----------------------------------------------------------------------------------*/
+int8_t LoRaAT::restoreLoraSession() {
+  int8_t ansCode;
+  char ans1[] PROGMEM = "OK";
+
+  sprintf_P(_command,(char*)F("AT+RS"));
+
+  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  if (ansCode < 0 ) {
+    return(-1);
+  }
+  ansCode = getNetworkSessionKey();
+  if (ansCode < 0 ) {
+    return(-1);
+  }
+  ansCode = getDataSessionKey();
+
+  if (ansCode == 1) {
     return (0);
   }
 

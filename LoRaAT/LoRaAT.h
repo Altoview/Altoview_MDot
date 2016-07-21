@@ -70,6 +70,8 @@ class LoRaAT
     int8_t getNetworkAddress();
     int8_t getNetworkSessionKey();
     int8_t getDataSessionKey();
+    int8_t saveLoraSession();
+    int8_t restoreLoraSession();
     int8_t commitSettings();
 
   private:

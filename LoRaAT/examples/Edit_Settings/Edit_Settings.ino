@@ -50,6 +50,14 @@ void setup() {
   debugSerial.println(mdot.dataRate);
   debugSerial.print(F("SETUP : "));
   debugSerial.println(mdot.adaptiveDataRate);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.deviceId);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkAddress);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkSessionKey);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.dataSessionKey);
 
   //Set some settings
   mdot.setFrequencySubBand('2');
@@ -73,6 +81,14 @@ void setup() {
   debugSerial.println(mdot.dataRate);
   debugSerial.print(F("SETUP : "));
   debugSerial.println(mdot.adaptiveDataRate);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.deviceId);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkAddress);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkSessionKey);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.dataSessionKey);
 
   //Get the settings
   mdot.getFrequencySubBand();
@@ -81,7 +97,11 @@ void setup() {
   mdot.getNetworkKey();
   mdot.getDataRate();
   mdot.getAdaptiveDataRate();
-
+  mdot.getDeviceId();
+  mdot.getNetworkAddress();
+  mdot.getNetworkSessionKey();
+  mdot.getDataSessionKey();
+  
   debugSerial.print(F("SETUP : "));
   debugSerial.println(mdot.frequencySubBand);
   debugSerial.print(F("SETUP : "));
@@ -94,21 +114,17 @@ void setup() {
   debugSerial.println(mdot.dataRate);
   debugSerial.print(F("SETUP : "));
   debugSerial.println(mdot.adaptiveDataRate);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.deviceId);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkAddress);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkSessionKey);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.dataSessionKey);
 
   //Set to defaults
   mdot.setDefaults();
-  debugSerial.print(F("SETUP : "));
-  debugSerial.println(mdot.frequencySubBand);
-  debugSerial.print(F("SETUP : "));
-  debugSerial.println(mdot.publicNetwork);
-  debugSerial.print(F("SETUP : "));
-  debugSerial.println(mdot.networkId);
-  debugSerial.print(F("SETUP : "));
-  debugSerial.println(mdot.networkKey);
-  debugSerial.print(F("SETUP : "));
-  debugSerial.println(mdot.dataRate);
-  debugSerial.print(F("SETUP : "));
-  debugSerial.println(mdot.adaptiveDataRate);
 
   //Get the settings
   mdot.getFrequencySubBand();
@@ -130,6 +146,14 @@ void setup() {
   debugSerial.println(mdot.dataRate);
   debugSerial.print(F("SETUP : "));
   debugSerial.println(mdot.adaptiveDataRate);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.deviceId);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkAddress);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.networkSessionKey);
+  debugSerial.print(F("SETUP : "));
+  debugSerial.println(mdot.dataSessionKey);
 }
 
 /*--- loop() ---------------------------------------------------------------------------
