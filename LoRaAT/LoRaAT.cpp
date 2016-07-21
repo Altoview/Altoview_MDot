@@ -449,7 +449,7 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
     _debugStream->print(F(", *json: "));
     _debugStream->println(json);
     //"jsonPtr > json" so not to delete the open curly brace '{'
-    while (jsonPtr > json && *jsonPtr != ',') {
+    while (jsonPtr - 1 > json && *jsonPtr != ',') {
       *jsonPtr-- = '\0';
       _debugStream->print(F("LaT:pj:  json: "));
       _debugStream->print((int)json);
