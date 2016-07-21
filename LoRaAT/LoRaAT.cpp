@@ -340,6 +340,7 @@ int8_t LoRaAT::sendPairs(char* pairs) {
 
   //String json;
   char json[_MAX_PAIRS_SIZE];
+  memcpy(json,0x00,_MAX_PAIRS_SIZE);
 
   //TODO: Check the string is actually pairs
 
@@ -363,7 +364,7 @@ int8_t LoRaAT::sendPairs(char* pairs) {
 | created pair will be removed, and the JSON closed and returned.                   |
 -----------------------------------------------------------------------------------*/
 void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
-  ///_debugStream->println(F("LaT:pj: enter"));
+  _debugStream->println(F("LaT:pj: enter"));
   char* jsonPtr;                                 //Points to the next free location
   uint8_t len = strlen(pairs);                   //Counts to the null terminator
 
@@ -372,11 +373,32 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   static const char JSON_PAIR_PAIR[2] = {',','\"'};
   static const char JSON_END[2] = {'}','\0'};
 
-  //Set the pointer back to beginning of JSON
+  _debugStream->print(F("LaT:pj:  json: "));
+  _debugStream->print((int)json);
+  _debugStream->print(F(", jsonPtr: "));
+  _debugStream->print((int)jsonPtr);
+  _debugStream->print(F(", *json: "));
+  _debugStream->println(json);
+
+  //Set the pointer to beginning of JSON
   jsonPtr = json;
+  _debugStream->print(F("LaT:pj:  json: "));
+  _debugStream->print((int)json);
+  _debugStream->print(F(", jsonPtr: "));
+  _debugStream->print((int)jsonPtr);
+  _debugStream->print(F(", *json: "));
+  _debugStream->println(json);
+
   // Adds the first { and "
   memcpy(jsonPtr,JSON_BEGIN,sizeof(JSON_BEGIN));
   jsonPtr += sizeof(JSON_BEGIN);
+  *jsonPtr = '\0';
+  _debugStream->print(F("LaT:pj:  json: "));
+  _debugStream->print((int)json);
+  _debugStream->print(F(", jsonPtr: "));
+  _debugStream->print((int)jsonPtr);
+  _debugStream->print(F(", *json: "));
+  _debugStream->println(json);
 
   //Loop through each of the characters, when getting to a delimiter, act accordingly
   for (uint8_t j = 0; j < len && ((jsonPtr - json) < jsonLength); j++) {
@@ -386,32 +408,72 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
         if (jsonPtr - json + sizeof(JSON_STR_VAL) < jsonLength) {
           memcpy(jsonPtr,JSON_STR_VAL,sizeof(JSON_STR_VAL));
           jsonPtr += sizeof(JSON_STR_VAL);
+          *jsonPtr = '\0';
         }
         break;
       case ',':
         if (jsonPtr - json + sizeof(JSON_PAIR_PAIR) < jsonLength) {
           memcpy(jsonPtr,JSON_PAIR_PAIR,sizeof(JSON_PAIR_PAIR));
           jsonPtr += sizeof(JSON_PAIR_PAIR);
+          *jsonPtr = '\0';
         }
         break;
       default:
         if ((jsonPtr - json) < jsonLength) {
           *jsonPtr++ = c;
+          *jsonPtr = '\0';
+          _debugStream->print(F("LaT:pj:  json: "));
+          _debugStream->print((int)json);
+          _debugStream->print(F(", jsonPtr: "));
+          _debugStream->print((int)jsonPtr);
+          _debugStream->print(F(", *json: "));
+          _debugStream->println(json);
         }
     }
   }
 
+  _debugStream->print(F("LaT:pj:  json: "));
+  _debugStream->print((int)json);
+  _debugStream->print(F(", jsonPtr: "));
+  _debugStream->print((int)jsonPtr);
+  _debugStream->print(F(", *json: "));
+  _debugStream->println(json);
+
   //If we can't fit the JSON termination i.e. }\0, make room, then check for a partial pair, removing it if exists
   if ((jsonPtr - json + sizeof(JSON_END)) >= jsonLength) {
     jsonPtr -= sizeof(JSON_END);
+    _debugStream->print(F("LaT:pj:  json: "));
+    _debugStream->print((int)json);
+    _debugStream->print(F(", jsonPtr: "));
+    _debugStream->print((int)jsonPtr);
+    _debugStream->print(F(", *json: "));
+    _debugStream->println(json);
     //"jsonPtr > json" so not to delete the open curly brace '{'
     while (jsonPtr > json && *jsonPtr != ',') {
       *jsonPtr-- = '\0';
+      _debugStream->print(F("LaT:pj:  json: "));
+      _debugStream->print((int)json);
+      _debugStream->print(F(", jsonPtr: "));
+      _debugStream->print((int)jsonPtr);
+      _debugStream->print(F(", *json: "));
+      _debugStream->println(json);
     }
   }
 
   memcpy(jsonPtr,JSON_END,sizeof(JSON_END));
+  _debugStream->print(F("LaT:pj:  json: "));
+  _debugStream->print((int)json);
+  _debugStream->print(F(", jsonPtr: "));
+  _debugStream->print((int)jsonPtr);
+  _debugStream->print(F(", *json: "));
+  _debugStream->println(json);
   jsonPtr += sizeof(JSON_END);
+  _debugStream->print(F("LaT:pj:  json: "));
+  _debugStream->print((int)json);
+  _debugStream->print(F(", jsonPtr: "));
+  _debugStream->print((int)jsonPtr);
+  _debugStream->print(F(", *json: "));
+  _debugStream->println(json);
 
   ///_debugStream->println(F("LaT:pj: exit"));
   return;
