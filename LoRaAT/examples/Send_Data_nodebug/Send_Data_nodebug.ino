@@ -70,6 +70,19 @@ void loop() {
   int responseCode;                              //Response code from the mdot
   String testMessage = "";                       //Test message sent via debugSerial
   
+  DateTime now = RTC.now();                      //get the current date-time
+
+  //If we have an old session key, rejoin the LoRa network
+  if (now.get() - loraSessionStart.get() > MAX_SESSION_AGE) {
+    do {
+      responseCode = mdot.join();
+      delay(10000);
+    } while (responseCode != 0);
+  
+    loraSessionStart = RTC.now();
+    EEPROM.put(1,loraSessionStart);
+  }
+  
   //Build the message to send:
   String rtcTemp = F("Temp RTC:");
   testMessage = rtcTemp;
@@ -84,7 +97,6 @@ void loop() {
   testMessage += count;
   testMessage += loopNum;
 
-  DateTime now = RTC.now();                      //get the current date-time
   String Year = F(",Year:");
   testMessage += Year;
   testMessage += now.year();
