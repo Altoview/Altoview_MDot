@@ -35,12 +35,11 @@ DS3231 RTC;                             //Create the DS3231 object
    - Opens serial communication with MDOT
   --------------------------------------------------------------------------------------*/
 void setup() {
-  const uint32_t MAX_SESSION_AGE = 240;        //Max session age allowed in seconds.
-  int responseCode;            //Response of mDot commands
-  DateTime loraSessionStart;   //Time the LoRa session began
-  DateTime beginTime = RTC.now();
-
   debugSerial.println(F("\r\n\r\n++ START ++\r\n\r\n"));
+
+  const uint32_t MAX_SESSION_AGE = 240;        //Max session age allowed in seconds.
+  int responseCode;                            //Response of mDot commands
+  DateTime loraSessionStart;                   //Time the LoRa session began
   
   debugSerial.begin(38400);   //Debug output. Listen on this ports for debugging info
   mdot.begin(38400);          //Begin (possibly amongst other things) opens serial comms with MDOT
@@ -56,33 +55,34 @@ void setup() {
   debugSerial.print(F("SETUP :   Data Sesstion Key: "));
   debugSerial.println(mdot.dataSessionKey);
 
-  if (mdot.networkSessionKey != "00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00") {
-    //If we have a valid saved session key, check the Arduino saved timestamp
-    EEPROM.get(1,loraSessionStart);
+  //Check the Arduino EEPROM for a saved timestamp
+  EEPROM.get(1,loraSessionStart);
+  debugSerial.print(F("SETUP : Timestamp mem: "));
+  debugSerial.println(loraSessionStart.get());
+  debugSerial.print(F("SETUP : Timestamp now: "));
+  debugSerial.println(RTC.now().get());
+
+  //If we have a blank session key, or an old session key, rejoin the LoRa network
+  if ((mdot.networkSessionKey == "00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00") || ((RTC.now().get() - loraSessionStart.get() > MAX_SESSION_AGE))) {
+    //do {
+      responseCode = mdot.join();
+      delay(10000);
+    //} while (responseCode != 0);
+    debugSerial.print(F("SETUP : Join result: "));
+    debugSerial.println(String(responseCode));
+  
+    debugSerial.print(F("SETUP : Network Session Key: "));
+    debugSerial.println(mdot.networkSessionKey);
+  
+    debugSerial.print(F("SETUP :   Data Sesstion Key: "));
+    debugSerial.println(mdot.dataSessionKey);
+  
+    loraSessionStart = RTC.now();
+    EEPROM.put(1,loraSessionStart);
+
     debugSerial.print(F("SETUP : Timestamp mem: "));
     debugSerial.println(loraSessionStart.get());
-    debugSerial.print(F("SETUP : Timestamp now: "));
-    debugSerial.println(RTC.now().get());
   }
-
-//  //If we have a blank session key, or an old session key, rejoin the LoRa network
-//  if ((mdot.networkSessionKey == "00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00") || ((RTC.now.get() - loraSessionStart.get() > MAX_SESSION_AGE))) {
-//    do {
-//      responseCode = mdot.join();
-//      delay(10000);
-//    } while (responseCode != 0);
-//    debugSerial.print(F("SETUP : Join result: "));
-//    debugSerial.println(String(responseCode));
-//  
-//    debugSerial.print(F("SETUP : Network Session Key: "));
-//    debugSerial.println(mdot.networkSessionKey);
-//  
-//    debugSerial.print(F("SETUP :   Data Sesstion Key: "));
-//    debugSerial.println(mdot.dataSessionKey);
-//  
-//    loraSessionStart = RTC.now();
-//    EEPROM.put(1,loraSessionStart);
-//  }
 }
 
 /*--- loop() ---------------------------------------------------------------------------
@@ -137,25 +137,6 @@ void loop() {
   responseCode = mdot.sendPairs(testMessage);
 
   debugSerial.println("MAIN  : send result: " + String(responseCode));
-
-  //To test different data rates
-  switch ( loopNum % 5) {
-    case 1:
-      mdot.setDataRate('1');
-      break;
-    case 2:
-      mdot.setDataRate('2');
-      break;
-    case 3:
-      mdot.setDataRate('3');
-      break;
-    case 4:
-      mdot.setDataRate('4');
-      break;
-    case 0:
-    default:
-      mdot.setDataRate('0');
-  }
 
   delay(30000);
   loopNum++;
