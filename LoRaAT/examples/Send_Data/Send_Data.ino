@@ -49,6 +49,12 @@ void setup() {
   } while (responseCode != 0);
   debugSerial.print(F("SETUP : Join result: "));
   debugSerial.println(String(responseCode));
+
+  debugSerial.print(F("SETUP : Network Session Key: "));
+  debugSerial.println(mdot.networkSessionKey);
+
+  debugSerial.print(F("SETUP :   Data Sesstion Key: "));
+  debugSerial.println(mdot.dataSessionKey);
 }
 
 /*--- loop() ---------------------------------------------------------------------------

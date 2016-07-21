@@ -8,7 +8,7 @@
 - [x] strlen is used on pairs[] which may not be null terminated.
    * If a user passes a string bigger than the buffer. The program reads in that string up to the size of the buffer, in that case the last character will be what's in the string at that point (not necessarily a null).
    * The user could also pass a non-null terminated char array of any length and also cause the same fault.
-- [ ] Always save session after join.
+- [x] Always save session after join.
 - [ ] Server expects a new join request every 5 days
    - [ ] long term timer to monitor, time since last join
    - [ ] Check timer before send(), and join if time condition met

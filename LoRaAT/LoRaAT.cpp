@@ -146,6 +146,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
   uint32_t maxEndTime = 0;
 
   //flush receive buffer before transmitting request
+  delay(20);                                     //Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
   while (ATSerial->read() != -1);
 
   //Blank string
@@ -249,13 +250,7 @@ int8_t LoRaAT::join(uint16_t timeout) {
   if (ansCode < 0 ) {
     return(-1);
   }
-  ansCode = saveLoraSession();
-
-  if (ansCode == 1) {
-    return (0);
-  }
-
-  return(-1);
+  return(saveLoraSession());
 }
 
 /*----------------------------------------------------------------------------------|
@@ -979,13 +974,7 @@ int8_t LoRaAT::saveLoraSession() {
   if (ansCode < 0 ) {
     return(-1);
   }
-  ansCode = getDataSessionKey();
-
-  if (ansCode == 1) {
-    return (0);
-  }
-
-  return(-1);
+  return(getDataSessionKey());
 }
 
 /*----------------------------------------------------------------------------------|
