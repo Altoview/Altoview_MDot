@@ -23,8 +23,12 @@
 class LoRaAT
 {
   public:
+    char networkSessionKey[48] = {'\0'};          //00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
+    char dataSessionKey[48] = {'\0'};             //00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
     char networkKey[48] = {'\0'};                 //00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01
     char networkId[24] = {'\0'};                  //00:00:aa:00:00:00:00:01
+    char deviceId[24] = {'\0'};                   //00-80-00-00-00-00-a9-13
+    char networkAddress[12] = {'\0'};             //00:00:00:00
     char frequencySubBand = '\0';                 //0-8
     char publicNetwork = '\0';                    //0,1
     char dataRate = '\0';                         //0-3
@@ -44,8 +48,9 @@ class LoRaAT
     int8_t send(char*);                           //Generic send command, using AT+SEND
     int8_t send(char*, uint16_t);                 //Use specific timeout.
     int8_t send(char*, uint8_t, uint16_t);        //Use specific message length.
-    int8_t sendPairs(char*);                      //Takes key,value pairs, forms a message, and sends to the LoRa server.
     int8_t sendPairs(String);                     //Takes key,value pairs, forms a message, and sends to the LoRa server.
+    int8_t sendPairs(String*);                    //Takes key,value pairs, forms a message, and sends to the LoRa server.
+    int8_t sendPairs(char*);                      //Takes key,value pairs, forms a message, and sends to the LoRa server.
     int8_t ping();                                //Not yet implemented
 
     int8_t setDefaults();
@@ -61,6 +66,12 @@ class LoRaAT
     int8_t getDataRate();
     int8_t setAdaptiveDataRate(char);
     int8_t getAdaptiveDataRate();
+    int8_t getDeviceId();
+    int8_t getNetworkAddress();
+    int8_t getNetworkSessionKey();
+    int8_t getDataSessionKey();
+    int8_t saveLoraSession();
+    int8_t restoreLoraSession();
     int8_t commitSettings();
 
   private:
