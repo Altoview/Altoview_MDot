@@ -18,6 +18,11 @@
 #include "Arduino.h"
 #include "LoRaAT.h"
 
+#define DEBUG
+
+const char answer1[] = "OK";
+const char answerX[] = "BUG";
+
 /************************************************************************************
  *                               GLOBAL VARIABLES                                   *
  ***********************************************************************************/
@@ -71,7 +76,6 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
 void LoRaAT::begin() {
-  //TODO: Input checking??
   begin(38400);
 }
 
@@ -153,11 +157,12 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
   //Blank string
   memset(_response,0x00,_MAX_MDOT_RESPONSE);
   _length = 0;
-
+#ifdef DEBUG
   //Send command
   _debugStream->print(F("LaT:sc: "));
   _debugStream->print(command);
   _debugStream->print(TERMINATOR);
+#endif
   ATSerial->print(command);
   ATSerial->print(TERMINATOR);
 
@@ -179,7 +184,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);             //3
+        *resp += sizeof(TERMINATOR);
       }
       //_debugStream->print(F("LaT:sc: "));
       //_debugStream->println(_response);
@@ -190,7 +195,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);             //3
+        *resp += sizeof(TERMINATOR);
       }
       return (2);
     }
@@ -199,7 +204,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);             //3
+        *resp += sizeof(TERMINATOR);
       }
       return (3);
     }
@@ -208,7 +213,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);             //3
+        *resp += sizeof(TERMINATOR);
       }
       return (4);
     }
@@ -245,15 +250,15 @@ int8_t LoRaAT::join() {
 int8_t LoRaAT::join(uint16_t timeout) {
   ///_debugStream->println(F("LaT:j : enter"));
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+JOIN"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,timeout);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,timeout);
   if (ansCode < 0 ) {
     return(-1);
   }
-  return(saveLoraSession());
+
+  return(0);
 }
 
 /*----------------------------------------------------------------------------------|
@@ -292,12 +297,11 @@ int8_t LoRaAT::send(char* message, uint16_t timeout) {
 int8_t LoRaAT::send(char* message, uint8_t length, uint16_t timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+SEND "));
   strncat(_command,message,length);              //Append message to command
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,timeout);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,timeout);
 
   if (ansCode == 1) {
     return (0);
@@ -347,10 +351,11 @@ int8_t LoRaAT::sendPairs(String* pairs) {
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::sendPairs(char* pairs) {
+#ifdef DEBUG
   ///_debugStream->println(F("LaT:sp: enter"));
   _debugStream->print(F("LaT:sp: "));
   _debugStream->println(pairs);
-
+#endif
   //String json;
   char json[_MAX_PAIRS_SIZE];
   memcpy(json,0x00,_MAX_PAIRS_SIZE);
@@ -359,9 +364,11 @@ int8_t LoRaAT::sendPairs(char* pairs) {
 
   ///_debugStream->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, _MAX_PAIRS_SIZE, pairs);
+#ifdef DEBUG
   _debugStream->print(F("LaT:sp: "));
   _debugStream->println(json);
   ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
+#endif
   _createFragmentBuffer(json);
   ///_debugStream->println(F("LaT:sp: process buffer"));
 
@@ -567,8 +574,8 @@ int8_t LoRaAT::_processBuffer() {
 int8_t LoRaAT::setDefaults() {
   int8_t result = -1;
 
-  char key[] = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
-  char id[] = "00:00:aa:00:00:00:00:01";
+  const char key[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+  const char id[] PROGMEM = "00:00:aa:00:00:00:00:01";
 
   if (setFrequencySubBand('1') == 0) {
     result = 0;
@@ -576,10 +583,10 @@ int8_t LoRaAT::setDefaults() {
   if (setPublicNetwork('1') == 0) {
     result = 0;
   }
-  if (setNetworkID(id) == 0) {
+  if (setNetworkID((char*)id) == 0) {
     result = 0;
   }
-  if (setNetworkKey(key) == 0) {
+  if (setNetworkKey((char*) key) == 0) {
     result = 0;
   }
   if (setDataRate('2') == 0) {
@@ -602,13 +609,12 @@ int8_t LoRaAT::setDefaults() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setFrequencySubBand(char fsb) {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+FSB "));
   _command[7] = fsb;
   _command[8] = '\0';
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
   ///_debugStream->println(_response);
 
   if (ansCode == 1) {
@@ -624,12 +630,11 @@ int8_t LoRaAT::setFrequencySubBand(char fsb) {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getFrequencySubBand() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+FSB?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
     frequencySubBand = r[0];
@@ -649,7 +654,6 @@ int8_t LoRaAT::getFrequencySubBand() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setPublicNetwork(char pn) {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+PN "));
   if (pn != '0') {
@@ -658,7 +662,7 @@ int8_t LoRaAT::setPublicNetwork(char pn) {
   _command[6] = pn;
   _command[7] = '\0';
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
     publicNetwork = pn;
@@ -673,12 +677,11 @@ int8_t LoRaAT::setPublicNetwork(char pn) {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getPublicNetwork() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+PN?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
     publicNetwork = r[0];
@@ -700,12 +703,11 @@ int8_t LoRaAT::getPublicNetwork() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setNetworkID(char* id) {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+NI 0,"));
   strcat(_command,id);                           //Append ID to command
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
     strncpy(networkId,id,sizeof(networkId)-1);
@@ -721,12 +723,11 @@ int8_t LoRaAT::setNetworkID(char* id) {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getNetworkID() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+NI?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkId,r,(sizeof(networkId)-1));
@@ -749,13 +750,11 @@ int8_t LoRaAT::getNetworkID() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setNetworkKey(char* key) {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
-  char ansX[] PROGMEM = "BUG";
 
   sprintf_P(_command,(char*)F("AT+NK 0,"));
   strcat(_command,key);                          //Append key to command
 
-  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000);
+  ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000);
 
   if (ansCode == 1) {
     strncpy(networkKey,key,sizeof(networkKey)-1);
@@ -771,13 +770,11 @@ int8_t LoRaAT::setNetworkKey(char* key) {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getNetworkKey() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
-  char ansX[] PROGMEM = "BUG";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+NK?"));
 
-  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkKey,r,(sizeof(networkKey)-1));
@@ -796,13 +793,12 @@ int8_t LoRaAT::getNetworkKey() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setDataRate(char txdr) {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+TXDR "));
   _command[8] = txdr;
   _command[9] = '\0';
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
     dataRate = txdr;
@@ -817,12 +813,11 @@ int8_t LoRaAT::setDataRate(char txdr) {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getDataRate() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+TXDR?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
     dataRate = r[2];
@@ -842,13 +837,12 @@ int8_t LoRaAT::getDataRate() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setAdaptiveDataRate(char adr) {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+ADR "));
   _command[7] = adr;
   _command[8] = '\0';
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
     adaptiveDataRate = adr;
@@ -863,12 +857,12 @@ int8_t LoRaAT::setAdaptiveDataRate(char adr) {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getAdaptiveDataRate() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
+
   char* r;
 
   sprintf_P(_command,(char*)F("AT+ADR?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
     adaptiveDataRate = r[0];
@@ -883,12 +877,11 @@ int8_t LoRaAT::getAdaptiveDataRate() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getDeviceId() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+DI?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
     strncpy(deviceId,r,(sizeof(deviceId)-1));
@@ -904,12 +897,11 @@ int8_t LoRaAT::getDeviceId() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getNetworkAddress() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+NA?"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkAddress,r,(sizeof(networkAddress)-1));
@@ -925,13 +917,11 @@ int8_t LoRaAT::getNetworkAddress() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getNetworkSessionKey() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
-  char ansX[] PROGMEM = "BUG";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+NSK?"));
 
-  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkSessionKey,r,(sizeof(networkSessionKey)-1));
@@ -947,13 +937,11 @@ int8_t LoRaAT::getNetworkSessionKey() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::getDataSessionKey() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
-  char ansX[] PROGMEM = "BUG";
   char* r;
 
   sprintf_P(_command,(char*)F("AT+DSK?"));
 
-  ansCode = _sendCommand(_command,ans1,ansX,ansX,ansX,10000, &r);
+  ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000, &r);
 
   if (ansCode == 1) {
     strncpy(dataSessionKey,r,(sizeof(dataSessionKey)-1));
@@ -967,6 +955,7 @@ int8_t LoRaAT::getDataSessionKey() {
 /*----------------------------------------------------------------------------------|
 | Saves the current session information in the mDot.                                |
 -----------------------------------------------------------------------------------*/
+/*
 int8_t LoRaAT::saveLoraSession() {
   int8_t ansCode;
   char ans1[] PROGMEM = "OK";
@@ -983,10 +972,11 @@ int8_t LoRaAT::saveLoraSession() {
   }
   return(getDataSessionKey());
 }
-
+*/
 /*----------------------------------------------------------------------------------|
 | Saves the current session information in the mDot.                                |
 -----------------------------------------------------------------------------------*/
+/*
 int8_t LoRaAT::restoreLoraSession() {
   int8_t ansCode;
   char ans1[] PROGMEM = "OK";
@@ -1009,7 +999,7 @@ int8_t LoRaAT::restoreLoraSession() {
 
   return(-1);
 }
-
+*/
 /*----------------------------------------------------------------------------------|
 | Writes the current settings of the mDot to it's memory                            |
 -----------------------------------------------------------------------------------*/
