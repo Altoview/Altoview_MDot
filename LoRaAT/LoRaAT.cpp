@@ -148,6 +148,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
   //flush receive buffer before transmitting request
   delay(20);                                     //Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
   while (ATSerial->read() != -1);
+  delay(20);                                     //Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
 
   //Blank string
   memset(_response,0x00,_MAX_MDOT_RESPONSE);
@@ -174,16 +175,18 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
       }
     }
 
-    if (strstr(_response, ans1) != '\0') {
+    if (ans1 != NULL && strstr(_response, ans1) != '\0') {
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
         *resp += sizeof(TERMINATOR);             //3
       }
+      //_debugStream->print(F("LaT:sc: "));
+      //_debugStream->println(_response);
       return (1);
     }
 
-    if (strstr(_response, ans2) != '\0') {
+    if (ans2 != NULL && strstr(_response, ans2) != '\0') {
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
@@ -192,7 +195,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
       return (2);
     }
 
-    if (strstr(_response, ans3) != '\0') {
+    if (ans3 != NULL && strstr(_response, ans3) != '\0') {
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
@@ -201,7 +204,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
       return (3);
     }
 
-    if (strstr(_response, ans4) != '\0') {
+    if (ans4 != NULL && strstr(_response, ans4) != '\0') {
       if (resp != NULL) {
         *resp = strstr(_response,command);
         *resp += strlen(command);
@@ -486,7 +489,7 @@ void LoRaAT::_createFragmentBuffer(char* message) {
         // padding the rest of the fragment if not fitting 100% with space
         while (j < _PAYLOAD_SIZE)
         {
-          _txBuffer[_txPutter][j + _HEADER_SIZE]   = '.';//TODO:DEBUG:undothis
+          _txBuffer[_txPutter][j + _HEADER_SIZE]   = '\0';
           j++;
         }
         break;
@@ -543,6 +546,10 @@ int8_t LoRaAT::_processBuffer() {
       length = (char*)_txBuffer + buffLength - txGtr;
     }
 
+    //_debugStream->print(F("LaT:pb: DR: "));
+    //_debugStream->print(dataRate);
+    //_debugStream->print(F(", length: "));
+    //_debugStream->println(String(length));
     result = send(txGtr,length,10000);
 
     txGtr += length;

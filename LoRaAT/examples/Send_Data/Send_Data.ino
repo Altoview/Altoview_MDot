@@ -32,7 +32,7 @@ SoftwareSerial debugSerial(10, 11);              //RX, TX
 LoRaAT mdot(0, &debugSerial);                    //Instantiate a LoRaAT object
 DS3231 RTC;                                      //Create the DS3231 object
 
-const uint32_t MAX_SESSION_AGE = 120;//345600;         //Max session age allowed in seconds. e.g. 4 days => 4*24*60*60 = 345600
+const uint32_t MAX_SESSION_AGE = 345600;         //Max session age allowed in seconds. e.g. 4 days => 4*24*60*60 = 345600
 DateTime loraSessionStart;                       //Time the LoRa session began
 
 /*--- setup() --------------------------------------------------------------------------
@@ -176,7 +176,7 @@ void loop() {
   //Debug feedback for the developer to double check what the result of the send
   debugSerial.println("MAIN  : send result: " + String(responseCode));
 
-  delay(1000);
+  delay(120000);
   loopNum++;
 }
 
