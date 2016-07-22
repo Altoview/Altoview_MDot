@@ -1,6 +1,6 @@
 /*
- This is an example program writen for the Seeeduino Stalker v2.3 and 
- uses the Multitech mDOT LoRa module running the Australian compatable AT
+ This is an example program written for the Seeeduino Stalker v2.3 and 
+ uses the Multitech mDOT LoRa module running the Australian compatible AT
  enabled firmware.
  
  This program,
@@ -18,7 +18,7 @@
 /*--------------------------------------------------------------------------------------
   Includes
   --------------------------------------------------------------------------------------*/
-#include <LoRaAT.h>                              //Include LoRa AT libraray
+#include <LoRaAT.h>                              //Include LoRa AT library
 #include <EEPROM.h>
 #include <Wire.h>
 #include "DS3231.h"                              //http://www.seeedstudio.com/wiki/Seeeduino_Stalker_v2.3#Real_Time_Clock_.28RTC.29_Related
@@ -48,7 +48,7 @@ void setup() {
 
   mdot.restoreLoraSession();                     //Restore any saved session on mDot
 
-  EEPROM.get(1,loraSessionStart);                //Check the Arduino EEPROM for a saved timestamp
+  EEPROM.get(1,loraSessionStart);                //Check the Arduino EEPROM for a saved time-stamp
 
   //If we have a blank session key, or an old session key, rejoin the LoRa network
   if ((mdot.networkSessionKey == "00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00") || ((RTC.now().get() - loraSessionStart.get() > MAX_SESSION_AGE))) {
@@ -68,7 +68,7 @@ void setup() {
 int loopNum = 0;
 void loop() {
   int responseCode;                              //Response code from the mdot
-  String testMessage = "";                       //Test message sent via debugSerial
+  String testMessage = "";                       //Message to be built and sent
   
   DateTime now = RTC.now();                      //get the current date-time
 
@@ -86,12 +86,12 @@ void loop() {
   //Build the message to send:
   String rtcTemp = F("Temp RTC:");
   testMessage = rtcTemp;
-  RTC.convertTemperature();                      //convert current temperature into registers
+  RTC.convertTemperature();                      //Convert current RTC temperature into registers
   testMessage += RTC.getTemperature();
 
   String atTemp = F(",Temp ATmega:");
   testMessage += atTemp;
-  testMessage += GetTemp();
+  testMessage += GetTemp();                      //Get the temperature from the ATmega
   
   String count = F(",Loop Count:");
   testMessage += count;
@@ -127,6 +127,14 @@ void loop() {
   loopNum++;
 }
 
+/*--- GetTemp() ------------------------------------------------------------------------
+  Most new AVR chips (used in the Arduino) have an internal temperature sensor. It is not
+  often used, since it is not accurate.
+
+  For more information see: http://playground.arduino.cc/Main/InternalTemperatureSensor
+
+  This function returns the temperature in degrees Celsius.
+  --------------------------------------------------------------------------------------*/
 double GetTemp(void) {
   unsigned int wADC;
   double t;
