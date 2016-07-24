@@ -1005,11 +1005,10 @@ int8_t LoRaAT::restoreLoraSession() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::commitSettings() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT&W"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
 
   if (ansCode == 1) {
     return (0);
