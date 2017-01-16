@@ -1,19 +1,20 @@
 # About mdot_lora_arduino
-The library to send user data to [Multitech mDot](http://www.multitech.com/brands/multiconnect-mdot) using AT commands on serial. 
+The library to send user data to [Multitech mDot](http://www.multitech.com/brands/multiconnect-mdot) using [AT commands](https://www.sparkfun.com/datasheets/Cellular%20Modules/AT_Commands_Reference_Guide_r0.pdf) on serial. All AT commands begin with an `AT`. Please see the link for information on AT commands. 
 
-# Pre-requisites
-- Make sure the mDot serial port is configured to match the baud rate specified in `begin(<baud-rate>)` methods.
+# Note well: 
+- The mDot serial port Baud Rate (BR) should match the BR specified in the `begin(<baud-rate>)` method.
   1. `AT+IPR 38400` to change the BR to 38400 in this example.
   2. `AT&W` to save the changes.
-- This library only supports boards with an AVR or SAM processors.
+- This library **only** supports boards with an **AVR or SAM processor**.
 
 ## How to use
 - Clone the project to a preferred folder.
-- Copy the LoRaAT folder to your `C:\Users\{user}\Documents\Arduino\libraries` directory which Arduino application will access it's libraries.
-- Include the library in your project. `#include <LoRaAT.h>`
-- Instantiate the mDot object. `LoRaAT mdot;`
-- In the `setup()` loop, initialise the instance. `mdot.begin();`
-- Now you can use `mdot.join()`, `mdot.sendPairs()`, etc.
+- Copy the LoRaAT folder to your Arduino directory (eg: `C:\Users\{user}\Documents\Arduino\libraries`). This allows the Arduino application to access it's libraries.
+- Create a new Arduino script (ensure to set the BR of the serial to the chosen BR).
+- Include the library in your new Arduino: `#include <LoRaAT.h>`
+- Before the `setup()` instruction, instantiate the mDot object: `LoRaAT mdot;`
+- In the `setup()` function, initialise an instance of the mdot object: `mdot.begin();` (see [object oriented programming](https://en.wikipedia.org/wiki/Object-oriented_programming) wiki page for more information
+- Now you can use the instance methods  `mdot.join()` and `mdot.sendPairs()` etc 
 
 ### join( )
 This method sends a join request to the LoRa server.
