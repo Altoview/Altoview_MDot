@@ -13,7 +13,7 @@ The library to send user data to Multitech mDot using AT commands on serial.
 - Include the library in your project. `#include <LoRaAT.h>`
 - Instantiate the mDot object. `LoRaAT mdot;`
 - In the `setup()` loop, initialise the instance. `mdot.begin();`
-- Now you can use `join()`, `sendPairs()`, etc.
+- Now you can use `mdot.join()`, `mdot.sendPairs()`, etc.
 
 #join( )
 This method sends a join request to the LoRa server.
