@@ -1,5 +1,5 @@
 # About mdot_lora_arduino
-The library to send user data to [Multitech mDot](http://www.multitech.com/brands/multiconnect-mdot) using [AT commands](https://www.sparkfun.com/datasheets/Cellular%20Modules/AT_Commands_Reference_Guide_r0.pdf) on serial. All AT commands begin with an `AT`. Please see the link for information on AT commands. 
+Contains a library (with example scripts) to send user data to [Multitech mDot](http://www.multitech.com/brands/multiconnect-mdot) using [AT commands](https://www.sparkfun.com/datasheets/Cellular%20Modules/AT_Commands_Reference_Guide_r0.pdf) on serial. All AT commands begin with an `AT`. Please see the link for information on AT commands. 
 
 # Note well: 
 - The mDot serial port Baud Rate (BR) should match the BR specified in the `begin(<baud-rate>)` method.
@@ -15,6 +15,9 @@ The library to send user data to [Multitech mDot](http://www.multitech.com/brand
 - Before the `setup()` instruction, instantiate the mDot object: `LoRaAT mdot;`
 - In the `setup()` function, initialise an instance of the mdot object: `mdot.begin();` (see [object oriented programming](https://en.wikipedia.org/wiki/Object-oriented_programming) wiki page for more information
 - Now you can use the instance methods  `mdot.join()` and `mdot.sendPairs()` etc 
+  1. `mdot.join()` joins the LoRa network and returns a response code. If the response code is equal to 0 then the join has not been successful and you will need to run the `mdot.join()` command again. 
+  2. Once the `mdot.join()` method is successful, the `mdot.networkSessionKey` method will return the relevant session key
+- Please see the example Arduino scripts (supplied in the `LoRaAT/examples` folder) for further information on how to connect to the LoRa network and send data
 
 ### join( )
 This method sends a join request to the LoRa server.
