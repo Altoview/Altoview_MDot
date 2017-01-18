@@ -29,7 +29,7 @@ This method accepts a comma separated key-value pair in the form of a `String` o
 
 - Once you have identified the LoRa node has successful connected to the LoRa network and is sending data, navigate to [AltoView](http://www.altoview.com/) (create a login if you don't already have one) 
 - On the left hand side menu, select **My Nodes** and click **Register a Node** 
-- Enter the DevEUI ([Development Extended Unique Identifier](https://en.wikipedia.org/wiki/MAC_address)) which can be found on the mDot node in small print (look a 16 value long ID with numbers and letters in it, eg: 00 80 00 00 00 00 AA 66) 
+- Enter the DevEUI ([Development Extended Unique Identifier](https://en.wikipedia.org/wiki/MAC_address)) which can be found on the mDot node in small print (look for a 16 value long ID with numbers and letters in it, eg: 00 80 00 00 00 00 AA 66) 
 
 
 License
