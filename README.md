@@ -28,9 +28,10 @@ This method accepts a comma separated key-value pair in the form of a `String` o
 `Temp1:26.00,Temp2:22.70,RH%:59,Moral%:100`
 
 ### Wiring and debugging: 
-- Once you have uploaded the code to your dev board, you must remove the TX and RX wires are removed (otherwise this will disrupt the mdot signals being sent to the LoRa netork) 
-- Ensure that all your baudrates match (everything must **send on** and **receive on** on 34100
+- Once you have uploaded the code to your dev board, you must remove the TX and RX wires (otherwise this will disrupt the mdot signals being sent to the LoRa netork and you node will not connect) 
+- Ensure that all your baudrates match. Everything must **send on** and **receive on** on 34100 (or the baudrate in the `begin()` statement)
 - The mDot must be programmed with the Australian Firmware 
+- The baudrate is effected by the speed of the On Board Crystal. If the microcontroller is programmed at 8 Mhz then the dev board performing the serial listening task for the debug serial must also have 8 Mhz 
 
 ### Register Node in AltoView
 - Once you have identified the LoRa node has successful connected to the LoRa network and is sending data, navigate to [AltoView](http://www.altoview.com/) (create a login if you don't already have one) 
