@@ -27,10 +27,16 @@ This method accepts a comma separated key-value pair in the form of a `String` o
 - example:
 `Temp1:26.00,Temp2:22.70,RH%:59,Moral%:100`
 
+### Wiring and debugging: 
+- Once you have uploaded the code to your dev board, you must remove the TX and RX wires are removed (otherwise this will disrupt the mdot signals being sent to the LoRa netork) 
+- Ensure that all your baudrates match (everything must **send on** and **receive on** on 34100
+- The mDot must be programmed with the Australian Firmware 
+
 ### Register Node in AltoView
 - Once you have identified the LoRa node has successful connected to the LoRa network and is sending data, navigate to [AltoView](http://www.altoview.com/) (create a login if you don't already have one) 
 - On the left hand side menu, select **My Nodes** and click **Register a Node** 
 - Enter the DevEUI ([Development Extended Unique Identifier](https://en.wikipedia.org/wiki/MAC_address)) which can be found on the mDot node in small print (look for a 16 value long ID with numbers and letters in it, eg: 00 80 00 00 00 00 AA 66) 
+- **NB//** although the DevEUI is written in *uppercase* on most mDot modules, altoview requirers the DevEUI in ***LOWERCASE*** 
 
 
 License
