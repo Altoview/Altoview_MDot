@@ -71,7 +71,7 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 | Initialize class object.                                                          |
 |                                                                                   |
 | Sets up the serial port specified in instantiation using default 38400 baud rate. |
-| Then configure the mDot with some default settings.                               |
+| Then configures the mDot with some default settings.                              |
 |                                                                                   |
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
@@ -84,25 +84,25 @@ void LoRaAT::begin() {
 |                                                                                   |
 | Sets up the serial port specified in instantiation with a user specified baud     |
 | rate. Then configure the mDot with some default settings. If the serial port      |
-| specific is not a valid one the serial port with default to 0.                    |
+| specified is not a valid uint32, the serial port will default to 0.               |
 |                                                                                   |
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
 void LoRaAT::begin(uint32_t u32BaudRate) {
   switch(_u8SerialPort) {
-  #if defined(UBRR1H)
+  #if defined(UBRR1H)							//BRR1H is a constant belonging to HardwareSerial.h
     case 1:
     ATSerial = &Serial1;
     break;
   #endif
 
-  #if defined(UBRR2H)
+  #if defined(UBRR2H)							//BRR2H is a constant belonging to HardwareSerial.h
     case 2:
     ATSerial = &Serial2;
     break;
   #endif
 
-  #if defined(UBRR3H)
+  #if defined(UBRR3H)							//BRR3H is a constant belonging to HardwareSerial.h
     case 3:
     ATSerial = &Serial3;
     break;
@@ -120,10 +120,10 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 }
 
 /*----------------------------------------------------------------------------------|
-| The send command method, takes a null terminated command, some responses, and a   |
+| The send command method. Takes a null terminated command, some responses, and a   |
 | timeout.                                                                          |
 |                                                                                   |
-| The command is sent to the mDot and waits for a response. once a recognised       |
+| The command is sent to the mDot and waits for a response. Once a recognised       |
 | response is received it returns the corresponding integer. If no recognised       |
 | response is received within the timeout period a -1 is returned.                  |
 -----------------------------------------------------------------------------------*/
@@ -150,12 +150,12 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
   uint32_t maxEndTime = 0;
 
   //flush receive buffer before transmitting request
-  delay(20);                                     //Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
+  delay(20);                                     				//Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
   while (ATSerial->read() != -1);
-  delay(20);                                     //Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
+  delay(20);                                     				//Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
 
-  //Blank string
-  memset(_response,0x00,_MAX_MDOT_RESPONSE);
+  
+  memset(_response,0x00,_MAX_MDOT_RESPONSE);					//Blank string
   _length = 0;
 #ifdef DEBUG
   //Send command
@@ -166,17 +166,16 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
   ATSerial->print(command);
   ATSerial->print(TERMINATOR);
 
-  //Set timeout time
-  maxEndTime = millis() + timeout;
+  maxEndTime = millis() + timeout;								//Set timeout time
 
   //While something is available get it
   ///_debugStream->println(F("LaT:sc: Loop collecting response"));
   *resp = NULL;
   do {
-    if (ATSerial->available() != 0) {
+    if (ATSerial->available() != 0) {							//available() is a method of the serial class 
       if (_length < (_MAX_MDOT_RESPONSE - 2)) {
         _response[_length++] = ATSerial->read();
-        _response[_length] = '\0';               //Ensure response buffer is null terminated
+        _response[_length] = '\0';               				//Ensure response buffer is null terminated
       }
     }
 

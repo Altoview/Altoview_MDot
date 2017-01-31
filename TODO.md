@@ -39,6 +39,8 @@
      + { a b c d e f g h i             U  V  W  X  ,  Z
    - [x] If end is reached, always delete last two before looking for comma. Mention this explicitly in comments.
 - [ ] Check what Data Rate should default to.
+- [ ] Amend code in supplied arduino example scripts to include AT response codes --> for debugging and resolving of connection issues 
+- [ ] LoRat::restoreLoraSession is commented out in library but is being used in arduino example scripts --> results in compilation error for supplied examples
 
 ## Future Version Goals
 - [x] Overload send() function so it can also accept a char* and length. For when we don't want to read until null.
