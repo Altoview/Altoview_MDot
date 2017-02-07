@@ -36,17 +36,17 @@ This method accepts a comma separated key-value pair in the form of a `String` o
 #### The debug serial
 If you have chosen to use a debug serial, it should be noted that the serial **is not** instantiated in the usual way. Instead, the LoRat object must be made aware of the extra serial using the syntax: 
 
-  ``
+  ```
   SoftwareSerial debugSerial(10, 11); // RX, TX 
   LoRaAT mdot(0, &debugSerial);     //Instantiate a LoRaAT object
-  ``
+  ```
   
 The mdot object will then post data to the serial on its own accord. An explanation of some likely debug responses is listed below: 
-``
+```
 LaT:sp: {"L":66}            --> sp stands for *send pairs* 
 LaT:sc: AT+TXDR?            --> sc stands for *send command* and TXDR stands for transmit data rate (the ? is asking for a response) 
 LaT:sc: AT+SEND 11{"L":66}  --> the pairs of data is sent 
-``
+```
 For more information on AT commands, please see the Multech [AT Command Getting Started Guide](http://www.multitech.net/developer/software/mdot-software/at-command-firmware-user-guide/) and the [DOT Series AT Command Reference Guide](http://www.multitech.com/documents/publications/manuals/s000643.pdf).
 
 ### Register Node in AltoView
