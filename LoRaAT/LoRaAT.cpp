@@ -313,38 +313,26 @@ int8_t LoRaAT::send(char* message, uint8_t length, uint16_t timeout) {
 | Gets the RSSI and SNR using their AT commands. Saves them to public variables.    |
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::ping() {
-	int8_t ansCode;
+	int8_t ansCode1;
+	int8_t ansCode2;
 	char* r;
-  ///_debugStream->println(F("LaT:p: not implemented"));
 
-	_debugStream->println(F("-------------------"));
-  	_debugStream->println(F("sendCommand within ping()"));
-  	sprintf_P(_command,(char*)F("AT+SNR?"));
-  	ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
-  	_debugStream->println(F("ansCode: "));
-  	_debugStream->println(ansCode);
-  	_debugStream->println(F("response: "));
-  	_debugStream->println(r);
-  	_debugStream->println(F("-------------------"));
+  	ansCode1 = getSnr(); 
+  	ansCode2 = getRssi(); 
 
-  if (ansCode == 1) {
+  if (ansCode1 == 1 && ansCode2 == 1) {
       return (0);
     }
   return(-1);
 }
 
-
 int8_t LoRaAT::getSnr() {
-  ///_debugStream->println(F("LaT:p: not implemented"));
+  //_debugStream->println(F("LaT:snr:"));
   int8_t ansCode;
   char* r;
 
   sprintf_P(_command,(char*)F("AT+SNR"));
   ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
-  _debugStream->println(F("ansCode: "));
-  _debugStream->println(ansCode);
-  _debugStream->println(F("response: "));
-  _debugStream->println(r);
 
   if (ansCode == 1) {
     strncpy(snr,r,(sizeof(snr)-1));
@@ -356,7 +344,7 @@ int8_t LoRaAT::getSnr() {
 }
 
 int8_t LoRaAT::getRssi() {
-  ///_debugStream->println(F("LaT:p: not implemented"));
+  ///_debugStream->println(F("LaT:rssi:"));
   int8_t ansCode;
   char* r;
 
