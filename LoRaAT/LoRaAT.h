@@ -51,6 +51,8 @@ class LoRaAT
     char publicNetwork = '\0';                    //0,1
     char dataRate = '\0';                         //0-3
     char adaptiveDataRate = '\0';                 //0,1
+    char snr[26] = {'\0'};                        //-00.0, -00.0, -00.0, -00.0
+    char rssi[22] = {'\0'};                       //-000, -000, -000, -000
 
     LoRaAT();                                     //Use default serial port
     LoRaAT(uint8_t);                              //Use specified serial port.
@@ -69,7 +71,9 @@ class LoRaAT
     int8_t sendPairs(String);                     //Takes key,value pairs, forms a message, and sends to the LoRa server.
     int8_t sendPairs(String*);                    //Takes key,value pairs, forms a message, and sends to the LoRa server.
     int8_t sendPairs(char*);                      //Takes key,value pairs, forms a message, and sends to the LoRa server.
-    int8_t ping();                                //Not yet implemented
+    int8_t ping();                                //Uses getSnr() and getRssi(), returns 0 if variables saved, returns -1 if either fncs failed 
+    int8_t getSnr();                              //Gets SNR using AT command, returns 0 if variable saved, returns -1 if failed 
+    int8_t getRssi();                             //Gets RSSI using AT command, returns 0 if variable saved, returns -1 if failed 
 
     int8_t setDefaults();
     int8_t setFrequencySubBand(char);
