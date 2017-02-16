@@ -49,10 +49,10 @@ class LoRaAT
     char networkAddress[12] = {'\0'};             //00:00:00:00
     char frequencySubBand = '\0';                 //0-8
     char publicNetwork = '\0';                    //0,1
-    uint8_t dataRate = '\0';                         //0-3
+    uint8_t dataRate = '\0';                      //0-3
     char adaptiveDataRate = '\0';                 //0,1
-    char snr[26] = {'\0'};                        //-00.0, -00.0, -00.0, -00.0
-    char rssi[22] = {'\0'};                       //-000, -000, -000, -000
+    float snr = '\0';                             //-00.0 (-20dbm to 20dbm) --> float range: -3.4E38 .. 3.4E38
+    int16_t rssi = '\0';                          //-000 (-180dbm to 0dbm) --> int16_t range: -32,768 to 32,767
 
     LoRaAT();                                     //Use default serial port
     LoRaAT(uint8_t);                              //Use specified serial port.

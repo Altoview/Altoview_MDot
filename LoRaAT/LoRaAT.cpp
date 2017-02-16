@@ -334,14 +334,15 @@ int8_t LoRaAT::getSnr() {
   //_debugStream->println(F("LaT:snr:"));
   int8_t ansCode;
   char* r;
-  
+  char temp[5];									//variable to store potential length snr of latest packet 
 
   sprintf_P(_command,(char*)F("AT+SNR"));
   ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-    strncpy(snr,r,(sizeof(snr)-1));
-    snr[(sizeof(snr)-1)] = '\0';
+    //strncpy(snr,r,(sizeof(snr)-1)); 
+  	sprintf(temp, "%.5s",r);					//get the first 5 values from the response array				
+  	snr = (float)atof(temp);					//use atoi to cast char array to uint16 and strip ' ' or ','
     return (0);
   }
 
@@ -349,16 +350,18 @@ int8_t LoRaAT::getSnr() {
 }
 
 int8_t LoRaAT::getRssi() {
-  ///_debugStream->println(F("LaT:rssi:"));
+  //_debugStream->println(F("LaT:rssi:"));
   int8_t ansCode;
   char* r;
+  char temp[4];									//variable to store potential length rssi of latest packet 
 
   sprintf_P(_command,(char*)F("AT+RSSI"));
   ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-    strncpy(rssi,r,(sizeof(rssi)-1));
-    rssi[(sizeof(rssi)-1)] = '\0';
+    //strncpy(snr,r,(sizeof(snr)-1)); 
+  	sprintf(temp, "%.4s",r);					//get the first 4 values from the response array				
+  	rssi = (int16_t)atof(temp);					//use atoi to cast char array to uint16 and strip ' ' or ','
     return (0);
   }
 
