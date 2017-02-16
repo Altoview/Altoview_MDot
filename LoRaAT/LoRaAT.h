@@ -32,7 +32,7 @@
 
 #define _MAX_PAIRS_SIZE 70
 #define _MAX_MDOT_RESPONSE 100    //Max number of bytes the mdot might return
-#define _MAX_MDOT_COMMAND 100     //TODO: Check against the manual for mDot
+#define _MAX_MDOT_COMMAND 50     //TODO: Check against the manual for mDot
 
 
 /*
@@ -49,7 +49,7 @@ class LoRaAT
     char networkAddress[12] = {'\0'};             //00:00:00:00
     char frequencySubBand = '\0';                 //0-8
     char publicNetwork = '\0';                    //0,1
-    char dataRate = '\0';                         //0-3
+    uint8_t dataRate = '\0';                         //0-3
     char adaptiveDataRate = '\0';                 //0,1
     char snr[26] = {'\0'};                        //-00.0, -00.0, -00.0, -00.0
     char rssi[22] = {'\0'};                       //-000, -000, -000, -000
@@ -85,6 +85,7 @@ class LoRaAT
     int8_t setNetworkKey(char*);                  //Also referred to as the AppKey
     int8_t getNetworkKey();                       //Also referred to as the AppKey
     int8_t setDataRate(char);
+    int8_t setDataRate(uint8_t);
     int8_t getDataRate();
     int8_t setAdaptiveDataRate(char);
     int8_t getAdaptiveDataRate();
