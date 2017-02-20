@@ -18,7 +18,7 @@
 #include "Arduino.h"
 #include "LoRaAT.h"
 
-#define DEBUG
+//#define DEBUG
 
 const char answer1[] = "OK";
 const char answerX[] = "BUG";
@@ -47,25 +47,27 @@ const char answerX[] = "BUG";
   _debugStream = NULL;
 }
 
-/*----------------------------------------------------------------------------------|
-| CONSTRUCTOR: Creates class object using a specified serial port.                  |
------------------------------------------------------------------------------------*/
- LoRaAT::LoRaAT(uint8_t u8SerialPort) {
-  //TODO: Input checking, what range of values to accept, how to handle invalid input
-  _u8SerialPort = u8SerialPort;
-  _debugStream = NULL;
-}
+#ifdef DEBUG
+	/*----------------------------------------------------------------------------------|
+	| CONSTRUCTOR: Creates class object using a specified serial port.                  |
+	-----------------------------------------------------------------------------------*/
+	 LoRaAT::LoRaAT(uint8_t u8SerialPort) {
+	  //TODO: Input checking, what range of values to accept, how to handle invalid input
+	  _u8SerialPort = u8SerialPort;
+	  _debugStream = NULL;
+	}
 
-/*----------------------------------------------------------------------------------|
-| CONSTRUCTOR: Creates class object using a specified serial port, and passing it a |
-| specified debug stream. This stream can be used to pass debug info to a serial    |
-| port, either hardware serial or software serial.                                  |
------------------------------------------------------------------------------------*/
-LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
-  //TODO: Input checking, what range of values to accept, how to handle invalid input
-  _u8SerialPort = u8SerialPort;
-  _debugStream = debugStream;
-}
+	/*----------------------------------------------------------------------------------|
+	| CONSTRUCTOR: Creates class object using a specified serial port, and passing it a |
+	| specified debug stream. This stream can be used to pass debug info to a serial    |
+	| port, either hardware serial or software serial.                                  |
+	-----------------------------------------------------------------------------------*/
+	LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
+	  //TODO: Input checking, what range of values to accept, how to handle invalid input
+	  _u8SerialPort = u8SerialPort;
+	  _debugStream = debugStream;
+	}
+#endif
 
 /*----------------------------------------------------------------------------------|
 | Initialize class object.                                                          |
@@ -77,6 +79,7 @@ LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 -----------------------------------------------------------------------------------*/
 void LoRaAT::begin() {
   begin(38400);
+
 }
 
 /*----------------------------------------------------------------------------------|
@@ -150,19 +153,20 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
   uint32_t maxEndTime = 0;
 
   //flush receive buffer before transmitting request
-  delay(20);                                     				//Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
+  delay(20);                                     				//Undesirable delay, if we read/write too quick to the mDot,  timing issues arise.
   while (ATSerial->read() != -1);
-  delay(20);                                     				//Undesirable dealy, if we read/write too quick to the mDot. We get out of time.
+  delay(20);                                     				//Undesirable delay, if we read/write too quick to the mDot,  timing issues arise.
 
-  
   memset(_response,0x00,_MAX_MDOT_RESPONSE);					//Blank string
   _length = 0;
+
 #ifdef DEBUG
   //Send command
   _debugStream->print(F("LaT:sc: "));
   _debugStream->print(command);
   _debugStream->print(TERMINATOR);
 #endif
+
   ATSerial->print(command);
   ATSerial->print(TERMINATOR);
 
@@ -310,11 +314,61 @@ int8_t LoRaAT::send(char* message, uint8_t length, uint16_t timeout) {
 }
 
 /*----------------------------------------------------------------------------------|
-| Not yet implemented.                                                              |
+| Gets the RSSI and SNR using their AT commands. Saves them to public variables.    |
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::ping() {
-  ///_debugStream->println(F("LaT:p: not implemented"));
+	int8_t ansCode1;
+	int8_t ansCode2;
+	char* r;
+
+  	ansCode1 = getSnr(); 
+  	ansCode2 = getRssi(); 
+
+  if (ansCode1 == 1 && ansCode2 == 1) {
+      return (0);
+    }
+  return(-1);
 }
+
+int8_t LoRaAT::getSnr() {
+  //_debugStream->println(F("LaT:snr:"));
+  int8_t ansCode;
+  char* r;
+  char temp[5];									//variable to store potential length snr of latest packet 
+
+  sprintf_P(_command,(char*)F("AT+SNR"));
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+
+  if (ansCode == 1) {
+    //strncpy(snr,r,(sizeof(snr)-1)); 
+  	sprintf(temp, "%.5s",r);					//get the first 5 values from the response array				
+  	snr = (float)atof(temp);					//use atoi to cast char array to uint16 and strip ' ' or ','
+    return (0);
+  }
+
+  return(-1);
+}
+
+int8_t LoRaAT::getRssi() {
+  //_debugStream->println(F("LaT:rssi:"));
+  int8_t ansCode;
+  char* r;
+  char temp[4];									//variable to store potential length rssi of latest packet 
+
+  sprintf_P(_command,(char*)F("AT+RSSI"));
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+
+  if (ansCode == 1) {
+    //strncpy(snr,r,(sizeof(snr)-1)); 
+  	sprintf(temp, "%.4s",r);					//get the first 4 values from the response array				
+  	rssi = (int16_t)atof(temp);					//use atoi to cast char array to uint16 and strip ' ' or ','
+    return (0);
+  }
+
+  return(-1);
+}
+
+
 
 /*----------------------------------------------------------------------------------|
 | Receives a string in the format key:value,key:value,...                           |
@@ -530,19 +584,19 @@ int8_t LoRaAT::_processBuffer() {
   while (txGtr < (char*)_txBuffer + buffLength) {
     getDataRate();                               //Update data rate public member
     switch (dataRate) {
-      case '4':
+      case 4:
         length = floor(_DR4_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
         break;
-      case '3':
+      case 3:
         length = floor(_DR3_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
         break;
-      case '2':
+      case 2:
         length = floor(_DR2_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
         break;
-      case '1':
+      case 1:
         length = floor(_DR1_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
         break;
-      case '0':
+      case 0:
       default:
         length = floor(_DR0_PAYLOAD_USAGE/_PACKET_SIZE) * _PACKET_SIZE;
     }
@@ -588,10 +642,10 @@ int8_t LoRaAT::setDefaults() {
   if (setNetworkKey((char*) key) == 0) {
     result = 0;
   }
-  if (setDataRate('2') == 0) {
+  if (setDataRate((uint8_t)2) == 0) {
     result = 0;
   }
-  if (setAdaptiveDataRate('1') == 0) {
+  if (setAdaptiveDataRate('0') == 0) {
     result = 0;
   }
 
@@ -788,14 +842,61 @@ int8_t LoRaAT::getNetworkKey() {
 | Sets the data rate                                                                |
 |                                                                                   |
 | AT+TXDR ?                                                                         |
-| AT+TXDR: (0-3|10-7|DR0-DR4|DR8-DR13)                                              |
+| AT+TXDR: (0-3|10-7|DR0-DR4|DR8-DR13) 												|
+|																					|
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setDataRate(char txdr) {
   int8_t ansCode;
 
-  sprintf_P(_command,(char*)F("AT+TXDR "));
+  sprintf_P(_command,(char*)F("AT+TXDR"));
   _command[8] = txdr;
   _command[9] = '\0';
+
+  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
+
+  if (ansCode == 1) {
+    dataRate = (uint8_t)txdr;
+    return (0);
+  }
+
+  return(-1);
+}
+
+/*----------------------------------------------------------------------------------|
+| Sets the data rate                                                                |
+|                                                                                   |
+| AT+TXDR ?                                                                         |
+| AT+TXDR: (DR0-DR4|DR8-DR13) 														|
+|																					|
+| Eg:           																	|
+|					| DataRate | Config   | Bit rate |								|
+|					|----------|----------|----------|								|
+|					| 	DR0    |SF10BW125 |   980    |								|
+|					| 	DR1    |SF09BW125 |  1760    |								|
+|					| 	DR2    |SF08BW125 |  3125    |								|
+|					| 	DR3    |SF07BW125 |  5470    |								|
+|					| 	DR4    |SF08BW500 | 12500    |								|
+|					| DR5:DR7  | Not Used |          |								|
+|					| 	DR8    |SF12BW500 |   980    |								|
+|					| 	DR9    |SF11BW500 |  1760    |								|
+|					|   DR10   |SF10BW500 |  3900    |								|
+|					| 	DR11   |SF09BW500 |  7000    |								|
+|					| 	DR12   |SF08BW500 | 12500    |								|
+|					| 	DR13   |SF07BW500 | 21900    |								|
+|					| DR14:DR15| Not Used |          |								|
+|                   |----------|----------|----------|                              |
+|																					|
+|																					|
+-----------------------------------------------------------------------------------*/
+int8_t LoRaAT::setDataRate(uint8_t txdr) {
+  int8_t ansCode;
+  char temp[2]; 								//temp char array to store txdr range of 0-13
+
+  sprintf_P(_command,(char*)F("AT+TXDR=DR")); 	//_command = {'A','T','+','T','X','D','R','=','D','R','X','Y','\0'}
+  sprintf(temp, "%u",txdr);						//convert txdr to temp char array
+
+  strcat(_command,temp);						//concatenate _command with temp
+  _command[12] = '\0';
 
   ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
 
@@ -813,13 +914,18 @@ int8_t LoRaAT::setDataRate(char txdr) {
 int8_t LoRaAT::getDataRate() {
   int8_t ansCode;
   char* r;
+  char temp[2];
 
   sprintf_P(_command,(char*)F("AT+TXDR?"));
 
   ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
 
   if (ansCode == 1) {
-    dataRate = r[2];
+  	temp[0] = r[2];						//get first char from response
+  	if (r[3] != ' '){					//if next character is not white space --> response can be ("DRX - SFXXBWXXX" | "DRXX - SFXXBWXXX")
+  		temp[1] = r[3];					//store third character of response to temp char array 
+  	}
+    dataRate = (uint8_t)atoi(temp);		//convert char* to uint8_t 
     return (0);
   }
 
