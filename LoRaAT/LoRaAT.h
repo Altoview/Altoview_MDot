@@ -16,7 +16,6 @@
 #define LoRaAT_h
 
 #include "Arduino.h"
-#include "SoftwareSerial.h"
 
 #define _DR0_PAYLOAD_USAGE 11     //Use 11 of 11 available bytes in payload
 #define _DR1_PAYLOAD_USAGE 53     //Use 53 of 53 available bytes in payload
@@ -57,8 +56,7 @@ class LoRaAT
 
     LoRaAT();                                     //Use default serial port
     LoRaAT(uint8_t);                              //Use specified serial port.
-    LoRaAT(Stream*, Stream*);                      //Use specified serial port and a debugging stream.
-    LoRaAT(SoftwareSerial*, HardwareSerial*);                      //Use specified serial port and a debugging stream.
+    LoRaAT(uint8_t,Stream*);                      //Use specified serial port and a debugging stream.
 
     void begin();                                 //Use default baud
     void begin(uint32_t);                         //Use specified baud rate.
@@ -115,8 +113,8 @@ class LoRaAT
     void _createFragmentBuffer(char*);
     int8_t _processBuffer();
 
-    HardwareSerial* _debugStream;                        //AT Command serial port selection by user
-    //SoftwareSerial* _u8SerialPort;                         //Debugging serial port initialized in constructor
+    uint8_t _u8SerialPort;                        //AT Command serial port selection by user
+    Stream* _debugStream;                         //Debugging serial port initialized in constructor
 };
 
 #endif

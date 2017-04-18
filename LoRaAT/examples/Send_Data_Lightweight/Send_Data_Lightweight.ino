@@ -41,10 +41,8 @@ int loopNum = 0;
 void loop() {
   int responseCode;                              //Response code from the mdot
 
-  char cmd[4];                                  //cmd = {'L', ':', '#', '#'}
-  sprintf(cmd,"Loop:%d",loopNum);
-  responseCode = mdot.sendPairs(cmd);
+  responseCode = mdot.sendPairs("L:" + String(loopNum));
 
-  delay(5000);
+  delay(120000);
   loopNum++;
 }

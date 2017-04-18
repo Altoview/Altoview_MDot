@@ -17,34 +17,57 @@
  ***********************************************************************************/
 #include "Arduino.h"
 #include "LoRaAT.h"
-#include "SoftwareSerial.h"
 
-//#define _debugStream Serial 
-#define DEBUG
+//#define DEBUG
 
 const char answer1[] = "OK";
 const char answerX[] = "BUG";
 
-SoftwareSerial* ATSerial;
-
+/************************************************************************************
+ *                               GLOBAL VARIABLES                                   *
+ ***********************************************************************************/
+#if defined(ARDUINO_ARCH_AVR)
+  HardwareSerial* ATSerial = &Serial;            //Pointer to Serial class object
+#elif defined(ARDUINO_ARCH_SAM)
+  UARTClass* ATSerial = &Serial;                 //Pointer to Serial class object
+#else
+  #error "This library only supports boards with an AVR or SAM processor."
+#endif
 
 
 /************************************************************************************
  *                               PUBLIC FUNCTIONS                                   *
  ***********************************************************************************/
 
+/*----------------------------------------------------------------------------------|
+| CONSTRUCTOR: Creates class object using a default hardware serial port 0          |
+-----------------------------------------------------------------------------------*/
+ LoRaAT::LoRaAT() {
+  _u8SerialPort = 0;
+  _debugStream = NULL;
+}
+
+#ifdef DEBUG
+	/*----------------------------------------------------------------------------------|
+	| CONSTRUCTOR: Creates class object using a specified serial port.                  |
+	-----------------------------------------------------------------------------------*/
+	 LoRaAT::LoRaAT(uint8_t u8SerialPort) {
+	  //TODO: Input checking, what range of values to accept, how to handle invalid input
+	  _u8SerialPort = u8SerialPort;
+	  _debugStream = NULL;
+	}
+
 	/*----------------------------------------------------------------------------------|
 	| CONSTRUCTOR: Creates class object using a specified serial port, and passing it a |
 	| specified debug stream. This stream can be used to pass debug info to a serial    |
 	| port, either hardware serial or software serial.                                  |
 	-----------------------------------------------------------------------------------*/
-	LoRaAT::LoRaAT(SoftwareSerial* mdot_serial, HardwareSerial* debug_serial) {
+	LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
 	  //TODO: Input checking, what range of values to accept, how to handle invalid input
-	  //_u8SerialPort = mdot_serial;       //legacy 
-	  _debugStream = debug_serial;
-    ATSerial = mdot_serial; 
+	  _u8SerialPort = u8SerialPort;
+	  _debugStream = debugStream;
 	}
-
+#endif
 
 /*----------------------------------------------------------------------------------|
 | Initialize class object.                                                          |
@@ -55,7 +78,6 @@ SoftwareSerial* ATSerial;
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
 void LoRaAT::begin() {
-
   begin(38400);
 
 }
@@ -70,8 +92,33 @@ void LoRaAT::begin() {
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
 void LoRaAT::begin(uint32_t u32BaudRate) {
+  switch(_u8SerialPort) {
+  #if defined(UBRR1H)							//BRR1H is a constant belonging to HardwareSerial.h
+    case 1:
+    ATSerial = &Serial1;
+    break;
+  #endif
+
+  #if defined(UBRR2H)							//BRR2H is a constant belonging to HardwareSerial.h
+    case 2:
+    ATSerial = &Serial2;
+    break;
+  #endif
+
+  #if defined(UBRR3H)							//BRR3H is a constant belonging to HardwareSerial.h
+    case 3:
+    ATSerial = &Serial3;
+    break;
+  #endif
+
+    case 0:
+    default:
+    ATSerial = &Serial;
+    break;
+  }
+
   ATSerial->begin(u32BaudRate);
-  ATSerial->println("AT");
+
   setDefaults();
 }
 
@@ -176,7 +223,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
 
   } while (millis() <= maxEndTime);
 
-  _debugStream->println(F("LaT:sc: Timed out"));
+  ///_debugStream->println(F("LaT:sc: Timed out"));
   return (-1);
 }
 
@@ -755,15 +802,12 @@ int8_t LoRaAT::getNetworkID() {
 |  * AT+NK 0,00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-01                        |
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setNetworkKey(char* key) {
-  _debugStream->println("network 1");
   int8_t ansCode;
 
   sprintf_P(_command,(char*)F("AT+NK 0,"));
-  _debugStream->println("network 2");
   strcat(_command,key);                          //Append key to command
 
   ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000);
-  _debugStream->println("network 3");
 
   if (ansCode == 1) {
     strncpy(networkKey,key,sizeof(networkKey)-1);
