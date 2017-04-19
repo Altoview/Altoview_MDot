@@ -1,7 +1,7 @@
 /*
-  File: LoRaAT.h
+  File: AltoviewMDot.h
 
-  Version: v0.0.1.1
+  Version: v0.2
 
   Brief: Arduino library for controlling Multitech mDot LoRa modules using
          AT commands.
@@ -12,8 +12,8 @@
   Author: Campbell Scientific Australia Pty Ltd
 */
 
-#ifndef LoRaAT_h
-#define LoRaAT_h
+#ifndef ALTOVIEW_MDOT_H
+#define ALTOVIEW_MDOT_H
 
 #include "Arduino.h"
 #include "SoftwareSerial.h"
@@ -39,7 +39,7 @@
 /*
   Class definition
 */
-class LoRaAT
+class AltoviewMDot
 {
   public:
     char networkSessionKey[48] = {'\0'};          //00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
@@ -55,9 +55,9 @@ class LoRaAT
     float snr = '\0';                             //-00.0 (-20dbm to 20dbm) --> float range: -3.4E38 .. 3.4E38
     int16_t rssi = '\0';                          //-000 (-180dbm to 0dbm) --> int16_t range: -32,768 to 32,767
 
-    LoRaAT();                                     //Use default serial port
-    LoRaAT(uint8_t);                              //Use specified serial port.
-    LoRaAT(SoftwareSerial*, HardwareSerial*);                      //Use specified serial port and a debugging stream.
+    AltoviewMDot();                                     //Use default serial port
+    AltoviewMDot(uint8_t);                              //Use specified serial port.
+    AltoviewMDot(SoftwareSerial*, HardwareSerial*);                      //Use specified serial port and a debugging stream.
 
     void begin();                                 //Use default baud
     void begin(uint32_t);                         //Use specified baud rate.
