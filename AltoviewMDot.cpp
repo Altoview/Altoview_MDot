@@ -1,7 +1,7 @@
 /*
-  File: LoRaAT.cpp
+  File: AltoviewMDot.cpp
 
-  Version: v0.0.1.1
+  Version: v0.2
 
   Brief: Arduino library for controlling Multitech mDot LoRa modules using
          AT commands.
@@ -16,7 +16,7 @@
  *                                   INCLUDES                                       *
  ***********************************************************************************/
 #include "Arduino.h"
-#include "LoRaAT.h"
+#include "AltoviewMDot.h"
 #include "SoftwareSerial.h"
 #include <avr/pgmspace.h>
 
@@ -39,7 +39,7 @@ SoftwareSerial* ATSerial;
 	| specified debug stream. This stream can be used to pass debug info to a serial    |
 	| port, either hardware serial or software serial.                                  |
 	-----------------------------------------------------------------------------------*/
-	LoRaAT::LoRaAT(SoftwareSerial* mdot_serial, HardwareSerial* debug_serial) {
+	AltoviewMDot::AltoviewMDot(SoftwareSerial* mdot_serial, HardwareSerial* debug_serial) {
 	  //TODO: Input checking, what range of values to accept, how to handle invalid input
 	  //_u8SerialPort = mdot_serial;       //legacy 
 		_debugStream = debug_serial;
@@ -55,7 +55,7 @@ SoftwareSerial* ATSerial;
 |                                                                                   |
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::begin() {
+void AltoviewMDot::begin() {
 
   begin(38400);
 
@@ -70,7 +70,7 @@ void LoRaAT::begin() {
 |                                                                                   |
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::begin(uint32_t u32BaudRate) {
+void AltoviewMDot::begin(uint32_t u32BaudRate) {
   ATSerial->begin(u32BaudRate);
   ATSerial->println(F("AT"));
 
@@ -89,7 +89,7 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 | response is received it returns the corresponding integer. If no recognised       |
 | response is received within the timeout period a -1 is returned.                  |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout) {
+int8_t AltoviewMDot::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout) {
   return _sendCommand(command, ans1, ans2, ans3, ans4, timeout, NULL);
 }
 /*----------------------------------------------------------------------------------|
@@ -105,7 +105,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
 | the command. If the command is not found in the mDot response, the “actual        |
 | response” is set to null.                                                         |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char** resp) {
+int8_t AltoviewMDot::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char** resp) {
   ///_debugStream->println(F("LaT:sc: enter"));
   static const char TERMINATOR[3] = {'\r','\n','\0'};
 
@@ -195,7 +195,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
 |   0 - success                                                                     |
 |  -1 - Timeout error                                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::join() {
+int8_t AltoviewMDot::join() {
   return(join(10000));
 }
 
@@ -209,7 +209,7 @@ int8_t LoRaAT::join() {
 |   0 - success                                                                     |
 |  -1 - Timeout error                                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::join(uint16_t timeout) {
+int8_t AltoviewMDot::join(uint16_t timeout) {
   ///_debugStream->println(F("LaT:j : enter"));
   int8_t ansCode;
 
@@ -226,7 +226,7 @@ int8_t LoRaAT::join(uint16_t timeout) {
 /*----------------------------------------------------------------------------------|
 | Leave a LoRa(WAN?) network                                                        |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::leave() {
+void AltoviewMDot::leave() {
   ///_debugStream->println(F("LaT:l: not implemented"));
 }
 
@@ -234,7 +234,7 @@ void LoRaAT::leave() {
 | Send method, takes a null terminated char array and sends that over the LoRaWAN   |
 | network. Using a default timeout of 10,000ms (10sec).                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::send(char* message) {
+int8_t AltoviewMDot::send(char* message) {
   ///_debugStream->println(F("LaT:s : enter, w/ default timeout"));
   return(send(message,10000));
 }
@@ -243,7 +243,7 @@ int8_t LoRaAT::send(char* message) {
 | Send method, takes a null terminated char array and sends that over the LoRaWAN   |
 | network. Using a specified timeout.                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::send(char* message, uint16_t timeout) {
+int8_t AltoviewMDot::send(char* message, uint16_t timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
   uint8_t l;
 
@@ -256,7 +256,7 @@ int8_t LoRaAT::send(char* message, uint16_t timeout) {
 | Send method, takes a char array and length and sends that over the LoRaWAN        |
 | network. Using a specified timeout.                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::send(char* message, uint8_t length, uint16_t timeout) {
+int8_t AltoviewMDot::send(char* message, uint8_t length, uint16_t timeout) {
   ///_debugStream->println(F("LaT:s : enter"));
   int8_t ansCode;
 
@@ -275,7 +275,7 @@ int8_t LoRaAT::send(char* message, uint8_t length, uint16_t timeout) {
 /*----------------------------------------------------------------------------------|
 | Gets the RSSI and SNR using their AT commands. Saves them to public variables.    |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::ping() {
+int8_t AltoviewMDot::ping() {
 	int8_t ansCode1;
 	int8_t ansCode2;
 	char* r;
@@ -289,7 +289,7 @@ int8_t LoRaAT::ping() {
   return(-1);
 }
 
-int8_t LoRaAT::getSnr() {
+int8_t AltoviewMDot::getSnr() {
   //_debugStream->println(F("LaT:snr:"));
   int8_t ansCode;
   char* r;
@@ -308,7 +308,7 @@ int8_t LoRaAT::getSnr() {
   return(-1);
 }
 
-int8_t LoRaAT::getRssi() {
+int8_t AltoviewMDot::getRssi() {
   //_debugStream->println(F("LaT:rssi:"));
   int8_t ansCode;
   char* r;
@@ -336,7 +336,7 @@ int8_t LoRaAT::getRssi() {
 | 2. The json is fragmented to the _txBuffer .                                      |
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::sendPairs(String pairs) {
+int8_t AltoviewMDot::sendPairs(String pairs) {
   return(sendPairs(&pairs));
 }
 
@@ -347,7 +347,7 @@ int8_t LoRaAT::sendPairs(String pairs) {
 | 2. The json is fragmented to the _txBuffer .                                      |
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::sendPairs(String* pairs) {
+int8_t AltoviewMDot::sendPairs(String* pairs) {
   ///_debugStream->println(F("LaT:sp: enter"));
   char pairsC[_MAX_PAIRS_SIZE];
   pairs->toCharArray(pairsC, _MAX_PAIRS_SIZE);
@@ -362,7 +362,7 @@ int8_t LoRaAT::sendPairs(String* pairs) {
 | 2. The json is fragmented to the _txBuffer .                                      |
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::sendPairs(char* pairs) {
+int8_t AltoviewMDot::sendPairs(char* pairs) {
 #ifdef DEBUG
   ///_debugStream->println(F("LaT:sp: enter"));
   _debugStream->print(F("LaT:sp: "));
@@ -395,7 +395,7 @@ int8_t LoRaAT::sendPairs(char* pairs) {
 | In the case the maximum JSON length is reached, the loop will exit, any partially |
 | created pair will be removed, and the JSON closed and returned.                   |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
+void AltoviewMDot::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   ///_debugStream->println(F("LaT:pj: enter"));
   char* jsonPtr;                                 //Points to the next free location
   uint8_t len = strlen(pairs);                   //Counts to the null terminator
@@ -459,7 +459,7 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
 |                                                                                   |
 | Header is of the format [fragment number][total number of fragments]              |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::_createFragmentBuffer(char* message) {
+void AltoviewMDot::_createFragmentBuffer(char* message) {
   ///_debugStream->println(F("LaT:fb: enter"));
 
   uint8_t strLength = strlen(message);            //Counts to the null terminator
@@ -533,7 +533,7 @@ void LoRaAT::_createFragmentBuffer(char* message) {
 | it, which should never happen if we ever point past it, the length gets reduced   |
 | accordingly) the loop is exited.                                                  |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::_processBuffer() {
+int8_t AltoviewMDot::_processBuffer() {
   ///_debugStream->println(F("LaT:pb: enter"));
   char* txGtr = (char*)_txBuffer;                //Pointer to where in the buffer we're up to
   uint8_t length = 0;                            //Number of bytes to send from buffer
@@ -583,7 +583,7 @@ int8_t LoRaAT::_processBuffer() {
 | Some of these default settings may be required for successful communication with  |
 | the Campbell Scientific Australia LoRaWAN server.                                 |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setDefaults() {
+int8_t AltoviewMDot::setDefaults() {
   int8_t result = -1;
 char testC;
   const static char keyy[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
@@ -630,7 +630,7 @@ char testC;
 | AT+FSB ?                                                                          |
 | AT+FSB: (0-8)                                                                     |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setFrequencySubBand(char fsb) {
+int8_t AltoviewMDot::setFrequencySubBand(char fsb) {
   int8_t ansCode;
 
   sprintf_P(_command,(char*)F("AT+FSB "));
@@ -651,7 +651,7 @@ int8_t LoRaAT::setFrequencySubBand(char fsb) {
 /*----------------------------------------------------------------------------------|
 | Gets the frequency sub band                                                       |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getFrequencySubBand() {
+int8_t AltoviewMDot::getFrequencySubBand() {
   int8_t ansCode;
   char* r;
 
@@ -675,7 +675,7 @@ int8_t LoRaAT::getFrequencySubBand() {
 |  0 - off                                                                          |
 |  1 - on                                                                           |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setPublicNetwork(char pn) {
+int8_t AltoviewMDot::setPublicNetwork(char pn) {
   int8_t ansCode;
 
   sprintf_P(_command,(char*)F("AT+PN "));
@@ -698,7 +698,7 @@ int8_t LoRaAT::setPublicNetwork(char pn) {
 /*----------------------------------------------------------------------------------|
 | Gets the public network                                                           |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getPublicNetwork() {
+int8_t AltoviewMDot::getPublicNetwork() {
   int8_t ansCode;
   char* r;
 
@@ -724,7 +724,7 @@ int8_t LoRaAT::getPublicNetwork() {
 |  * AT+NI 0,00:00:aa:00:00:00:00:01                                                |
 |  * AT+NI 0,00-00-aa-00-00-00-00-01                                                |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setNetworkID(char* id) {
+int8_t AltoviewMDot::setNetworkID(char* id) {
   int8_t ansCode;
 
   sprintf_P(_command,(char*)F("AT+NI 0,"));
@@ -744,7 +744,7 @@ int8_t LoRaAT::setNetworkID(char* id) {
 /*----------------------------------------------------------------------------------|
 | Gets the network ID                                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getNetworkID() {
+int8_t AltoviewMDot::getNetworkID() {
   int8_t ansCode;
   char* r;
 
@@ -771,7 +771,7 @@ int8_t LoRaAT::getNetworkID() {
 |  * AT+NK 0,00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01                        |
 |  * AT+NK 0,00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-01                        |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setNetworkKey(char* key) {
+int8_t AltoviewMDot::setNetworkKey(char* key) {
   _debugStream->println(F("[DEBUG] Point 1.1 start"));
   _debugStream->print(key);
   _debugStream->println(F("[DEBUG] Point 1.1 end"));
@@ -795,7 +795,7 @@ int8_t LoRaAT::setNetworkKey(char* key) {
 /*----------------------------------------------------------------------------------|
 | Gets the network key                                                              |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getNetworkKey() {
+int8_t AltoviewMDot::getNetworkKey() {
   int8_t ansCode;
   char* r;
 
@@ -819,7 +819,7 @@ int8_t LoRaAT::getNetworkKey() {
 | AT+TXDR: (0-3|10-7|DR0-DR4|DR8-DR13) 												|
 |																					|
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setDataRate(char txdr) {
+int8_t AltoviewMDot::setDataRate(char txdr) {
   int8_t ansCode;
 
   sprintf_P(_command,(char*)F("AT+TXDR"));
@@ -862,7 +862,7 @@ int8_t LoRaAT::setDataRate(char txdr) {
 |																					|
 |																					|
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setDataRate(uint8_t txdr) {
+int8_t AltoviewMDot::setDataRate(uint8_t txdr) {
   int8_t ansCode;
   char temp[2]; 								//temp char array to store txdr range of 0-13
 
@@ -885,7 +885,7 @@ int8_t LoRaAT::setDataRate(uint8_t txdr) {
 /*----------------------------------------------------------------------------------|
 | Gets the data rate                                                                |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getDataRate() {
+int8_t AltoviewMDot::getDataRate() {
   int8_t ansCode;
   char* r;
   char temp[2];
@@ -914,7 +914,7 @@ int8_t LoRaAT::getDataRate() {
 |  0 - off                                                                          |
 |  1 - on                                                                           |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setAdaptiveDataRate(char adr) {
+int8_t AltoviewMDot::setAdaptiveDataRate(char adr) {
   int8_t ansCode;
 
   sprintf_P(_command,(char*)F("AT+ADR "));
@@ -934,7 +934,7 @@ int8_t LoRaAT::setAdaptiveDataRate(char adr) {
 /*----------------------------------------------------------------------------------|
 | Gets the state of the adaptive data rate.                                         |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getAdaptiveDataRate() {
+int8_t AltoviewMDot::getAdaptiveDataRate() {
   int8_t ansCode;
 
   char* r;
@@ -954,7 +954,7 @@ int8_t LoRaAT::getAdaptiveDataRate() {
 /*----------------------------------------------------------------------------------|
 | Gets the device ID                                                                |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getDeviceId() {
+int8_t AltoviewMDot::getDeviceId() {
   int8_t ansCode;
   char* r;
 
@@ -974,7 +974,7 @@ int8_t LoRaAT::getDeviceId() {
 /*----------------------------------------------------------------------------------|
 | Gets the network address                                                          |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getNetworkAddress() {
+int8_t AltoviewMDot::getNetworkAddress() {
   int8_t ansCode;
   char* r;
 
@@ -994,7 +994,7 @@ int8_t LoRaAT::getNetworkAddress() {
 /*----------------------------------------------------------------------------------|
 | Gets the network session key                                                      |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getNetworkSessionKey() {
+int8_t AltoviewMDot::getNetworkSessionKey() {
   int8_t ansCode;
   char* r;
 
@@ -1014,7 +1014,7 @@ int8_t LoRaAT::getNetworkSessionKey() {
 /*----------------------------------------------------------------------------------|
 | Gets the data session key                                                         |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getDataSessionKey() {
+int8_t AltoviewMDot::getDataSessionKey() {
   int8_t ansCode;
   char* r;
 
@@ -1035,7 +1035,7 @@ int8_t LoRaAT::getDataSessionKey() {
 | Saves the current session information in the mDot.                                |
 -----------------------------------------------------------------------------------*/
 /*
-int8_t LoRaAT::saveLoraSession() {
+int8_t AltoviewMDot::saveLoraSession() {
   int8_t ansCode;
   char ans1[] PROGMEM = "OK";
 
@@ -1056,7 +1056,7 @@ int8_t LoRaAT::saveLoraSession() {
 | Saves the current session information in the mDot.                                |
 -----------------------------------------------------------------------------------*/
 /*
-int8_t LoRaAT::restoreLoraSession() {
+int8_t AltoviewMDot::restoreLoraSession() {
   int8_t ansCode;
   char ans1[] PROGMEM = "OK";
 
@@ -1082,7 +1082,7 @@ int8_t LoRaAT::restoreLoraSession() {
 /*----------------------------------------------------------------------------------|
 | Writes the current settings of the mDot to it's memory                            |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::commitSettings() {
+int8_t AltoviewMDot::commitSettings() {
   int8_t ansCode;
 
   sprintf_P(_command,(char*)F("AT&W"));
