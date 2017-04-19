@@ -18,8 +18,8 @@
 #include "Arduino.h"
 #include "LoRaAT.h"
 #include "SoftwareSerial.h"
+#include <avr/pgmspace.h>
 
-//#define _debugStream Serial 
 #define DEBUG
 
 const char answer1[] = "OK";
@@ -27,6 +27,7 @@ const char answerX[] = "BUG";
 
 SoftwareSerial* ATSerial;
 
+// const char keyy[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
 
 
 /************************************************************************************
@@ -41,8 +42,8 @@ SoftwareSerial* ATSerial;
 	LoRaAT::LoRaAT(SoftwareSerial* mdot_serial, HardwareSerial* debug_serial) {
 	  //TODO: Input checking, what range of values to accept, how to handle invalid input
 	  //_u8SerialPort = mdot_serial;       //legacy 
-	  _debugStream = debug_serial;
-    ATSerial = mdot_serial; 
+		_debugStream = debug_serial;
+		ATSerial = mdot_serial; 
 	}
 
 
@@ -71,7 +72,12 @@ void LoRaAT::begin() {
 -----------------------------------------------------------------------------------*/
 void LoRaAT::begin(uint32_t u32BaudRate) {
   ATSerial->begin(u32BaudRate);
-  ATSerial->println("AT");
+  ATSerial->println(F("AT"));
+
+  // _debugStream->println("********");
+  // _debugStream->println(keyy[0]);
+  // _debugStream->println("++++++++");
+
   setDefaults();
 }
 
@@ -579,9 +585,17 @@ int8_t LoRaAT::_processBuffer() {
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setDefaults() {
   int8_t result = -1;
-
-  const char key[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+char testC;
+  const static char keyy[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
   const char id[] PROGMEM = "00:00:aa:00:00:00:00:01";
+  _debugStream->println(F("[DEBUG] Point 0 start"));
+  for (int i = 0; i < 47; ++i)
+  {
+  	testC = pgm_read_byte_near(keyy + i);
+	_debugStream->print(testC);
+  }
+	  _debugStream->println("");
+  _debugStream->println(F("[DEBUG] Point 0 end"));
 
   if (setFrequencySubBand('1') == 0) {
     result = 0;
@@ -589,12 +603,15 @@ int8_t LoRaAT::setDefaults() {
   if (setPublicNetwork('1') == 0) {
     result = 0;
   }
+  _debugStream->println(F("[DEBUG] Point 1"));
   if (setNetworkID((char*)id) == 0) {
     result = 0;
   }
-  if (setNetworkKey((char*) key) == 0) {
+  _debugStream->println(F("[DEBUG] Point 2"));
+  if (setNetworkKey((char*) keyy) == 0) {
     result = 0;
   }
+  _debugStream->println(F("[DEBUG] Point 3"));
   if (setDataRate((uint8_t)2) == 0) {
     result = 0;
   }
@@ -755,15 +772,16 @@ int8_t LoRaAT::getNetworkID() {
 |  * AT+NK 0,00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-01                        |
 -----------------------------------------------------------------------------------*/
 int8_t LoRaAT::setNetworkKey(char* key) {
-  _debugStream->println("network 1");
+  _debugStream->println(F("[DEBUG] Point 1.1 start"));
+  _debugStream->print(key);
+  _debugStream->println(F("[DEBUG] Point 1.1 end"));
   int8_t ansCode;
 
   sprintf_P(_command,(char*)F("AT+NK 0,"));
-  _debugStream->println("network 2");
   strcat(_command,key);                          //Append key to command
 
   ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000);
-  _debugStream->println("network 3");
+  _debugStream->println(F("network 3"));
 
   if (ansCode == 1) {
     strncpy(networkKey,key,sizeof(networkKey)-1);

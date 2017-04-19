@@ -57,7 +57,6 @@ class LoRaAT
 
     LoRaAT();                                     //Use default serial port
     LoRaAT(uint8_t);                              //Use specified serial port.
-    LoRaAT(Stream*, Stream*);                      //Use specified serial port and a debugging stream.
     LoRaAT(SoftwareSerial*, HardwareSerial*);                      //Use specified serial port and a debugging stream.
 
     void begin();                                 //Use default baud
