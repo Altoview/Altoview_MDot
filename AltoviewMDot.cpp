@@ -19,8 +19,6 @@
 
 #define DEBUG
 
-AltSoftSerial* ATSerial;
-
 const char command_00[]  PROGMEM = "AT+FSB ";
 const char command_01[]  PROGMEM = "AT+PN ";
 const char command_02[]  PROGMEM = "AT+NI 0,";
@@ -95,8 +93,8 @@ const char* const table_LoRaWAN_ANSWERS[] PROGMEM=
 	AltoviewMDot::AltoviewMDot(AltSoftSerial* mdot_serial, HardwareSerial* debug_serial) {
 	  //TODO: Input checking, what range of values to accept, how to handle invalid input
 	  //_u8SerialPort = mdot_serial;       //legacy 
-		_debugStream = debug_serial;
-		ATSerial = mdot_serial; 
+		_debug_serial = debug_serial;
+		_mdot_serial = mdot_serial; 
 	}
 
 
@@ -109,28 +107,6 @@ const char* const table_LoRaWAN_ANSWERS[] PROGMEM=
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
 void AltoviewMDot::begin() {
-
-  begin(38400);
-
-}
-
-/*----------------------------------------------------------------------------------|
-| Initialize class object.                                                          |
-|                                                                                   |
-| Sets up the serial port specified in instantiation with a user specified baud     |
-| rate. Then configure the mDot with some default settings. If the serial port      |
-| specified is not a valid uint32, the serial port will default to 0.               |
-|                                                                                   |
-| Call once class has been instantiated, typically within setup().                  |
------------------------------------------------------------------------------------*/
-void AltoviewMDot::begin(uint32_t u32BaudRate) {
-  ATSerial->begin(u32BaudRate);
-
-  // ATSerial->println(F("AT"));
-  // _debugStream->println("********");
-  // _debugStream->println(keyy[0]);
-  // _debugStream->println("++++++++");
-
   setDefaults();
 }
 
@@ -174,14 +150,14 @@ int8_t AltoviewMDot::_sendCommand(char* command, char* answer1, char* ans2, uint
 | we were facing a GCC bug in-case of checking 4 answers.                           |
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::_sendCommand(char* command, char* ans1, char* ans2, uint16_t timeout, char** resp)  {
-  ///_debugStream->println(F("LaT:sc: enter"));
+  ///_debug_serial->println(F("LaT:sc: enter"));
   static const char TERMINATOR[3] = {'\r','\n','\0'};
 
   uint32_t maxEndTime = 0;
 
   //flush receive buffer before transmitting request
   delay(20);                                     				//Undesirable delay, if we read/write too quick to the mDot,  timing issues arise.
-  while (ATSerial->read() != -1);
+  while (_mdot_serial->read() != -1);
   delay(20);                                     				//Undesirable delay, if we read/write too quick to the mDot,  timing issues arise.
 
   memset(_response,0x00,_MAX_MDOT_RESPONSE);					//Blank string
@@ -189,36 +165,36 @@ int8_t AltoviewMDot::_sendCommand(char* command, char* ans1, char* ans2, uint16_
 
 #ifdef DEBUG
   //Send command
-  _debugStream->print(F("LaT:sc: "));
-  _debugStream->print(command);
-  _debugStream->print(TERMINATOR);
+  _debug_serial->print(F("LaT:sc: "));
+  _debug_serial->print(command);
+  _debug_serial->print(TERMINATOR);
 #endif
 
-  // ATSerial->flush();
+  // _mdot_serial->flush();
   
-  ATSerial->print(command);
-  ATSerial->print(TERMINATOR);
+  _mdot_serial->print(command);
+  _mdot_serial->print(TERMINATOR);
 
-  // ATSerial->flush() ;
+  // _mdot_serial->flush() ;
 
   maxEndTime = millis() + timeout;								//Set timeout time
 
   //While something is available get it
-  ///_debugStream->println(F("LaT:sc: Loop collecting response"));
+  ///_debug_serial->println(F("LaT:sc: Loop collecting response"));
   *resp = NULL;
 
   int availableCount = 0;
   int tempRet = -1;
   do {
-    availableCount = ATSerial->available();
+    availableCount = _mdot_serial->available();
     if (availableCount != 0) {							//available() is a method of the serial class showing number of available bytes to read. 
-      // _debugStream->print("[");
-      // _debugStream->print(availableCount);
-      // _debugStream->print("]");
+      // _debug_serial->print("[");
+      // _debug_serial->print(availableCount);
+      // _debug_serial->print("]");
       if (_length < (_MAX_MDOT_RESPONSE - 2)) {
-        _response[_length++] = ATSerial->read();
-        // _debugStream->write(_response[_length - 1]);
-        // _debugStream->println();
+        _response[_length++] = _mdot_serial->read();
+        // _debug_serial->write(_response[_length - 1]);
+        // _debug_serial->println();
         _response[_length] = '\0';               				//Ensure response buffer is null terminated
       }
 
@@ -236,8 +212,8 @@ int8_t AltoviewMDot::_sendCommand(char* command, char* ans1, char* ans2, uint16_
   } while (millis() <= maxEndTime);
 
   if (resp != NULL && tempRet != -1) {
-    //_debugStream->print(F("LaT:sc: "));
-    //_debugStream->println(_response);
+    //_debug_serial->print(F("LaT:sc: "));
+    //_debug_serial->println(_response);
     *resp = strstr(_response,command);
     *resp += strlen(command);
     *resp += sizeof(TERMINATOR);
@@ -245,7 +221,7 @@ int8_t AltoviewMDot::_sendCommand(char* command, char* ans1, char* ans2, uint16_
 
   if (tempRet == -1)
   {
-    _debugStream->println(F("LaT:sc: Timed out"));
+    _debug_serial->println(F("LaT:sc: Timed out"));
   }
   
   return (tempRet);
@@ -275,7 +251,7 @@ int8_t AltoviewMDot::join() {
 |  -1 - Timeout error                                                               |
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::join(uint16_t timeout) {
-  ///_debugStream->println(F("LaT:j : enter"));
+  ///_debug_serial->println(F("LaT:j : enter"));
   int8_t ansCode;
   char answer1[5];
   memset(_command,0x00,sizeof(_command));
@@ -297,7 +273,7 @@ int8_t AltoviewMDot::join(uint16_t timeout) {
 | Leave a LoRa(WAN?) network                                                        |
 -----------------------------------------------------------------------------------*/
 void AltoviewMDot::leave() {
-  ///_debugStream->println(F("LaT:l: not implemented"));
+  ///_debug_serial->println(F("LaT:l: not implemented"));
 }
 
 /*----------------------------------------------------------------------------------|
@@ -305,7 +281,7 @@ void AltoviewMDot::leave() {
 | network. Using a default timeout of 10,000ms (10sec).                             |
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::send(char* message) {
-  ///_debugStream->println(F("LaT:s : enter, w/ default timeout"));
+  ///_debug_serial->println(F("LaT:s : enter, w/ default timeout"));
   return(send(message,10000));
 }
 
@@ -314,7 +290,7 @@ int8_t AltoviewMDot::send(char* message) {
 | network. Using a specified timeout.                                               |
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::send(char* message, uint16_t timeout) {
-  ///_debugStream->println(F("LaT:s : enter"));
+  ///_debug_serial->println(F("LaT:s : enter"));
   uint8_t l;
 
   l = sizeof(_command);                     //Will only send char array up to null, or l (max size of _command buffer)
@@ -327,7 +303,7 @@ int8_t AltoviewMDot::send(char* message, uint16_t timeout) {
 | network. Using a specified timeout.                                               |
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::send(char* message, uint8_t length, uint16_t timeout) {
-  ///_debugStream->println(F("LaT:s : enter"));
+  ///_debug_serial->println(F("LaT:s : enter"));
   int8_t ansCode;
   char answer1[5];
   memset(_command,0x00,sizeof(_command));
@@ -368,7 +344,7 @@ int8_t AltoviewMDot::ping() {
 }
 
 int8_t AltoviewMDot::getSnr() {
-  //_debugStream->println(F("LaT:snr:"));
+  //_debug_serial->println(F("LaT:snr:"));
   int8_t ansCode;
   char answer1[5];
   memset(_command,0x00,sizeof(_command));
@@ -392,7 +368,7 @@ int8_t AltoviewMDot::getSnr() {
 }
 
 int8_t AltoviewMDot::getRssi() {
-  //_debugStream->println(F("LaT:rssi:"));
+  //_debug_serial->println(F("LaT:rssi:"));
   int8_t ansCode;
   char answer1[5];
   memset(_command,0x00,sizeof(_command));
@@ -437,7 +413,7 @@ int8_t AltoviewMDot::sendPairs(String pairs) {
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::sendPairs(String* pairs) {
-  ///_debugStream->println(F("LaT:sp: enter"));
+  ///_debug_serial->println(F("LaT:sp: enter"));
   char pairsC[_MAX_PAIRS_SIZE];
   pairs->toCharArray(pairsC, _MAX_PAIRS_SIZE);
   pairsC[_MAX_PAIRS_SIZE-1] = '\0';
@@ -454,9 +430,9 @@ int8_t AltoviewMDot::sendPairs(String* pairs) {
 int8_t AltoviewMDot::sendPairs(char* pairs) {
 
 #ifdef DEBUG
-  ///_debugStream->println(F("LaT:sp: enter"));
-  _debugStream->print(F("LaT:sp: "));
-  _debugStream->println(pairs);
+  ///_debug_serial->println(F("LaT:sp: enter"));
+  _debug_serial->print(F("LaT:sp: "));
+  _debug_serial->println(pairs);
 #endif
   //String json;
   char json[_MAX_PAIRS_SIZE];
@@ -464,17 +440,17 @@ int8_t AltoviewMDot::sendPairs(char* pairs) {
 
   //TODO: Check the string is actually pairs
 
-  ///_debugStream->println(F("LaT:sp: convert to JSON"));
+  ///_debug_serial->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, _MAX_PAIRS_SIZE, pairs);
 
 #ifdef DEBUG
-  _debugStream->print(F("LaT:sp: "));
-  _debugStream->println(json);
-  ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
+  _debug_serial->print(F("LaT:sp: "));
+  _debug_serial->println(json);
+  ///_debug_serial->println(F("LaT:sp: fragment JSON to buffer"));
 #endif
 
   _createFragmentBuffer(json);
-  ///_debugStream->println(F("LaT:sp: process buffer"));
+  ///_debug_serial->println(F("LaT:sp: process buffer"));
 
   return(_processBuffer());
 }
@@ -488,7 +464,7 @@ int8_t AltoviewMDot::sendPairs(char* pairs) {
 | created pair will be removed, and the JSON closed and returned.                   |
 -----------------------------------------------------------------------------------*/
 void AltoviewMDot::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
-  ///_debugStream->println(F("LaT:pj: enter"));
+  ///_debug_serial->println(F("LaT:pj: enter"));
   char* jsonPtr;                                 //Points to the next free location
   uint8_t len = strlen(pairs);                   //Counts to the null terminator
 
@@ -539,7 +515,7 @@ void AltoviewMDot::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   memcpy(jsonPtr,JSON_END,sizeof(JSON_END));
   jsonPtr += sizeof(JSON_END);
 
-  ///_debugStream->println(F("LaT:pj: exit"));
+  ///_debug_serial->println(F("LaT:pj: exit"));
   return;
 }
 
@@ -552,7 +528,7 @@ void AltoviewMDot::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
 | Header is of the format [fragment number][total number of fragments]              |
 -----------------------------------------------------------------------------------*/
 void AltoviewMDot::_createFragmentBuffer(char* message) {
-  ///_debugStream->println(F("LaT:fb: enter"));
+  ///_debug_serial->println(F("LaT:fb: enter"));
 
   uint8_t strLength = strlen(message);            //Counts to the null terminator
   //Calculate the number of fragments required for this message
@@ -566,13 +542,13 @@ void AltoviewMDot::_createFragmentBuffer(char* message) {
   //Check we haven't exceeded the maximum number of fragments
   if (numFragments > _MAX_FRAGMENTS)
   {
-    ///_debugStream->println(F("LaT:fb: max frags exceeded"));
+    ///_debug_serial->println(F("LaT:fb: max frags exceeded"));
     numFragments = _MAX_FRAGMENTS;
   }
 
-  ///_debugStream->print(F("LaT:fb: create "));
-  ///_debugStream->print(numFragments);
-  ///_debugStream->println(F(" fragments"));
+  ///_debug_serial->print(F("LaT:fb: create "));
+  ///_debug_serial->print(numFragments);
+  ///_debug_serial->println(F(" fragments"));
   //Loop through each fragment
   for (_txPutter = 0; _txPutter < numFragments; _txPutter++) {
     union headerPacket
@@ -589,8 +565,8 @@ void AltoviewMDot::_createFragmentBuffer(char* message) {
     _txBuffer[_txPutter][0] = header.asChar[0];
     _txBuffer[_txPutter][1] = header.asChar[1];
 
-    ///_debugStream->print(F("LaT:fb: create fragment "));
-    ///_debugStream->println(_txPutter);
+    ///_debug_serial->print(F("LaT:fb: create fragment "));
+    ///_debug_serial->println(_txPutter);
     //Loop through each location of the message and append to the fragment (as the payload)
     for (uint8_t j = 0; j < _PAYLOAD_SIZE; j++)
     {
@@ -606,8 +582,8 @@ void AltoviewMDot::_createFragmentBuffer(char* message) {
         break;
       }
     }
-    ///_debugStream->print(F("LaT:fb: "));
-    ///_debugStream->println(_txBuffer[_txPutter]);
+    ///_debug_serial->print(F("LaT:fb: "));
+    ///_debug_serial->println(_txBuffer[_txPutter]);
   }
 }
 
@@ -626,7 +602,7 @@ void AltoviewMDot::_createFragmentBuffer(char* message) {
 | accordingly) the loop is exited.                                                  |
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::_processBuffer() {
-  ///_debugStream->println(F("LaT:pb: enter"));
+  ///_debug_serial->println(F("LaT:pb: enter"));
   char* txGtr = (char*)_txBuffer;                //Pointer to where in the buffer we're up to
   uint8_t length = 0;                            //Number of bytes to send from buffer
   uint8_t buffLength = _txPutter * _PACKET_SIZE; //Number of bytes in _txBuffer
@@ -657,10 +633,10 @@ int8_t AltoviewMDot::_processBuffer() {
       length = (char*)_txBuffer + buffLength - txGtr;
     }
 
-    //_debugStream->print(F("LaT:pb: DR: "));
-    //_debugStream->print(dataRate);
-    //_debugStream->print(F(", length: "));
-    //_debugStream->println(String(length));
+    //_debug_serial->print(F("LaT:pb: DR: "));
+    //_debug_serial->print(dataRate);
+    //_debug_serial->print(F(", length: "));
+    //_debug_serial->println(String(length));
     result = send(txGtr,length,10000);
 
     txGtr += length;
@@ -680,7 +656,7 @@ int8_t AltoviewMDot::setDefaults() {
   // char key[] = "0";
   // const char keyy[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
   const char id[] PROGMEM = "00:00:aa:00:00:00:00:01";
-  // _debugStream->println(F("[DEBUG] Point 0 start"));
+  // _debug_serial->println(F("[DEBUG] Point 0 start"));
 
   char key[50];
   sprintf_P(key,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[4])));
@@ -731,7 +707,7 @@ int8_t AltoviewMDot::setFrequencySubBand(char fsb) {
   _command[8] = '\0';
 
   ansCode = _sendCommand(_command,answer1,NULL,10000);
-  ///_debugStream->println(_response);
+  ///_debug_serial->println(_response);
 
   if (ansCode == 1) {
     frequencySubBand = fsb;
