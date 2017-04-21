@@ -1,7 +1,7 @@
 /*
-  File: LoRaAT.h
+  File: AltoviewMDot.h
 
-  Version: v0.0.1.1
+  Version: v0.2
 
   Brief: Arduino library for controlling Multitech mDot LoRa modules using
          AT commands.
@@ -12,10 +12,12 @@
   Author: Campbell Scientific Australia Pty Ltd
 */
 
-#ifndef LoRaAT_h
-#define LoRaAT_h
+#ifndef ALTOVIEW_MDOT_H
+#define ALTOVIEW_MDOT_H
 
 #include "Arduino.h"
+#include <AltSoftSerial.h>
+#include <avr/pgmspace.h>
 
 #define _DR0_PAYLOAD_USAGE 11     //Use 11 of 11 available bytes in payload
 #define _DR1_PAYLOAD_USAGE 53     //Use 53 of 53 available bytes in payload
@@ -31,14 +33,14 @@
 #define _HEADER_OFFSET 48         //ASCII offest to start at char = '0'
 
 #define _MAX_PAIRS_SIZE 70
-#define _MAX_MDOT_RESPONSE 100    //Max number of bytes the mdot might return
-#define _MAX_MDOT_COMMAND 50     //TODO: Check against the manual for mDot
+#define _MAX_MDOT_RESPONSE 140    //Max number of bytes the mdot might return
+#define _MAX_MDOT_COMMAND 60     //TODO: Check against the manual for mDot
 
 
 /*
   Class definition
 */
-class LoRaAT
+class AltoviewMDot
 {
   public:
     char networkSessionKey[48] = {'\0'};          //00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
@@ -54,9 +56,9 @@ class LoRaAT
     float snr = '\0';                             //-00.0 (-20dbm to 20dbm) --> float range: -3.4E38 .. 3.4E38
     int16_t rssi = '\0';                          //-000 (-180dbm to 0dbm) --> int16_t range: -32,768 to 32,767
 
-    LoRaAT();                                     //Use default serial port
-    LoRaAT(uint8_t);                              //Use specified serial port.
-    LoRaAT(uint8_t,Stream*);                      //Use specified serial port and a debugging stream.
+    AltoviewMDot();                                     //Use default serial port
+    AltoviewMDot(uint8_t);                              //Use specified serial port.
+    AltoviewMDot(AltSoftSerial*, HardwareSerial*);                      //Use specified serial port and a debugging stream.
 
     void begin();                                 //Use default baud
     void begin(uint32_t);                         //Use specified baud rate.
@@ -106,15 +108,15 @@ class LoRaAT
 
     char _command[_MAX_MDOT_COMMAND];
 
-    int8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
-    int8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char**);   //Generic serial out get response wrapper
+    int8_t _sendCommand(char*, char*, char*, uint16_t);
+    int8_t _sendCommand(char*, char*, char*, uint16_t, char**);   //Generic serial out get response wrapper
 
     void _pairsToJSON(char*, uint8_t, char*);
     void _createFragmentBuffer(char*);
     int8_t _processBuffer();
 
-    uint8_t _u8SerialPort;                        //AT Command serial port selection by user
-    Stream* _debugStream;                         //Debugging serial port initialized in constructor
+    HardwareSerial* _debug_serial;                        //Debugging serial port initialized in constructor
+    AltSoftSerial*  _mdot_serial;                         //AT Command serial port selection by user
 };
 
 #endif

@@ -1,7 +1,7 @@
 /*
-  File: LoRaAT.cpp
+  File: AltoviewMDot.cpp
 
-  Version: v0.0.1.1
+  Version: v0.2
 
   Brief: Arduino library for controlling Multitech mDot LoRa modules using
          AT commands.
@@ -15,59 +15,88 @@
 /************************************************************************************
  *                                   INCLUDES                                       *
  ***********************************************************************************/
-#include "Arduino.h"
-#include "LoRaAT.h"
+#include "AltoviewMDot.h"
 
-//#define DEBUG
+#define DEBUG
 
-const char answer1[] = "OK";
-const char answerX[] = "BUG";
+const char command_00[]  PROGMEM = "AT+FSB ";
+const char command_01[]  PROGMEM = "AT+PN ";
+const char command_02[]  PROGMEM = "AT+NI 0,";
+const char command_03[]  PROGMEM = "AT+NK 0,";
+const char command_04[]  PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+const char command_05[]  PROGMEM = "AT+JOIN";
+const char command_06[]  PROGMEM = "AT+SEND ";
+const char command_07[]  PROGMEM = "AT+SNR";
+const char command_08[]  PROGMEM = "AT+RSSI";
+const char command_09[]  PROGMEM = "AT+FSB?";
+const char command_10[]  PROGMEM = "AT+PN?";
+const char command_11[]  PROGMEM = "AT+NI?";
+const char command_12[]  PROGMEM = "AT+NK?";
+const char command_13[]  PROGMEM = "AT+TXDR";
+const char command_14[]  PROGMEM = "AT+TXDR=DR";
+const char command_15[]  PROGMEM = "AT+TXDR?";
+const char command_16[]  PROGMEM = "AT+ADR ";
+const char command_17[]  PROGMEM = "AT+ADR?";
+const char command_18[]  PROGMEM = "AT+DI?";
+const char command_19[]  PROGMEM = "AT+NA?";
+const char command_20[]  PROGMEM = "AT+NSK?";
+const char command_21[]  PROGMEM = "AT+DSK?";
+const char command_22[]  PROGMEM = "AT&W";
 
-/************************************************************************************
- *                               GLOBAL VARIABLES                                   *
- ***********************************************************************************/
-#if defined(ARDUINO_ARCH_AVR)
-  HardwareSerial* ATSerial = &Serial;            //Pointer to Serial class object
-#elif defined(ARDUINO_ARCH_SAM)
-  UARTClass* ATSerial = &Serial;                 //Pointer to Serial class object
-#else
-  #error "This library only supports boards with an AVR or SAM processor."
-#endif
+
+const char* const table_LoRaWAN_COMMANDS[] PROGMEM=     
+{   
+  command_00, 
+  command_01,
+  command_02,
+  command_03,
+  command_04,
+  command_05,
+  command_06,
+  command_07,
+  command_08,
+  command_09,
+  command_10,
+  command_11,
+  command_12,
+  command_13,
+  command_14,
+  command_15,
+  command_16,
+  command_17,
+  command_18,
+  command_19,
+  command_20,
+  command_21,
+  command_22
+};
+
+const char answer_00[] PROGMEM = "OK";
+const char answer_01[] PROGMEM = "BUG";
+
+const char* const table_LoRaWAN_ANSWERS[] PROGMEM=    
+{   
+  answer_00, 
+  answer_01
+};
 
 
 /************************************************************************************
  *                               PUBLIC FUNCTIONS                                   *
  ***********************************************************************************/
 
-/*----------------------------------------------------------------------------------|
-| CONSTRUCTOR: Creates class object using a default hardware serial port 0          |
------------------------------------------------------------------------------------*/
- LoRaAT::LoRaAT() {
-  _u8SerialPort = 0;
-  _debugStream = NULL;
-}
-
-#ifdef DEBUG
-	/*----------------------------------------------------------------------------------|
-	| CONSTRUCTOR: Creates class object using a specified serial port.                  |
-	-----------------------------------------------------------------------------------*/
-	 LoRaAT::LoRaAT(uint8_t u8SerialPort) {
-	  //TODO: Input checking, what range of values to accept, how to handle invalid input
-	  _u8SerialPort = u8SerialPort;
-	  _debugStream = NULL;
-	}
-
 	/*----------------------------------------------------------------------------------|
 	| CONSTRUCTOR: Creates class object using a specified serial port, and passing it a |
 	| specified debug stream. This stream can be used to pass debug info to a serial    |
 	| port, either hardware serial or software serial.                                  |
 	-----------------------------------------------------------------------------------*/
-	LoRaAT::LoRaAT(uint8_t u8SerialPort, Stream* debugStream) {
+	AltoviewMDot::AltoviewMDot(AltSoftSerial* mdot_serial, HardwareSerial* debug_serial) {
 	  //TODO: Input checking, what range of values to accept, how to handle invalid input
-	  _u8SerialPort = u8SerialPort;
-	  _debugStream = debugStream;
+	  //_u8SerialPort = mdot_serial;       //legacy 
+		_debug_serial = debug_serial;
+		_mdot_serial = mdot_serial; 
 	}
-#endif
+
 
 /*----------------------------------------------------------------------------------|
 | Initialize class object.                                                          |
@@ -77,48 +106,7 @@ const char answerX[] = "BUG";
 |                                                                                   |
 | Call once class has been instantiated, typically within setup().                  |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::begin() {
-  begin(38400);
-
-}
-
-/*----------------------------------------------------------------------------------|
-| Initialize class object.                                                          |
-|                                                                                   |
-| Sets up the serial port specified in instantiation with a user specified baud     |
-| rate. Then configure the mDot with some default settings. If the serial port      |
-| specified is not a valid uint32, the serial port will default to 0.               |
-|                                                                                   |
-| Call once class has been instantiated, typically within setup().                  |
------------------------------------------------------------------------------------*/
-void LoRaAT::begin(uint32_t u32BaudRate) {
-  switch(_u8SerialPort) {
-  #if defined(UBRR1H)							//BRR1H is a constant belonging to HardwareSerial.h
-    case 1:
-    ATSerial = &Serial1;
-    break;
-  #endif
-
-  #if defined(UBRR2H)							//BRR2H is a constant belonging to HardwareSerial.h
-    case 2:
-    ATSerial = &Serial2;
-    break;
-  #endif
-
-  #if defined(UBRR3H)							//BRR3H is a constant belonging to HardwareSerial.h
-    case 3:
-    ATSerial = &Serial3;
-    break;
-  #endif
-
-    case 0:
-    default:
-    ATSerial = &Serial;
-    break;
-  }
-
-  ATSerial->begin(u32BaudRate);
-
+void AltoviewMDot::begin() {
   setDefaults();
 }
 
@@ -130,9 +118,20 @@ void LoRaAT::begin(uint32_t u32BaudRate) {
 | response is received it returns the corresponding integer. If no recognised       |
 | response is received within the timeout period a -1 is returned.                  |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout) {
-  return _sendCommand(command, ans1, ans2, ans3, ans4, timeout, NULL);
+int8_t AltoviewMDot::_sendCommand(char* command, char* answer1, char* ans2, uint16_t timeout) {
+  return _sendCommand(command, answer1, ans2, timeout, NULL);
 }
+
+// char** AltoviewMDot::compileResp(char* ans)
+// {
+//     if (answer1 != NULL && 
+//         strstr(_response, answer1) != '\0' && 
+//         (resp != NULL) {
+//         *resp = strstr(_response,command);
+//         *resp += strlen(command);
+//         *resp += sizeof(TERMINATOR);
+//       }
+// }
 /*----------------------------------------------------------------------------------|
 | The send command method, takes a null terminated command, some responses, a       |
 | timeout and a pointer to a response.                                              |
@@ -145,16 +144,20 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
 | The “actual response” is considered to begin just after the echoed termination of |
 | the command. If the command is not found in the mDot response, the “actual        |
 | response” is set to null.                                                         |
+|                                                                                   |
+| *Note,                                                                            |
+| We have also reduced the number of answers accepted by the function from 4 to 2 as|
+| we were facing a GCC bug in-case of checking 4 answers.                           |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, char* ans4, uint16_t timeout, char** resp) {
-  ///_debugStream->println(F("LaT:sc: enter"));
+int8_t AltoviewMDot::_sendCommand(char* command, char* ans1, char* ans2, uint16_t timeout, char** resp)  {
+  ///_debug_serial->println(F("LaT:sc: enter"));
   static const char TERMINATOR[3] = {'\r','\n','\0'};
 
   uint32_t maxEndTime = 0;
 
   //flush receive buffer before transmitting request
   delay(20);                                     				//Undesirable delay, if we read/write too quick to the mDot,  timing issues arise.
-  while (ATSerial->read() != -1);
+  while (_mdot_serial->read() != -1);
   delay(20);                                     				//Undesirable delay, if we read/write too quick to the mDot,  timing issues arise.
 
   memset(_response,0x00,_MAX_MDOT_RESPONSE);					//Blank string
@@ -162,69 +165,66 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
 
 #ifdef DEBUG
   //Send command
-  _debugStream->print(F("LaT:sc: "));
-  _debugStream->print(command);
-  _debugStream->print(TERMINATOR);
+  _debug_serial->print(F("LaT:sc: "));
+  _debug_serial->print(command);
+  _debug_serial->print(TERMINATOR);
 #endif
 
-  ATSerial->print(command);
-  ATSerial->print(TERMINATOR);
+  // _mdot_serial->flush();
+  
+  _mdot_serial->print(command);
+  _mdot_serial->print(TERMINATOR);
+
+  // _mdot_serial->flush() ;
 
   maxEndTime = millis() + timeout;								//Set timeout time
 
   //While something is available get it
-  ///_debugStream->println(F("LaT:sc: Loop collecting response"));
+  ///_debug_serial->println(F("LaT:sc: Loop collecting response"));
   *resp = NULL;
+
+  int availableCount = 0;
+  int tempRet = -1;
   do {
-    if (ATSerial->available() != 0) {							//available() is a method of the serial class 
+    availableCount = _mdot_serial->available();
+    if (availableCount != 0) {							//available() is a method of the serial class showing number of available bytes to read. 
+      // _debug_serial->print("[");
+      // _debug_serial->print(availableCount);
+      // _debug_serial->print("]");
       if (_length < (_MAX_MDOT_RESPONSE - 2)) {
-        _response[_length++] = ATSerial->read();
+        _response[_length++] = _mdot_serial->read();
+        // _debug_serial->write(_response[_length - 1]);
+        // _debug_serial->println();
         _response[_length] = '\0';               				//Ensure response buffer is null terminated
       }
-    }
 
-    if (ans1 != NULL && strstr(_response, ans1) != '\0') {
-      if (resp != NULL) {
-        *resp = strstr(_response,command);
-        *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);
+      if (ans1 != NULL && strstr(_response, ans1) != '\0') {
+        tempRet = 1;
+        break;
       }
-      //_debugStream->print(F("LaT:sc: "));
-      //_debugStream->println(_response);
-      return (1);
-    }
 
-    if (ans2 != NULL && strstr(_response, ans2) != '\0') {
-      if (resp != NULL) {
-        *resp = strstr(_response,command);
-        *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);
+      if (ans2 != NULL && strstr(_response, ans2) != '\0') {
+        tempRet = 2;
+        break;
       }
-      return (2);
-    }
 
-    if (ans3 != NULL && strstr(_response, ans3) != '\0') {
-      if (resp != NULL) {
-        *resp = strstr(_response,command);
-        *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);
-      }
-      return (3);
     }
-
-    if (ans4 != NULL && strstr(_response, ans4) != '\0') {
-      if (resp != NULL) {
-        *resp = strstr(_response,command);
-        *resp += strlen(command);
-        *resp += sizeof(TERMINATOR);
-      }
-      return (4);
-    }
-
   } while (millis() <= maxEndTime);
 
-  ///_debugStream->println(F("LaT:sc: Timed out"));
-  return (-1);
+  if (resp != NULL && tempRet != -1) {
+    //_debug_serial->print(F("LaT:sc: "));
+    //_debug_serial->println(_response);
+    *resp = strstr(_response,command);
+    *resp += strlen(command);
+    *resp += sizeof(TERMINATOR);
+  }
+
+  if (tempRet == -1)
+  {
+    _debug_serial->println(F("LaT:sc: Timed out"));
+  }
+  
+  return (tempRet);
 }
 
 /*----------------------------------------------------------------------------------|
@@ -236,7 +236,7 @@ int8_t LoRaAT::_sendCommand(char* command, char* ans1, char* ans2, char* ans3, c
 |   0 - success                                                                     |
 |  -1 - Timeout error                                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::join() {
+int8_t AltoviewMDot::join() {
   return(join(10000));
 }
 
@@ -250,13 +250,18 @@ int8_t LoRaAT::join() {
 |   0 - success                                                                     |
 |  -1 - Timeout error                                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::join(uint16_t timeout) {
-  ///_debugStream->println(F("LaT:j : enter"));
+int8_t AltoviewMDot::join(uint16_t timeout) {
+  ///_debug_serial->println(F("LaT:j : enter"));
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT+JOIN"));
+  // sprintf_P(_command,(char*)F("AT+JOIN"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[5]))); 
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,timeout);
+  ansCode = _sendCommand(_command, answer1,NULL,timeout);
   if (ansCode < 0 ) {
     return(-1);
   }
@@ -267,16 +272,16 @@ int8_t LoRaAT::join(uint16_t timeout) {
 /*----------------------------------------------------------------------------------|
 | Leave a LoRa(WAN?) network                                                        |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::leave() {
-  ///_debugStream->println(F("LaT:l: not implemented"));
+void AltoviewMDot::leave() {
+  ///_debug_serial->println(F("LaT:l: not implemented"));
 }
 
 /*----------------------------------------------------------------------------------|
 | Send method, takes a null terminated char array and sends that over the LoRaWAN   |
 | network. Using a default timeout of 10,000ms (10sec).                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::send(char* message) {
-  ///_debugStream->println(F("LaT:s : enter, w/ default timeout"));
+int8_t AltoviewMDot::send(char* message) {
+  ///_debug_serial->println(F("LaT:s : enter, w/ default timeout"));
   return(send(message,10000));
 }
 
@@ -284,8 +289,8 @@ int8_t LoRaAT::send(char* message) {
 | Send method, takes a null terminated char array and sends that over the LoRaWAN   |
 | network. Using a specified timeout.                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::send(char* message, uint16_t timeout) {
-  ///_debugStream->println(F("LaT:s : enter"));
+int8_t AltoviewMDot::send(char* message, uint16_t timeout) {
+  ///_debug_serial->println(F("LaT:s : enter"));
   uint8_t l;
 
   l = sizeof(_command);                     //Will only send char array up to null, or l (max size of _command buffer)
@@ -297,14 +302,19 @@ int8_t LoRaAT::send(char* message, uint16_t timeout) {
 | Send method, takes a char array and length and sends that over the LoRaWAN        |
 | network. Using a specified timeout.                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::send(char* message, uint8_t length, uint16_t timeout) {
-  ///_debugStream->println(F("LaT:s : enter"));
+int8_t AltoviewMDot::send(char* message, uint8_t length, uint16_t timeout) {
+  ///_debug_serial->println(F("LaT:s : enter"));
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT+SEND "));
+  // sprintf_P(_command,(char*)F("AT+SEND "));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[6])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
   strncat(_command,message,length);              //Append message to command
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,timeout);
+  ansCode = _sendCommand(_command, answer1,NULL,timeout);
 
   if (ansCode == 1) {
     return (0);
@@ -316,9 +326,12 @@ int8_t LoRaAT::send(char* message, uint8_t length, uint16_t timeout) {
 /*----------------------------------------------------------------------------------|
 | Gets the RSSI and SNR using their AT commands. Saves them to public variables.    |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::ping() {
+int8_t AltoviewMDot::ping() {
 	int8_t ansCode1;
 	int8_t ansCode2;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 	char* r;
 
   	ansCode1 = getSnr(); 
@@ -330,14 +343,19 @@ int8_t LoRaAT::ping() {
   return(-1);
 }
 
-int8_t LoRaAT::getSnr() {
-  //_debugStream->println(F("LaT:snr:"));
+int8_t AltoviewMDot::getSnr() {
+  //_debug_serial->println(F("LaT:snr:"));
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
   char temp[5];									//variable to store potential length snr of latest packet 
 
-  sprintf_P(_command,(char*)F("AT+SNR"));
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  // sprintf_P(_command,(char*)F("AT+SNR"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[7])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
     //strncpy(snr,r,(sizeof(snr)-1)); 
@@ -349,14 +367,20 @@ int8_t LoRaAT::getSnr() {
   return(-1);
 }
 
-int8_t LoRaAT::getRssi() {
-  //_debugStream->println(F("LaT:rssi:"));
+int8_t AltoviewMDot::getRssi() {
+  //_debug_serial->println(F("LaT:rssi:"));
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
   char temp[4];									//variable to store potential length rssi of latest packet 
 
-  sprintf_P(_command,(char*)F("AT+RSSI"));
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  // sprintf_P(_command,(char*)F("AT+RSSI"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[8])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
+
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
     //strncpy(snr,r,(sizeof(snr)-1)); 
@@ -377,7 +401,7 @@ int8_t LoRaAT::getRssi() {
 | 2. The json is fragmented to the _txBuffer .                                      |
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::sendPairs(String pairs) {
+int8_t AltoviewMDot::sendPairs(String pairs) {
   return(sendPairs(&pairs));
 }
 
@@ -388,8 +412,8 @@ int8_t LoRaAT::sendPairs(String pairs) {
 | 2. The json is fragmented to the _txBuffer .                                      |
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::sendPairs(String* pairs) {
-  ///_debugStream->println(F("LaT:sp: enter"));
+int8_t AltoviewMDot::sendPairs(String* pairs) {
+  ///_debug_serial->println(F("LaT:sp: enter"));
   char pairsC[_MAX_PAIRS_SIZE];
   pairs->toCharArray(pairsC, _MAX_PAIRS_SIZE);
   pairsC[_MAX_PAIRS_SIZE-1] = '\0';
@@ -403,11 +427,12 @@ int8_t LoRaAT::sendPairs(String* pairs) {
 | 2. The json is fragmented to the _txBuffer .                                      |
 | 3. The _txBuffer is processed (sent).                                             |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::sendPairs(char* pairs) {
+int8_t AltoviewMDot::sendPairs(char* pairs) {
+
 #ifdef DEBUG
-  ///_debugStream->println(F("LaT:sp: enter"));
-  _debugStream->print(F("LaT:sp: "));
-  _debugStream->println(pairs);
+  ///_debug_serial->println(F("LaT:sp: enter"));
+  _debug_serial->print(F("LaT:sp: "));
+  _debug_serial->println(pairs);
 #endif
   //String json;
   char json[_MAX_PAIRS_SIZE];
@@ -415,15 +440,17 @@ int8_t LoRaAT::sendPairs(char* pairs) {
 
   //TODO: Check the string is actually pairs
 
-  ///_debugStream->println(F("LaT:sp: convert to JSON"));
+  ///_debug_serial->println(F("LaT:sp: convert to JSON"));
   _pairsToJSON(json, _MAX_PAIRS_SIZE, pairs);
+
 #ifdef DEBUG
-  _debugStream->print(F("LaT:sp: "));
-  _debugStream->println(json);
-  ///_debugStream->println(F("LaT:sp: fragment JSON to buffer"));
+  _debug_serial->print(F("LaT:sp: "));
+  _debug_serial->println(json);
+  ///_debug_serial->println(F("LaT:sp: fragment JSON to buffer"));
 #endif
+
   _createFragmentBuffer(json);
-  ///_debugStream->println(F("LaT:sp: process buffer"));
+  ///_debug_serial->println(F("LaT:sp: process buffer"));
 
   return(_processBuffer());
 }
@@ -436,8 +463,8 @@ int8_t LoRaAT::sendPairs(char* pairs) {
 | In the case the maximum JSON length is reached, the loop will exit, any partially |
 | created pair will be removed, and the JSON closed and returned.                   |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
-  ///_debugStream->println(F("LaT:pj: enter"));
+void AltoviewMDot::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
+  ///_debug_serial->println(F("LaT:pj: enter"));
   char* jsonPtr;                                 //Points to the next free location
   uint8_t len = strlen(pairs);                   //Counts to the null terminator
 
@@ -488,7 +515,7 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
   memcpy(jsonPtr,JSON_END,sizeof(JSON_END));
   jsonPtr += sizeof(JSON_END);
 
-  ///_debugStream->println(F("LaT:pj: exit"));
+  ///_debug_serial->println(F("LaT:pj: exit"));
   return;
 }
 
@@ -500,8 +527,8 @@ void LoRaAT::_pairsToJSON(char* json, uint8_t jsonLength, char* pairs) {
 |                                                                                   |
 | Header is of the format [fragment number][total number of fragments]              |
 -----------------------------------------------------------------------------------*/
-void LoRaAT::_createFragmentBuffer(char* message) {
-  ///_debugStream->println(F("LaT:fb: enter"));
+void AltoviewMDot::_createFragmentBuffer(char* message) {
+  ///_debug_serial->println(F("LaT:fb: enter"));
 
   uint8_t strLength = strlen(message);            //Counts to the null terminator
   //Calculate the number of fragments required for this message
@@ -515,13 +542,13 @@ void LoRaAT::_createFragmentBuffer(char* message) {
   //Check we haven't exceeded the maximum number of fragments
   if (numFragments > _MAX_FRAGMENTS)
   {
-    ///_debugStream->println(F("LaT:fb: max frags exceeded"));
+    ///_debug_serial->println(F("LaT:fb: max frags exceeded"));
     numFragments = _MAX_FRAGMENTS;
   }
 
-  ///_debugStream->print(F("LaT:fb: create "));
-  ///_debugStream->print(numFragments);
-  ///_debugStream->println(F(" fragments"));
+  ///_debug_serial->print(F("LaT:fb: create "));
+  ///_debug_serial->print(numFragments);
+  ///_debug_serial->println(F(" fragments"));
   //Loop through each fragment
   for (_txPutter = 0; _txPutter < numFragments; _txPutter++) {
     union headerPacket
@@ -538,8 +565,8 @@ void LoRaAT::_createFragmentBuffer(char* message) {
     _txBuffer[_txPutter][0] = header.asChar[0];
     _txBuffer[_txPutter][1] = header.asChar[1];
 
-    ///_debugStream->print(F("LaT:fb: create fragment "));
-    ///_debugStream->println(_txPutter);
+    ///_debug_serial->print(F("LaT:fb: create fragment "));
+    ///_debug_serial->println(_txPutter);
     //Loop through each location of the message and append to the fragment (as the payload)
     for (uint8_t j = 0; j < _PAYLOAD_SIZE; j++)
     {
@@ -555,8 +582,8 @@ void LoRaAT::_createFragmentBuffer(char* message) {
         break;
       }
     }
-    ///_debugStream->print(F("LaT:fb: "));
-    ///_debugStream->println(_txBuffer[_txPutter]);
+    ///_debug_serial->print(F("LaT:fb: "));
+    ///_debug_serial->println(_txBuffer[_txPutter]);
   }
 }
 
@@ -574,8 +601,8 @@ void LoRaAT::_createFragmentBuffer(char* message) {
 | it, which should never happen if we ever point past it, the length gets reduced   |
 | accordingly) the loop is exited.                                                  |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::_processBuffer() {
-  ///_debugStream->println(F("LaT:pb: enter"));
+int8_t AltoviewMDot::_processBuffer() {
+  ///_debug_serial->println(F("LaT:pb: enter"));
   char* txGtr = (char*)_txBuffer;                //Pointer to where in the buffer we're up to
   uint8_t length = 0;                            //Number of bytes to send from buffer
   uint8_t buffLength = _txPutter * _PACKET_SIZE; //Number of bytes in _txBuffer
@@ -606,10 +633,10 @@ int8_t LoRaAT::_processBuffer() {
       length = (char*)_txBuffer + buffLength - txGtr;
     }
 
-    //_debugStream->print(F("LaT:pb: DR: "));
-    //_debugStream->print(dataRate);
-    //_debugStream->print(F(", length: "));
-    //_debugStream->println(String(length));
+    //_debug_serial->print(F("LaT:pb: DR: "));
+    //_debug_serial->print(dataRate);
+    //_debug_serial->print(F(", length: "));
+    //_debug_serial->println(String(length));
     result = send(txGtr,length,10000);
 
     txGtr += length;
@@ -624,11 +651,15 @@ int8_t LoRaAT::_processBuffer() {
 | Some of these default settings may be required for successful communication with  |
 | the Campbell Scientific Australia LoRaWAN server.                                 |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setDefaults() {
+int8_t AltoviewMDot::setDefaults() {
   int8_t result = -1;
-
-  const char key[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+  // char key[] = "0";
+  // const char keyy[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
   const char id[] PROGMEM = "00:00:aa:00:00:00:00:01";
+  // _debug_serial->println(F("[DEBUG] Point 0 start"));
+
+  char key[50];
+  sprintf_P(key,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[4])));
 
   if (setFrequencySubBand('1') == 0) {
     result = 0;
@@ -660,15 +691,23 @@ int8_t LoRaAT::setDefaults() {
 | AT+FSB ?                                                                          |
 | AT+FSB: (0-8)                                                                     |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setFrequencySubBand(char fsb) {
+int8_t AltoviewMDot::setFrequencySubBand(char fsb) {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT+FSB "));
+
+  // sprintf_P(_command,(char*)F("AT+FSB "));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[0])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
+
+
   _command[7] = fsb;
   _command[8] = '\0';
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
-  ///_debugStream->println(_response);
+  ansCode = _sendCommand(_command,answer1,NULL,10000);
+  ///_debug_serial->println(_response);
 
   if (ansCode == 1) {
     frequencySubBand = fsb;
@@ -681,13 +720,18 @@ int8_t LoRaAT::setFrequencySubBand(char fsb) {
 /*----------------------------------------------------------------------------------|
 | Gets the frequency sub band                                                       |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getFrequencySubBand() {
+int8_t AltoviewMDot::getFrequencySubBand() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+FSB?"));
+  // sprintf_P(_command,(char*)F("AT+FSB?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[9])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
     frequencySubBand = r[0];
@@ -705,17 +749,22 @@ int8_t LoRaAT::getFrequencySubBand() {
 |  0 - off                                                                          |
 |  1 - on                                                                           |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setPublicNetwork(char pn) {
+int8_t AltoviewMDot::setPublicNetwork(char pn) {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT+PN "));
+  // sprintf_P(_command,(char*)F("AT+PN "));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[1])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
   if (pn != '0') {
     pn = '1';
   }
   _command[6] = pn;
   _command[7] = '\0';
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command, answer1,NULL,10000);
 
   if (ansCode == 1) {
     publicNetwork = pn;
@@ -728,13 +777,18 @@ int8_t LoRaAT::setPublicNetwork(char pn) {
 /*----------------------------------------------------------------------------------|
 | Gets the public network                                                           |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getPublicNetwork() {
+int8_t AltoviewMDot::getPublicNetwork() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+PN?"));
+  // sprintf_P(_command,(char*)F("AT+PN?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[10])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
     publicNetwork = r[0];
@@ -754,13 +808,18 @@ int8_t LoRaAT::getPublicNetwork() {
 |  * AT+NI 0,00:00:aa:00:00:00:00:01                                                |
 |  * AT+NI 0,00-00-aa-00-00-00-00-01                                                |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setNetworkID(char* id) {
+int8_t AltoviewMDot::setNetworkID(char* id) {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT+NI 0,"));
+  // sprintf_P(_command,(char*)F("AT+NI 0,"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[2])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
   strcat(_command,id);                           //Append ID to command
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command, answer1,NULL,10000);
 
   if (ansCode == 1) {
     strncpy(networkId,id,sizeof(networkId)-1);
@@ -774,13 +833,18 @@ int8_t LoRaAT::setNetworkID(char* id) {
 /*----------------------------------------------------------------------------------|
 | Gets the network ID                                                               |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getNetworkID() {
+int8_t AltoviewMDot::getNetworkID() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+NI?"));
+  // sprintf_P(_command,(char*)F("AT+NI?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[11])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkId,r,(sizeof(networkId)-1));
@@ -801,13 +865,28 @@ int8_t LoRaAT::getNetworkID() {
 |  * AT+NK 0,00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01                        |
 |  * AT+NK 0,00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-01                        |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setNetworkKey(char* key) {
+int8_t AltoviewMDot::setNetworkKey(char* key) {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
+  char answerX[5];
 
-  sprintf_P(_command,(char*)F("AT+NK 0,"));
+  // TODO, remove
+  // char keyz[46];
+  // sprintf_P(keyz,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[4])));
+
+  // sprintf_P(_command,(char*)F("AT+NK 0,"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[3])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
+  sprintf_P(answerX,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[1]))); 
   strcat(_command,key);                          //Append key to command
+  // strcat(_command,keyz);                          //Append key to command
 
-  ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000);
+  // sprintf_P(keyz,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[5])));
+  // strcat(_command,keyz);                          //Append key to command
+
+  ansCode = _sendCommand(_command, answer1, answerX,10000);
 
   if (ansCode == 1) {
     strncpy(networkKey,key,sizeof(networkKey)-1);
@@ -821,13 +900,20 @@ int8_t LoRaAT::setNetworkKey(char* key) {
 /*----------------------------------------------------------------------------------|
 | Gets the network key                                                              |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getNetworkKey() {
+int8_t AltoviewMDot::getNetworkKey() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
+  char answerX[5];
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+NK?"));
+  // sprintf_P(_command,(char*)F("AT+NK?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[12])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
+  sprintf_P(answerX,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[1]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000, &r);
+  ansCode = _sendCommand(_command, answer1, answerX,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkKey,r,(sizeof(networkKey)-1));
@@ -845,14 +931,19 @@ int8_t LoRaAT::getNetworkKey() {
 | AT+TXDR: (0-3|10-7|DR0-DR4|DR8-DR13) 												|
 |																					|
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setDataRate(char txdr) {
+int8_t AltoviewMDot::setDataRate(char txdr) {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT+TXDR"));
+  // sprintf_P(_command,(char*)F("AT+TXDR"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[13])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
   _command[8] = txdr;
   _command[9] = '\0';
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command, answer1,NULL,10000);
 
   if (ansCode == 1) {
     dataRate = (uint8_t)txdr;
@@ -888,17 +979,22 @@ int8_t LoRaAT::setDataRate(char txdr) {
 |																					|
 |																					|
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setDataRate(uint8_t txdr) {
+int8_t AltoviewMDot::setDataRate(uint8_t txdr) {
   int8_t ansCode;
   char temp[2]; 								//temp char array to store txdr range of 0-13
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT+TXDR=DR")); 	//_command = {'A','T','+','T','X','D','R','=','D','R','X','Y','\0'}
+  // sprintf_P(_command,(char*)F("AT+TXDR=DR")); 	//_command = {'A','T','+','T','X','D','R','=','D','R','X','Y','\0'}
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[14])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
   sprintf(temp, "%u",txdr);						//convert txdr to temp char array
 
   strcat(_command,temp);						//concatenate _command with temp
   _command[12] = '\0';
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command, answer1,NULL,10000);
 
   if (ansCode == 1) {
     dataRate = txdr;
@@ -911,14 +1007,19 @@ int8_t LoRaAT::setDataRate(uint8_t txdr) {
 /*----------------------------------------------------------------------------------|
 | Gets the data rate                                                                |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getDataRate() {
+int8_t AltoviewMDot::getDataRate() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
   char temp[2];
 
-  sprintf_P(_command,(char*)F("AT+TXDR?"));
+  // sprintf_P(_command,(char*)F("AT+TXDR?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[15])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
   	temp[0] = r[2];						//get first char from response
@@ -940,14 +1041,19 @@ int8_t LoRaAT::getDataRate() {
 |  0 - off                                                                          |
 |  1 - on                                                                           |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::setAdaptiveDataRate(char adr) {
+int8_t AltoviewMDot::setAdaptiveDataRate(char adr) {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT+ADR "));
+  // sprintf_P(_command,(char*)F("AT+ADR "));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[16])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
   _command[7] = adr;
   _command[8] = '\0';
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command, answer1,NULL,10000);
 
   if (ansCode == 1) {
     adaptiveDataRate = adr;
@@ -960,14 +1066,18 @@ int8_t LoRaAT::setAdaptiveDataRate(char adr) {
 /*----------------------------------------------------------------------------------|
 | Gets the state of the adaptive data rate.                                         |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getAdaptiveDataRate() {
+int8_t AltoviewMDot::getAdaptiveDataRate() {
   int8_t ansCode;
-
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+ADR?"));
+  // sprintf_P(_command,(char*)F("AT+ADR?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[17])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
     adaptiveDataRate = r[0];
@@ -980,13 +1090,18 @@ int8_t LoRaAT::getAdaptiveDataRate() {
 /*----------------------------------------------------------------------------------|
 | Gets the device ID                                                                |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getDeviceId() {
+int8_t AltoviewMDot::getDeviceId() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+DI?"));
+  // sprintf_P(_command,(char*)F("AT+DI?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[18])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
     strncpy(deviceId,r,(sizeof(deviceId)-1));
@@ -1000,13 +1115,18 @@ int8_t LoRaAT::getDeviceId() {
 /*----------------------------------------------------------------------------------|
 | Gets the network address                                                          |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getNetworkAddress() {
+int8_t AltoviewMDot::getNetworkAddress() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+NA?"));
+  // sprintf_P(_command,(char*)F("AT+NA?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[19])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000, &r);
+  ansCode = _sendCommand(_command, answer1,NULL,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkAddress,r,(sizeof(networkAddress)-1));
@@ -1020,13 +1140,20 @@ int8_t LoRaAT::getNetworkAddress() {
 /*----------------------------------------------------------------------------------|
 | Gets the network session key                                                      |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getNetworkSessionKey() {
+int8_t AltoviewMDot::getNetworkSessionKey() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
+  char answerX[5];
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+NSK?"));
+  // sprintf_P(_command,(char*)F("AT+NSK?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[20])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
+  sprintf_P(answerX,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[1]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000, &r);
+  ansCode = _sendCommand(_command, answer1, answerX,10000, &r);
 
   if (ansCode == 1) {
     strncpy(networkSessionKey,r,(sizeof(networkSessionKey)-1));
@@ -1040,13 +1167,20 @@ int8_t LoRaAT::getNetworkSessionKey() {
 /*----------------------------------------------------------------------------------|
 | Gets the data session key                                                         |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::getDataSessionKey() {
+int8_t AltoviewMDot::getDataSessionKey() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
+  char answerX[5];
   char* r;
 
-  sprintf_P(_command,(char*)F("AT+DSK?"));
+  // sprintf_P(_command,(char*)F("AT+DSK?"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[21])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
+  sprintf_P(answerX,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[1]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,(char*)&answerX,(char*)&answerX,(char*)&answerX,10000, &r);
+  ansCode = _sendCommand(_command, answer1, answerX,10000, &r);
 
   if (ansCode == 1) {
     strncpy(dataSessionKey,r,(sizeof(dataSessionKey)-1));
@@ -1061,13 +1195,13 @@ int8_t LoRaAT::getDataSessionKey() {
 | Saves the current session information in the mDot.                                |
 -----------------------------------------------------------------------------------*/
 /*
-int8_t LoRaAT::saveLoraSession() {
+int8_t AltoviewMDot::saveLoraSession() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
+  char answer1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+SS"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,answer1,NULL,NULL,NULL,10000);
   if (ansCode < 0 ) {
     return(-1);
   }
@@ -1082,13 +1216,13 @@ int8_t LoRaAT::saveLoraSession() {
 | Saves the current session information in the mDot.                                |
 -----------------------------------------------------------------------------------*/
 /*
-int8_t LoRaAT::restoreLoraSession() {
+int8_t AltoviewMDot::restoreLoraSession() {
   int8_t ansCode;
-  char ans1[] PROGMEM = "OK";
+  char answer1[] PROGMEM = "OK";
 
   sprintf_P(_command,(char*)F("AT+RS"));
 
-  ansCode = _sendCommand(_command,ans1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command,answer1,NULL,NULL,NULL,10000);
   if (ansCode < 0 ) {
     return(-1);
   }
@@ -1108,12 +1242,17 @@ int8_t LoRaAT::restoreLoraSession() {
 /*----------------------------------------------------------------------------------|
 | Writes the current settings of the mDot to it's memory                            |
 -----------------------------------------------------------------------------------*/
-int8_t LoRaAT::commitSettings() {
+int8_t AltoviewMDot::commitSettings() {
   int8_t ansCode;
+  char answer1[5];
+  memset(_command,0x00,sizeof(_command));
+  memset(answer1,0x00,sizeof(answer1));
 
-  sprintf_P(_command,(char*)F("AT&W"));
+  // sprintf_P(_command,(char*)F("AT&W"));
+  sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[22])));
+  sprintf_P(answer1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0]))); 
 
-  ansCode = _sendCommand(_command,(char*)&answer1,NULL,NULL,NULL,10000);
+  ansCode = _sendCommand(_command, answer1,NULL,10000);
 
   if (ansCode == 1) {
     return (0);
