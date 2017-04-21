@@ -1,6 +1,16 @@
 # About Arduino_MDot
 Contains a library (with example scripts) to send user data to [Multitech mDot](http://www.multitech.com/brands/multiconnect-mdot) using [AT commands](https://www.sparkfun.com/datasheets/Cellular%20Modules/AT_Commands_Reference_Guide_r0.pdf) on serial. All AT commands begin with an `AT`. Please see the link for information on AT commands. 
 
+# Update History #
+- v0.2
+	- We have changed the software serial (AltSoftSerial) to run the MDot radio and using hardware serial for printing the debugging information.
+	- The change above, enables the use of serial monitor in the Arduino IDE and also does not require the XBee module to be disconnected while user is attempting to program the Arduino. 
+	- We are using AltSoftSerial instead of the traditional SoftwareSerial library because of its advantages such as supporting full-duplex and lower CPU burden.
+	-  **Please note** that this version of the library is not backward-compatible with the previous releases.
+-  v0.1
+	-  The library enables you to transmit the information in the correct JSON packets to the Altoview platform.
+	-  This is the initial release of the library and plenty of hotfixes are under development at this point in time.
+
 # Note well: 
 - The mDot serial port Baud Rate (BR) should match the BR specified in the `begin(<baud-rate>)` method.
   1. `AT+IPR 38400` to change the BR to 38400 in this example.
