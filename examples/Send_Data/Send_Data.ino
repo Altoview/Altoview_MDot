@@ -17,14 +17,13 @@
 /*--------------------------------------------------------------------------------------
   Definitions
   --------------------------------------------------------------------------------------*/
-/* using software serial to control the mDot module */
-AltSoftSerial mdot_serial;//(10, 11);              //RX, TX
-/* using hardware serial to print the debuggin information */
-HardwareSerial* hardwareSerial= &Serial;
+/* Library uses software serial to communicate with the mDot module */
+AltSoftSerial mdotSerial;				//AltSoftSerial locks ports 8, 9 for RX, TX
+/* Library uses hardware serial to print the debuggin information */
+HardwareSerial& debugSerial = Serial;
+
 /* creating an object of a type LoRaAT called mDot */
-AltoviewMDot mdot(&mdot_serial, hardwareSerial);        //Instantiate a LoRaAT object
-/* dereferencing the hardwareSerial for the end user to be able to use "." instead of "->" */
-HardwareSerial debugSerial = *hardwareSerial;
+AltoviewMDot mdot(&mdotSerial, &debugSerial);        //Instantiate a LoRaAT object
 
 /*--- setup() --------------------------------------------------------------------------
   Called by the Arduino framework once, before the main loop begins.
@@ -33,13 +32,16 @@ HardwareSerial debugSerial = *hardwareSerial;
    - Opens serial communication with MDOT
   --------------------------------------------------------------------------------------*/
 void setup() {
-  int responseCode;                              //Response of mDot commands
-  debugSerial.begin(38400);
-  mdot.begin(38400);                                  //Opens serial comms with MDOT
+  int responseCode;                     // Response of mDot commands
+  debugSerial.begin(38400);             // Begins a serial communication of a hardware serial
+  mdotSerial.begin(38400);
+  
+  debugSerial.println("Joining to Altoview...");
+  mdot.begin();                    // Begins a serial communication of a software serial
 
   do {
-    responseCode = mdot.join();
-    delay(10000);
+    responseCode = mdot.join();         // Attempt to join to Altoview
+    delay(10000);                       // Wait for the join process to finish.
   } while (responseCode != 0);
 }
 
@@ -48,10 +50,8 @@ void setup() {
   --------------------------------------------------------------------------------------*/
 int loopNum = 0;
 void loop() {
-  int responseCode;                              //Response code from the mdot
-
+  int responseCode;                     //Response code from the mdot
   responseCode = mdot.sendPairs("L:" + String(loopNum));
-
   delay(120000);
   loopNum++;
 }

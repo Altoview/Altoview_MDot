@@ -115,8 +115,8 @@ class AltoviewMDot
     void _createFragmentBuffer(char*);
     int8_t _processBuffer();
 
-    HardwareSerial* _debugStream;                        //AT Command serial port selection by user
-    //SoftwareSerial* _u8SerialPort;                         //Debugging serial port initialized in constructor
+    HardwareSerial* _debug_serial;                        //Debugging serial port initialized in constructor
+    AltSoftSerial*  _mdot_serial;                         //AT Command serial port selection by user
 };
 
 #endif
