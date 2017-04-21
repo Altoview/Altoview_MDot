@@ -1,6 +1,16 @@
 # About Arduino_MDot
 Contains a library (with example scripts) to send user data to [Multitech mDot](http://www.multitech.com/brands/multiconnect-mdot) using [AT commands](https://www.sparkfun.com/datasheets/Cellular%20Modules/AT_Commands_Reference_Guide_r0.pdf) on serial. All AT commands begin with an `AT`. Please see the link for information on AT commands. 
 
+# Update History #
+- v0.2
+	- We have changed the software serial (AltSoftSerial) to run the MDot radio and using hardware serial for printing the debugging information.
+	- The change above, enables the use of serial monitor in the Arduino IDE and also does not require the XBee module to be disconnected while user is attempting to program the Arduino. 
+	- We are using AltSoftSerial instead of the traditional SoftwareSerial library because of its advantages such as supporting full-duplex and lower CPU burden.
+	-  **Please note** that this version of the library is not backward-compatible with the previous releases.
+-  v0.1
+	-  The library enables you to transmit the information in the correct JSON packets to the Altoview platform.
+	-  This is the initial release of the library and plenty of hotfixes are under development at this point in time.
+
 # Note well: 
 - The mDot serial port Baud Rate (BR) should match the BR specified in the `begin(<baud-rate>)` method.
   1. `AT+IPR 38400` to change the BR to 38400 in this example.
@@ -8,16 +18,17 @@ Contains a library (with example scripts) to send user data to [Multitech mDot](
 - This library **only** supports boards with an **AVR or SAM processor**.
 
 ## How to use
-- Clone the project to a preferred folder.
-- Copy the ArduinoMDot folder to your Arduino directory (eg: `C:\Users\{user}\Documents\Arduino\libraries`). This allows the Arduino application to access it's libraries.
-- Create a new Arduino script (ensure to set the BR of the serial to the chosen BR).
-- Include the library in your new Arduino: `#include <ArduinoMDot.h>`
+- Install our library using this [Arduino guide under ***Importing a .zip Library***](https://www.arduino.cc/en/Guide/Libraries#toc4)
+- This would copy our library folder (ArduinoMDot) to your Arduino IDE directory (eg: `C:\Users\{user}\Documents\Arduino\libraries`). This allows the Arduino application to access it's libraries.
+- Create a new Arduino script or alternatively you could use one of the examples provided with the library which could be accessed from this path (eg: `C:\Users\{user}\Documents\Arduino\libraries`).
+- Include the library in your new Arduino script: `#include <ArduinoMDot.h>`
 - Before the `setup()` instruction, instantiate the mDot object: `ArduinoMDot mdot;`
-- In the `setup()` function, initialise an instance of the mdot object: `mdot.begin();` (see [object oriented programming](https://en.wikipedia.org/wiki/Object-oriented_programming) wiki page for more information
-- Now you can use the instance methods  `mdot.join()` and `mdot.sendPairs()` etc 
+- In the `setup()` function, initialise an instance of the mdot object by doing `mdot.begin();` (see [object oriented programming](https://en.wikipedia.org/wiki/Object-oriented_programming) wiki page for more information
+- Now you can use the created instance's methods such as `mdot.join()` and `mdot.sendPairs()`, etc. 
   1. `mdot.join()` joins the LoRa network and returns a response code. If the response code is equal to 0 then the join has not been successful and you will need to run the `mdot.join()` command again. 
   2. Once the `mdot.join()` method is successful, the `mdot.networkSessionKey` method will return the relevant session key
-- Please see the example Arduino scripts (supplied in the `ArduinoMDot/examples` folder) for further information on how to connect to the LoRa network and send data
+
+## Explanation of couple of common methods ##
 
 ### join( )
 This method sends a join request to the LoRa server.
@@ -49,7 +60,7 @@ LaT:sc: AT+SEND 11{"L":66}  --> the pairs of data is sent
 ```
 For more information on AT commands, please see the Multech [AT Command Getting Started Guide](http://www.multitech.net/developer/software/mdot-software/at-command-firmware-user-guide/) and the [DOT Series AT Command Reference Guide](http://www.multitech.com/documents/publications/manuals/s000643.pdf).
 
-### Register Node in AltoView
+### Register your Node in AltoView
 - Once you have identified the LoRa node has successful connected to the LoRa network and is sending data, navigate to [AltoView](http://www.altoview.com/) (create a login if you don't already have one) 
 - On the left hand side menu, select **My Nodes** and click **Register a Node** 
 - Enter the DevEUI ([Development Extended Unique Identifier](https://en.wikipedia.org/wiki/MAC_address)) which can be found on the mDot node in small print (look for a 16 value long ID with numbers and letters in it, eg: 00 80 00 00 00 00 AA 66) 
