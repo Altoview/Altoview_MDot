@@ -1,7 +1,7 @@
 /*
-  This is an example program writen for the Seeeduino Stalker v2.3 and
-  uses the Multitech mDOT LoRa module running the Australian compatable AT
-  enabled firmware.
+  This is an example program writen for the Arduino UNO R3 and
+  uses the Multitech mDOT LoRa module running the Australian 
+  compatable AT enabled firmware.
 
   This program,
     Joins the LoRa Network
@@ -11,12 +11,20 @@
 /*--------------------------------------------------------------------------------------
   Includes
   --------------------------------------------------------------------------------------*/
-#include <LoRaAT.h>                              //Include LoRa AT libraray
+#include <AltoviewMDot.h>           //Include LoRa AT library
+#include <AltSoftSerial.h>          //A better alternative for SoftwareSerial library
 
 /*--------------------------------------------------------------------------------------
   Definitions
   --------------------------------------------------------------------------------------*/
-LoRaAT mdot;                                     //Instantiate a LoRaAT object
+/* using software serial to control the mDot module */
+AltSoftSerial mdot_serial;//(10, 11);              //RX, TX
+/* using hardware serial to print the debuggin information */
+HardwareSerial* hardwareSerial= &Serial;
+/* creating an object of a type LoRaAT called mDot */
+AltoviewMDot mdot(&mdot_serial, hardwareSerial);        //Instantiate a LoRaAT object
+/* dereferencing the hardwareSerial for the end user to be able to use "." instead of "->" */
+HardwareSerial debugSerial = *hardwareSerial;
 
 /*--- setup() --------------------------------------------------------------------------
   Called by the Arduino framework once, before the main loop begins.
@@ -26,7 +34,8 @@ LoRaAT mdot;                                     //Instantiate a LoRaAT object
   --------------------------------------------------------------------------------------*/
 void setup() {
   int responseCode;                              //Response of mDot commands
-  mdot.begin();                                  //Opens serial comms with MDOT
+  debugSerial.begin(38400);
+  mdot.begin(38400);                                  //Opens serial comms with MDOT
 
   do {
     responseCode = mdot.join();

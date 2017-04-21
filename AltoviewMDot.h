@@ -16,7 +16,8 @@
 #define ALTOVIEW_MDOT_H
 
 #include "Arduino.h"
-#include "SoftwareSerial.h"
+#include <AltSoftSerial.h>
+#include <avr/pgmspace.h>
 
 #define _DR0_PAYLOAD_USAGE 11     //Use 11 of 11 available bytes in payload
 #define _DR1_PAYLOAD_USAGE 53     //Use 53 of 53 available bytes in payload
@@ -32,8 +33,8 @@
 #define _HEADER_OFFSET 48         //ASCII offest to start at char = '0'
 
 #define _MAX_PAIRS_SIZE 70
-#define _MAX_MDOT_RESPONSE 100    //Max number of bytes the mdot might return
-#define _MAX_MDOT_COMMAND 50     //TODO: Check against the manual for mDot
+#define _MAX_MDOT_RESPONSE 140    //Max number of bytes the mdot might return
+#define _MAX_MDOT_COMMAND 60     //TODO: Check against the manual for mDot
 
 
 /*
@@ -57,7 +58,7 @@ class AltoviewMDot
 
     AltoviewMDot();                                     //Use default serial port
     AltoviewMDot(uint8_t);                              //Use specified serial port.
-    AltoviewMDot(SoftwareSerial*, HardwareSerial*);                      //Use specified serial port and a debugging stream.
+    AltoviewMDot(AltSoftSerial*, HardwareSerial*);                      //Use specified serial port and a debugging stream.
 
     void begin();                                 //Use default baud
     void begin(uint32_t);                         //Use specified baud rate.
@@ -107,8 +108,8 @@ class AltoviewMDot
 
     char _command[_MAX_MDOT_COMMAND];
 
-    int8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t);
-    int8_t _sendCommand(char*, char*, char*, char*, char*, uint16_t, char**);   //Generic serial out get response wrapper
+    int8_t _sendCommand(char*, char*, char*, uint16_t);
+    int8_t _sendCommand(char*, char*, char*, uint16_t, char**);   //Generic serial out get response wrapper
 
     void _pairsToJSON(char*, uint8_t, char*);
     void _createFragmentBuffer(char*);
