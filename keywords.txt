@@ -1,4 +1,4 @@
-LoRaAT	KEYWORD1
+AltoviewMDot KEYWORD1
 begin	KEYWORD2
 join	KEYWORD2
 leave	KEYWORD2
