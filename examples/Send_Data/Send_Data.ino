@@ -5,25 +5,25 @@
 
   This program,
     Joins the LoRa Network
-    Sends loop count
+    Sends a loop count to Altoview
 */
 
 /*--------------------------------------------------------------------------------------
   Includes
   --------------------------------------------------------------------------------------*/
-#include <AltoviewMDot.h>           //Include LoRa AT library
-#include <AltSoftSerial.h>          //A better alternative for SoftwareSerial library
+#include <AltoviewMDot.h>
+#include <AltSoftSerial.h>
 
 /*--------------------------------------------------------------------------------------
   Definitions
   --------------------------------------------------------------------------------------*/
-/* Library uses software serial to communicate with the mDot module */
-AltSoftSerial mdotSerial;				//AltSoftSerial locks ports 8, 9 for RX, TX
-/* Library uses hardware serial to print the debuggin information */
+/* library uses software serial to communicate with the mDot module */
+AltSoftSerial mdotSerial;				// AltSoftSerial only uses ports 8, 9 for RX, TX 
+/* library uses hardware serial to print the debuggin information */
 HardwareSerial& debugSerial = Serial;
 
 /* creating an object of a type LoRaAT called mDot */
-AltoviewMDot mdot(&mdotSerial, &debugSerial);        //Instantiate a LoRaAT object
+AltoviewMDot mdot(&mdotSerial, &debugSerial);
 
 /*--- setup() --------------------------------------------------------------------------
   Called by the Arduino framework once, before the main loop begins.
@@ -32,16 +32,20 @@ AltoviewMDot mdot(&mdotSerial, &debugSerial);        //Instantiate a LoRaAT obje
    - Opens serial communication with MDOT
   --------------------------------------------------------------------------------------*/
 void setup() {
-  int responseCode;                     // Response of mDot commands
-  debugSerial.begin(38400);             // Begins a serial communication of a hardware serial
+  int responseCode;
+  /* begins a serial communication of a hardware serial */
+  debugSerial.begin(38400);             
+  /* begins a serial communication of a software serial */
   mdotSerial.begin(38400);
   
   debugSerial.println("Joining to Altoview...");
-  mdot.begin();                    // Begins a serial communication of a software serial
+  mdot.begin();							
 
   do {
-    responseCode = mdot.join();         // Attempt to join to Altoview
-    delay(10000);                       // Wait for the join process to finish.
+	/* attempt to join to Altoview */
+    responseCode = mdot.join();
+	/* waiting for the join process to finish. */
+    delay(10000);
   } while (responseCode != 0);
 }
 
@@ -50,8 +54,10 @@ void setup() {
   --------------------------------------------------------------------------------------*/
 int loopNum = 0;
 void loop() {
-  int responseCode;                     //Response code from the mdot
+  int responseCode;
+  /* send the loop count in the JSON format to Altoview */
   responseCode = mdot.sendPairs("L:" + String(loopNum));
-  delay(120000);
+  /* wait for 2 mins */
+  delay(120000);						
   loopNum++;
 }
