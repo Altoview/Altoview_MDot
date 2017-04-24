@@ -1,7 +1,7 @@
 /*
   File: AltoviewMDot.cpp
 
-  Version: v0.2
+  Version: v0.2.1
 
   Brief: Arduino library for controlling Multitech mDot LoRa modules using
          AT commands.
@@ -23,7 +23,7 @@ const char command_00[]  PROGMEM = "AT+FSB ";
 const char command_01[]  PROGMEM = "AT+PN ";
 const char command_02[]  PROGMEM = "AT+NI 0,";
 const char command_03[]  PROGMEM = "AT+NK 0,";
-const char command_04[]  PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+const char command_04[]  PROGMEM = ""; //vacant
 const char command_05[]  PROGMEM = "AT+JOIN";
 const char command_06[]  PROGMEM = "AT+SEND ";
 const char command_07[]  PROGMEM = "AT+SNR";
@@ -42,7 +42,6 @@ const char command_19[]  PROGMEM = "AT+NA?";
 const char command_20[]  PROGMEM = "AT+NSK?";
 const char command_21[]  PROGMEM = "AT+DSK?";
 const char command_22[]  PROGMEM = "AT&W";
-
 
 const char* const table_LoRaWAN_COMMANDS[] PROGMEM=     
 {   
@@ -80,6 +79,15 @@ const char* const table_LoRaWAN_ANSWERS[] PROGMEM=
   answer_01
 };
 
+
+const char key_NetworkKey[]   PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
+const char key_NetworkId[]    PROGMEM = "00:00:aa:00:00:00:00:01";
+
+const char* const table_LoRaWAN_KEYS[] PROGMEM=     
+{   
+  key_NetworkId,
+  key_NetworkKey
+};
 
 /************************************************************************************
  *                               PUBLIC FUNCTIONS                                   *
@@ -653,13 +661,10 @@ int8_t AltoviewMDot::_processBuffer() {
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::setDefaults() {
   int8_t result = -1;
-  // char key[] = "0";
-  // const char keyy[] PROGMEM = "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:01";
-  const char id[] PROGMEM = "00:00:aa:00:00:00:00:01";
-  // _debug_serial->println(F("[DEBUG] Point 0 start"));
-
-  char key[50];
-  sprintf_P(key,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[4])));
+  char id[sizeof(key_NetworkId)];
+  char key[sizeof(key_NetworkKey)];
+  sprintf_P(id, (char*)pgm_read_word(&(table_LoRaWAN_KEYS[0])));
+  sprintf_P(key,(char*)pgm_read_word(&(table_LoRaWAN_KEYS[1])));
 
   if (setFrequencySubBand('1') == 0) {
     result = 0;
@@ -667,10 +672,10 @@ int8_t AltoviewMDot::setDefaults() {
   if (setPublicNetwork('1') == 0) {
     result = 0;
   }
-  if (setNetworkID((char*)id) == 0) {
+  if (setNetworkID(id) == 0) {
     result = 0;
   }
-  if (setNetworkKey((char*) key) == 0) {
+  if (setNetworkKey(key) == 0) {
     result = 0;
   }
   if (setDataRate((uint8_t)2) == 0) {
@@ -871,6 +876,8 @@ int8_t AltoviewMDot::setNetworkKey(char* key) {
   memset(_command,0x00,sizeof(_command));
   memset(answer1,0x00,sizeof(answer1));
   char answerX[5];
+  memset(answerX,0x00,sizeof(answerX));
+  memset(answerX,0x00,sizeof(answerX));
 
   // TODO, remove
   // char keyz[46];
@@ -906,6 +913,7 @@ int8_t AltoviewMDot::getNetworkKey() {
   memset(_command,0x00,sizeof(_command));
   memset(answer1,0x00,sizeof(answer1));
   char answerX[5];
+  memset(answerX,0x00,sizeof(answerX));
   char* r;
 
   // sprintf_P(_command,(char*)F("AT+NK?"));
@@ -928,8 +936,8 @@ int8_t AltoviewMDot::getNetworkKey() {
 | Sets the data rate                                                                |
 |                                                                                   |
 | AT+TXDR ?                                                                         |
-| AT+TXDR: (0-3|10-7|DR0-DR4|DR8-DR13) 												|
-|																					|
+| AT+TXDR: (0-3|10-7|DR0-DR4|DR8-DR13)                                              |
+|																					                                          |
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::setDataRate(char txdr) {
   int8_t ansCode;
@@ -953,31 +961,32 @@ int8_t AltoviewMDot::setDataRate(char txdr) {
   return(-1);
 }
 
-/*----------------------------------------------------------------------------------|
-| Sets the data rate                                                                |
-|                                                                                   |
-| AT+TXDR ?                                                                         |
-| AT+TXDR: (DR0-DR4|DR8-DR13) 														|
-|																					|
-| Eg:           																	|
-|					| DataRate | Config   | Bit rate |								|
-|					|----------|----------|----------|								|
-|					| 	DR0    |SF10BW125 |   980    |								|
-|					| 	DR1    |SF09BW125 |  1760    |								|
-|					| 	DR2    |SF08BW125 |  3125    |								|
-|					| 	DR3    |SF07BW125 |  5470    |								|
-|					| 	DR4    |SF08BW500 | 12500    |								|
-|					| DR5:DR7  | Not Used |          |								|
-|					| 	DR8    |SF12BW500 |   980    |								|
-|					| 	DR9    |SF11BW500 |  1760    |								|
-|					|   DR10   |SF10BW500 |  3900    |								|
-|					| 	DR11   |SF09BW500 |  7000    |								|
-|					| 	DR12   |SF08BW500 | 12500    |								|
-|					| 	DR13   |SF07BW500 | 21900    |								|
-|					| DR14:DR15| Not Used |          |								|
-|                   |----------|----------|----------|                              |
-|																					|
-|																					|
+/*----------------------------------------------------------------------------------
+| Sets the data rate                                                                
+|                                                                                   
+| AT+TXDR ?                                                                         
+| AT+TXDR: (DR0-DR4|DR8-DR13) 														                          
+|																					                                          
+| Eg:                                                                               
+|         |----------|----------|----------|                              
+|					| DataRate | Config   | Bit rate |								
+|					|----------|----------|----------|								
+|					| 	DR0    |SF10BW125 |   980    |								
+|					| 	DR1    |SF09BW125 |  1760    |								
+|					| 	DR2    |SF08BW125 |  3125    |								
+|					| 	DR3    |SF07BW125 |  5470    |								
+|					| 	DR4    |SF08BW500 | 12500    |								
+|					| DR5:DR7  | Not Used |          |								
+|					| 	DR8    |SF12BW500 |   980    |								
+|					| 	DR9    |SF11BW500 |  1760    |							
+|					|   DR10   |SF10BW500 |  3900    |						
+|					| 	DR11   |SF09BW500 |  7000    |								
+|					| 	DR12   |SF08BW500 | 12500    |								
+|					| 	DR13   |SF07BW500 | 21900    |								
+|					| DR14:DR15| Not Used |          |								
+|         |----------|----------|----------|                              
+|																					
+|																					
 -----------------------------------------------------------------------------------*/
 int8_t AltoviewMDot::setDataRate(uint8_t txdr) {
   int8_t ansCode;
@@ -1146,6 +1155,7 @@ int8_t AltoviewMDot::getNetworkSessionKey() {
   memset(_command,0x00,sizeof(_command));
   memset(answer1,0x00,sizeof(answer1));
   char answerX[5];
+  memset(answerX,0x00,sizeof(answerX));
   char* r;
 
   // sprintf_P(_command,(char*)F("AT+NSK?"));
@@ -1173,6 +1183,7 @@ int8_t AltoviewMDot::getDataSessionKey() {
   memset(_command,0x00,sizeof(_command));
   memset(answer1,0x00,sizeof(answer1));
   char answerX[5];
+  memset(answerX,0x00,sizeof(answerX));
   char* r;
 
   // sprintf_P(_command,(char*)F("AT+DSK?"));
@@ -1191,54 +1202,6 @@ int8_t AltoviewMDot::getDataSessionKey() {
   return(-1);
 }
 
-/*----------------------------------------------------------------------------------|
-| Saves the current session information in the mDot.                                |
------------------------------------------------------------------------------------*/
-/*
-int8_t AltoviewMDot::saveLoraSession() {
-  int8_t ansCode;
-  char answer1[] PROGMEM = "OK";
-
-  sprintf_P(_command,(char*)F("AT+SS"));
-
-  ansCode = _sendCommand(_command,answer1,NULL,NULL,NULL,10000);
-  if (ansCode < 0 ) {
-    return(-1);
-  }
-  ansCode = getNetworkSessionKey();
-  if (ansCode < 0 ) {
-    return(-1);
-  }
-  return(getDataSessionKey());
-}
-*/
-/*----------------------------------------------------------------------------------|
-| Saves the current session information in the mDot.                                |
------------------------------------------------------------------------------------*/
-/*
-int8_t AltoviewMDot::restoreLoraSession() {
-  int8_t ansCode;
-  char answer1[] PROGMEM = "OK";
-
-  sprintf_P(_command,(char*)F("AT+RS"));
-
-  ansCode = _sendCommand(_command,answer1,NULL,NULL,NULL,10000);
-  if (ansCode < 0 ) {
-    return(-1);
-  }
-  ansCode = getNetworkSessionKey();
-  if (ansCode < 0 ) {
-    return(-1);
-  }
-  ansCode = getDataSessionKey();
-
-  if (ansCode == 1) {
-    return (0);
-  }
-
-  return(-1);
-}
-*/
 /*----------------------------------------------------------------------------------|
 | Writes the current settings of the mDot to it's memory                            |
 -----------------------------------------------------------------------------------*/
