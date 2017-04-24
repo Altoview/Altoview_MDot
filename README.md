@@ -63,7 +63,6 @@ For more information on AT commands, please see the Multech [AT Command Getting 
 - Enter the DevEUI ([Development Extended Unique Identifier](https://en.wikipedia.org/wiki/MAC_address)) which can be found on the mDot node in small print (look for a 16 value long ID with numbers and letters in it, eg: 00 80 00 00 00 00 AA 66) 
 
 #### NB when registering node in AltoView 
-- Although the DevEUI is written in *uppercase* on most mDot modules, Altoview requirers the DevEUI in ***LOWERCASE*** 
 - Once the node details have been entered and you have hit the `register` button, the node will have either an `online` or `offline` status. Please note that this status **does not** mean that the node is powered on and connected to the LoRa network. Instead: 
   - `online` --> the node was connected and sending data in the past. In other words, there is a history of the node having sent data
   - `offline` --> the node has never sent data. In other words, AltoView has never seen this nodes DevEUI before 
