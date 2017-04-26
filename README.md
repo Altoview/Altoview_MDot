@@ -76,11 +76,11 @@ After using our library with the given example, you may find yourself wanting to
 ### Gitter 
 We have also created the [Altoview Gitter](https://gitter.im/Altoview/) page so you could join-in, listen and/or contribute to the conversations going on about this library and also about Altoview in general. No invitations are required and Gitter accounts are free to create.
 
-###Slack
+### Slack
 Our Slack page called ***Lora-Fora*** proceeds the Altoview Gitter and there has been plenty of content and discussions prior to creation of the Altoview Gitter. If you're a big Slack fan or even want to have a peak on what happened so far and want to be in the loop in both fronts feel free to drop us an email and we will invite you to LoRa Fora. There has been plenty of discussion about LoRa, LoRaWAN and other interesting projects leading to creation of Altoview.
   
 
-#License
+# License
 Copyright (C) 2013-2016 - Campbell Scientific Australia ,Pty Ltd
 
 This program is free software: you can redistribute it and/or modify
