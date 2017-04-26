@@ -44,6 +44,7 @@
 
 ## Future Version Goals
 - [x] Overload send() function so it can also accept a char* and length. For when we don't want to read until null.
+- [ ] Cover **SAM** series. **AVR** series are already covered.
 - [ ] Check for wider range of responses from mDot.
 - [ ] Change txPutter to number of bytes, not number of fragments. Or change name to be more meaningful.
 - [ ] Ensure pairs[] and json[] are released after they're used. They are big chunks of memory on the stack.
