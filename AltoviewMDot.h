@@ -1,7 +1,7 @@
 /*
   File: AltoviewMDot.h
 
-  Version: v0.2.1
+  Version: v0.2.4
 
   Brief: Arduino library for controlling Multitech mDot LoRa modules using
          AT commands.
