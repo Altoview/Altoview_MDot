@@ -1,7 +1,7 @@
 /*
   File: AltoviewMDot.cpp
 
-  Version: v0.2.1
+  Version: v0.2.2
 
   Brief: Arduino library for controlling Multitech mDot LoRa modules using
          AT commands.
@@ -877,11 +877,6 @@ int8_t AltoviewMDot::setNetworkKey(char* key) {
   memset(answer1,0x00,sizeof(answer1));
   char answerX[5];
   memset(answerX,0x00,sizeof(answerX));
-  memset(answerX,0x00,sizeof(answerX));
-
-  // TODO, remove
-  // char keyz[46];
-  // sprintf_P(keyz,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[4])));
 
   // sprintf_P(_command,(char*)F("AT+NK 0,"));
   sprintf_P(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[3])));
