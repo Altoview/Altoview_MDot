@@ -1,5 +1,11 @@
 # TODO
-## Version 1 Goal
+## v0.2 Goal
+- [ ] Return verbose values of the Join reply 
+	- e.g. **Join Back off**, Join Successful, Join Fail.
+	- Hint message on the reasons which may cause a Join Fail. 
+- [ ] Cover **SAM** series. **AVR** series are already supported.
+- [ ] Revamp the data fragmentation section of the lib based on the chosen data rate.
+## v0.1 Goal
 - [x] Get and Set ADR.
 - [x] Default to set Data Rate to [?] and turn ADR on
 - [x] Check mDot Data rate before send.
@@ -44,7 +50,6 @@
 
 ## Future Version Goals
 - [x] Overload send() function so it can also accept a char* and length. For when we don't want to read until null.
-- [ ] Cover **SAM** series. **AVR** series are already covered.
 - [ ] Check for wider range of responses from mDot.
 - [ ] Change txPutter to number of bytes, not number of fragments. Or change name to be more meaningful.
 - [ ] Ensure pairs[] and json[] are released after they're used. They are big chunks of memory on the stack.
