@@ -1,5 +1,6 @@
 /*
    21 Mar 17 - Dane Lennon
+   v0.2
 
    This is a script writen for the Arduino Uno for the CSA Student Day and
    uses the Multitech mDOT LoRa module running the Australian compatable AT
@@ -69,12 +70,13 @@ void setup() {
     responseCode = mdot.join();
     /* waiting for the join process to finish. */
     delay(1000);
-    if (responseCode == -1) { 
-      delay(120000);             //undesirable delay due to multiTech joining back off (not allowed to attempt to join to frequently) 
+    if (responseCode == -1) {
+      /* To go around the Join Backoff if received from the LoRa Server */ 
+      delay(120000);              
     }
   } while (responseCode != 0);
   
-  // send some data to show that Altoview is set up correctly and working
+  /* Send a simple loop count to confirm that Altoview is set up correctly and receiving this sample data. */
   sprintf(msg, "count:%d", count);
   responseCode = mdot.sendPairs(msg);
   if (responseCode == 0) {
@@ -92,11 +94,12 @@ void loop() {
   responseCode = -1;
   sprintf(msg, "count:%d,accum:%d", count, accum);
   responseCode = mdot.sendPairs(msg);
-  if (responseCode == 0) {
-    count = 0;                //if successfully sent, reset the count to 0 to record the number of triggers since last packet sent.
+  if (responseCode == 0)      // Successful send.
+  {
+    count = 0;                // Reset the count to 0 to record the number of triggers since last packet sent.
     pulseAccumulator = 0;
   }
-  delay(30000);               //delay for 30 seconds
+  delay(30000);
 }
 
 void updateCount() {
@@ -104,10 +107,10 @@ void updateCount() {
     rising = true;
     rise = millis();
   } else {
-    if (rising) {                         //only execute this if we have had a rising edge previously (set to false initially) 
+    if (rising) {                         // Only execute this if we have had a rising edge previously. (set to false initially) 
       fall = millis();
-      pulseLength = fall - rise;          //the time between the rising and falling edge of the trigger
-      pulseAccumulator += pulseLength;    //the total time active
+      pulseLength = fall - rise;          // The time between the rising and falling edge of the trigger.
+      pulseAccumulator += pulseLength;    // The total time active.
       ++count;
       debugSerial.println(count);
       debugSerial.println(pulseLength);
