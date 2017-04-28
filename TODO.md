@@ -5,6 +5,8 @@
 	- Hint message on the reasons which may cause a Join Fail. 
 - [ ] Cover **SAM** series. **AVR** series are already supported.
 - [ ] Revamp the data fragmentation section of the lib based on the chosen data rate.
+- [ ] Create a **Arduino Bootloader** to plot the stack's high water mark.
+	- This could be used accordingly to monitor the memory footprint of the library. 
 ## v0.1 Goal
 - [x] Get and Set ADR.
 - [x] Default to set Data Rate to [?] and turn ADR on
