@@ -2,6 +2,9 @@
 Contains a library (with example scripts) to send user data to the Altoview Platform using [Multitech mDot](http://www.multitech.com/brands/multiconnect-mdot) with [AT commands](https://www.sparkfun.com/datasheets/Cellular%20Modules/AT_Commands_Reference_Guide_r0.pdf) on serial. We call them AT commands since they all begin with an `AT` such as `AT+NI` or `AT+NK`.
 
 ## Update History 
+- v0.2.6
+	- Through the past 5 minor updates we have did some cleaning up, and
+	- Added a new example to the library which reads the data from a PIR sensor and sends the data in terms of measuring and monitoring activity to Altoview.
 - v0.2.1
 	- *[Hotfix]* This fix is applied to separate the commands list from the ID lists. This should not affect the end user.
 	- The `README.md` file is updated with the latest changes.
