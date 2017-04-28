@@ -3,7 +3,7 @@ Contains a library (with example scripts) to send user data to the Altoview Plat
 
 ## Update History 
 - v0.2.6
-	- Through the past 5 minor updates we have did some cleaning up, and
+	- Through the past 5 minor updates we did some cleaning up, and
 	- Added a new example to the library which reads the data from a PIR sensor and sends the data in terms of measuring and monitoring activity to Altoview.
 - v0.2.1
 	- *[Hotfix]* This fix is applied to separate the commands list from the ID lists. This should not affect the end user.
